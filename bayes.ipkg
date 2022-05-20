@@ -19,12 +19,12 @@ package bayes
 -- modules =
 
 -- main file (i.e. file to load at REPL)
--- main =
+-- main = Main
 
 -- name of executable
--- executable =
+-- executable = Main
 -- opts =
--- sourcedir =
+-- sourcedir = "src"
 -- builddir =
 -- outputdir =
 
