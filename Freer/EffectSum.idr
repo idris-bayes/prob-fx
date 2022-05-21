@@ -1,23 +1,14 @@
 module Freer.EffectSum 
 
--- | Witnesses that a natural number encodes a membership proof
-data AtIndex : a -> List a -> (k : Nat) -> Type where
-  Z : AtIndex a (a :: as) 0
-  S : AtIndex a as n -> AtIndex a (b :: as) (S n)
+import Decidable.Equality
+import Decidable.Equality.Core
+import Data.List.AtIndex
 
-partial
-sameAtIndex : (a : AtIndex e1 es k1) -> (b : AtIndex e2 es k2) -> Maybe (k1 = k2)
-sameAtIndex Z Z = Just Refl
-sameAtIndex (S k) Z = Nothing
-sameAtIndex Z (S k) = Nothing
-sameAtIndex (S k1) (S k2) = case sameAtIndex k1 k2 of 
-  Just p => Just $ cong S p
-
--- | Natural number and proof of membership
+-- | Natural number and proof of memberships
 data Elem : (e : a) -> (es : List a) -> Type where
   MkElem : (k : Nat) -> (AtIndex e es k) -> Elem e es
 
--- | Establish an element is in a list
+-- | Establish an element is in a list 
 interface FindElem (0 x : a) (0 xs : List a) where
   findElem : Elem x xs 
 
@@ -28,20 +19,18 @@ FindElem a as => FindElem a (b :: as) where
   findElem = let MkElem n p = findElem {x = a} {xs = as}
              in  MkElem (S n) (S p) 
 
--- | Effect sums
+-- | EffectSum
 data EffectSum : (es : List (Type -> Type)) -> Type -> Type where
-  MkEffectSum : {e : Type -> Type} ->  AtIndex e es k -> e a -> EffectSum es a
+  MkEffectSum : (k : Nat) -> (AtIndex e es k) -> e x -> EffectSum es x
 
-
-prj' : FindElem e es => {e : Type -> Type} -> (AtIndex e' es k) -> (e' a) -> Maybe (e a)
-prj' {e} p = let MkElem n p' = findElem {x = e} {xs = es}
- in  ?x
-
+-- | Inject and project out of EffectSum
 interface FindElem e es => Member (e : Type -> Type) (es : List (Type -> Type)) where
   inj : e x -> EffectSum es x
-  inj op = let MkElem n p = findElem {x = e} {xs = es} in MkEffectSum p op
-  prj : EffectSum es x -> Maybe (e x)
-  prj (MkEffectSum p op) = ?y
+  inj op = let MkElem n p = findElem {x = e} {xs = es} in MkEffectSum n p op
 
--- FindElem e es => Member e es where
---   prj = ?y
+  prj : EffectSum es x -> Maybe (e x)
+  prj op = let MkElem n p = findElem {x = e} {xs = es} in prj' n p op
+    where prj' : (k : Nat) -> (AtIndex e es k) -> EffectSum es a -> Maybe (e a)
+          prj' k p (MkEffectSum k' q op) = case (decEq k k')  of
+            Yes Refl => rewrite atIndexUnique p q in Just op
+            No neq   => Nothing

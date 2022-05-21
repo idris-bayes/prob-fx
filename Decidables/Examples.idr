@@ -1,4 +1,4 @@
-module Decidable.Equality
+module Decidables.Examples
 
 import Data.Nat
 import Data.Vect
