@@ -1,5 +1,6 @@
 module Decidables.Equality
 
+import Prelude.Types
 import Control.Function
 import Data.Maybe
 import Data.Either
