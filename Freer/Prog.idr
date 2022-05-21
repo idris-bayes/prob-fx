@@ -1,4 +1,4 @@
-module Prog 
+module Freer.Prog 
 
 
 member : Eq a => a -> List a -> Bool
