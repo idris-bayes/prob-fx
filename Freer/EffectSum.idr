@@ -5,10 +5,19 @@ data AtIndex : a -> List a -> (k : Nat) -> Type where
   Z : AtIndex a (a :: as) 0
   S : AtIndex a as n -> AtIndex a (b :: as) (S n)
 
+partial
+sameAtIndex : (a : AtIndex e1 es k1) -> (b : AtIndex e2 es k2) -> Maybe (k1 = k2)
+sameAtIndex Z Z = Just Refl
+sameAtIndex (S k) Z = Nothing
+sameAtIndex Z (S k) = Nothing
+sameAtIndex (S k1) (S k2) = case sameAtIndex k1 k2 of 
+  Just p => Just $ cong S p
+
 -- | Natural number and proof of membership
 data Elem : (e : a) -> (es : List a) -> Type where
   MkElem : (k : Nat) -> (AtIndex e es k) -> Elem e es
 
+-- | Establish an element is in a list
 interface FindElem (0 x : a) (0 xs : List a) where
   findElem : Elem x xs 
 
