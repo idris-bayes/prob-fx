@@ -1,4 +1,5 @@
 module EffectSum 
 
 data EffectSum : (es : List (Type -> Type)) -> Type where
-  MkEffectSum : EffectSum es 
+  MkEffectSum : {e : Type -> Type} -> Nat -> e a -> EffectSum es 
+
