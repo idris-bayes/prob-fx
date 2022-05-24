@@ -1,4 +1,4 @@
-module Decidables.Equality
+module My.Decidables.Equality
 
 import Prelude.Types
 import Control.Function

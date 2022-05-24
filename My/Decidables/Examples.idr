@@ -1,4 +1,4 @@
-module Decidables.Examples
+module My.Decidables.Examples
 
 import Data.Nat
 import Data.Vect

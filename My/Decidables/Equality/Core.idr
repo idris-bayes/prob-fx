@@ -1,4 +1,4 @@
-module Decidables.Equality.Core
+module My.Decidables.Equality.Core
 
 import Control.Function
 
