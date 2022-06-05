@@ -4,6 +4,7 @@ import Decidable.Equality
 import Decidable.Equality.Core
 import Data.List.AtIndex
 
+
 -- | Natural number and proof of memberships
 data Elem : (e : a) -> (es : List a) -> Type where
   MkElem : (k : Nat) -> (AtIndex e es k) -> Elem e es
@@ -20,11 +21,14 @@ FindElem a as => FindElem a (b :: as) where
              in  MkElem (S n) (S p) 
 
 -- | EffectSum
+export
 data EffectSum : (es : List (Type -> Type)) -> Type -> Type where
   MkEffectSum : (k : Nat) -> (AtIndex e es k) -> e x -> EffectSum es x
 
 -- | Inject and project out of EffectSum
-interface FindElem e es => Member (e : Type -> Type) (es : List (Type -> Type)) where
+export
+interface FindElem e es 
+       => Member (e : Type -> Type) (es : List (Type -> Type)) where
   inj : e x -> EffectSum es x
   inj op = let MkElem n p = findElem {x = e} {xs = es} in MkEffectSum n p op
 
@@ -34,3 +38,17 @@ interface FindElem e es => Member (e : Type -> Type) (es : List (Type -> Type)) 
           prj' k p (MkEffectSum k' q op) = case (decEq k k')  of
             Yes Refl => rewrite atIndexUnique p q in Just op
             No neq   => Nothing
+
+Members : List (Type -> Type) -> List (Type -> Type) -> Type
+Members [] _ = ()
+Members (e :: es) ess = Member e ess
+
+-- | Discharge effect from front of signature
+discharge : EffectSum (e :: es) x -> Either (EffectSum es x) (e x)
+discharge (MkEffectSum Z Z t)         = Right t
+discharge (MkEffectSum (S n) (S k) t) = Left (MkEffectSum n k t)
+
+-- | Prepend effect to front of signature
+export
+weaken : EffectSum es x -> EffectSum (e :: es) x
+weaken (MkEffectSum n m e) = (MkEffectSum (S n) (S m) e)
