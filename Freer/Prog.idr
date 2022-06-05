@@ -28,5 +28,5 @@ call : {e : Type -> Type} -> {es : List (Type -> Type)} -> {auto ok : NonEmpty e
     => e x -> Prog es x
 call op = Op (inj op) Val
 
--- run : Prog [] a -> a
--- run (Val x) = x
+run : Prog [] a -> a
+run (Val x) = x

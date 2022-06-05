@@ -10,7 +10,7 @@ import Data.List1
 import Data.List1.Properties
 import Data.These
 
-import public Decidables.Equality.Core as Decidable.Equality
+import public My.Decidables.Equality.Core as Decidable.Equality
 
 %default total
 
