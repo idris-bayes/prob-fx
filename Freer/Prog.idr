@@ -3,6 +3,7 @@ module Freer.Prog
 import Freer.EffectSum
 import Data.List.NonEmpty
 
+public export
 data Prog : (es : List (Type -> Type)) -> (a : Type) -> Type where
   Op  : {auto ok : NonEmpty es} -> (op : EffectSum es x) -> (k : x -> Prog es a) -> Prog es a
   Val : a -> Prog es a

@@ -39,11 +39,13 @@ interface FindElem e es
             Yes Refl => rewrite atIndexUnique p q in Just op
             No neq   => Nothing
 
+export
 Members : List (Type -> Type) -> List (Type -> Type) -> Type
 Members [] _ = ()
 Members (e :: es) ess = Member e ess
 
 -- | Discharge effect from front of signature
+export
 discharge : {auto ok : NonEmpty es} -> EffectSum (e :: es) x -> Either (EffectSum es x) (e x)
 discharge (MkEffectSum Z Z t)         = Right t
 discharge (MkEffectSum (S n) (S k) t) = Left (MkEffectSum n k t)
