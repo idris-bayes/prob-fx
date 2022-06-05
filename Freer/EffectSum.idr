@@ -3,7 +3,7 @@ module Freer.EffectSum
 import Decidable.Equality
 import Decidable.Equality.Core
 import Data.List.AtIndex
-
+import Data.List.NonEmpty
 
 -- | Natural number and proof of memberships
 data Elem : (e : a) -> (es : List a) -> Type where
@@ -23,13 +23,13 @@ FindElem a as => FindElem a (b :: as) where
 -- | EffectSum
 export
 data EffectSum : (es : List (Type -> Type)) -> Type -> Type where
-  MkEffectSum : (k : Nat) -> (AtIndex e es k) -> e x -> EffectSum es x
+  MkEffectSum : {auto ok : NonEmpty es} -> (k : Nat) -> (AtIndex e es k) -> e x -> EffectSum es x
 
 -- | Inject and project out of EffectSum
 export
 interface FindElem e es 
        => Member (e : Type -> Type) (es : List (Type -> Type)) where
-  inj : e x -> EffectSum es x
+  inj : {auto ok : NonEmpty es} -> e x -> EffectSum es x
   inj op = let MkElem n p = findElem {x = e} {xs = es} in MkEffectSum n p op
 
   prj : EffectSum es x -> Maybe (e x)
@@ -44,11 +44,11 @@ Members [] _ = ()
 Members (e :: es) ess = Member e ess
 
 -- | Discharge effect from front of signature
-discharge : EffectSum (e :: es) x -> Either (EffectSum es x) (e x)
+discharge : {auto ok : NonEmpty es} -> EffectSum (e :: es) x -> Either (EffectSum es x) (e x)
 discharge (MkEffectSum Z Z t)         = Right t
 discharge (MkEffectSum (S n) (S k) t) = Left (MkEffectSum n k t)
 
 -- | Prepend effect to front of signature
 export
-weaken : EffectSum es x -> EffectSum (e :: es) x
-weaken (MkEffectSum n m e) = (MkEffectSum (S n) (S m) e)
+weaken : {auto ok : NonEmpty es} -> EffectSum es x -> EffectSum (e :: es) x
+weaken {ok = IsNonEmpty} (MkEffectSum n m e) = (MkEffectSum (S n) (S m) e) 
