@@ -9,6 +9,7 @@ package bayes
 -- sourceloc =
 -- bugtracker =
 
+-- sourcedir = "src"
 -- the Idris2 version required (e.g. langversion >= 0.5.1)
 -- langversion
 
@@ -16,16 +17,16 @@ package bayes
 -- depends =
 
 -- modules to install
--- modules =
+-- modules = Freer.Prog,
+--           Freer.EffectSum
 
 -- main file (i.e. file to load at REPL)
--- main = Main
+main = Main
 
 -- name of executable
 -- executable = Main
 -- opts =
--- sourcedir = "src"
--- builddir =
+-- builddir = "./"
 -- outputdir =
 
 -- script to run before building

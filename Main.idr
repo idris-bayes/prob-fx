@@ -1,4 +1,4 @@
 module Main
 
 main : IO () 
-main = print "hi"
+main = print "hi" 
