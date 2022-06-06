@@ -1,7 +1,6 @@
 module Effects.Dist
 
 import Data.List.NonEmpty
-import Freer.EffectSum
 import Freer.Prog
 
 data PrimDist : a -> Type where
@@ -21,8 +20,8 @@ data Observe : a -> Type where
 data Sample : a -> Type where
   MkSample  : PrimDist a -> Sample a
 
-partial
-handleDist : Prog (Dist :: es) a -> Prog (Observe :: Sample :: es) a
-handleDist (Op op k) = case discharge op of
-  _ => ?t
-handleDist (Val a)   = Val a
+-- partial
+-- handleDist : Prog (Dist :: es) a -> Prog (Observe :: Sample :: es) a
+-- handleDist (Op op k) = case discharge op of
+--   _ => ?t
+-- handleDist (Val a)   = Val a
