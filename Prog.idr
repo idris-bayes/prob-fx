@@ -1,9 +1,13 @@
-module Freer.Prog 
+module Prog 
 
 import Decidable.Equality
 import Decidable.Equality.Core
 import Data.List.AtIndex
 import Data.List.NonEmpty
+
+------------------------------------------
+-- Infrastructure for Algebraic Effects --
+------------------------------------------
 
 -- | Natural number and proof of memberships
 data Elem : (e : a) -> (es : List a) -> Type where
@@ -57,6 +61,8 @@ export
 weaken_op : {auto ok : NonEmpty es} -> EffectSum es x -> EffectSum (e :: es) x
 weaken_op {ok = IsNonEmpty} (MkEffectSum n m e) = (MkEffectSum (S n) (S m) e) 
 
+
+-- | Program with effect signature
 public export
 data Prog : (es : List (Type -> Type)) -> (a : Type) -> Type where
   Op  : {auto ok : NonEmpty es} -> (op : EffectSum es x) -> (k : x -> Prog es a) -> Prog es a

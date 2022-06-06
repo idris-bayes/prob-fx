@@ -1,7 +1,7 @@
 module Effects.Dist
 
 import Data.List.NonEmpty
-import Freer.Prog
+import Prog
 
 data PrimDist : a -> Type where
   Normal    : Double -> Double -> PrimDist Double
