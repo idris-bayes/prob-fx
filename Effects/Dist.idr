@@ -20,23 +20,10 @@ data Observe : a -> Type where
 data Sample : a -> Type where
   MkSample  : PrimDist a -> Sample a
 
-data Id : a -> Type where
-  MkId : a -> Id a
-
-data IdB : a -> Type where
-  MkIdB : a -> IdB a
-
-partial
-handleId : {es : _} -> Prog (Id :: es) a -> Prog (IdB :: es) a
-handleId (Val a)   = Val a
-handleId (Op op k) with (discharge op)
-  _ | Right (MkId x) = do y <- call (MkIdB x)
-                          (handleId . k) y
-
-partial
-handleDist : {es : _} -> Prog (Dist :: es) a -> Prog (Observe :: es) a
+handleDist : {es : _} -> Prog (Dist :: es) a -> Prog (Observe :: Sample :: es) a
 handleDist (Val a)   = Val a
 handleDist (Op op k) with (discharge op)
-  _ | Left op' = Op (weaken_op op') ?t
-  _ | Right d = case d.obs of Just y => do x <- call (MkObserve d.dist y) 
-                                           (handleDist . k) x
+  _ | Left op' = Op (weaken_op $ weaken_op op') (handleDist . k)
+  _ | Right d = case d.obs of Just y  => do x <- call (MkObserve d.dist y) 
+                                            (handleDist . k) x
+                              Nothing => call (MkSample d.dist) >>= (handleDist . k)
