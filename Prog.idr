@@ -25,9 +25,9 @@ FindElem a as => FindElem a (b :: as) where
             in  MkElem (S n) (S p) 
 
 -- | EffectSum
-export
+public export
 data EffectSum : (es : List (Type -> Type)) -> Type -> Type where
-  MkEffectSum : {auto ok : NonEmpty es} -> (k : Nat) -> (AtIndex e es k) -> e x -> EffectSum es x
+  MkEffectSum : (k : Nat) -> (AtIndex e es k) -> e x -> EffectSum es x
 
 -- | Inject and project out of EffectSum
 export
@@ -43,6 +43,9 @@ interface FindElem e es
             Yes Refl => rewrite atIndexUnique p q in Just op
             No neq   => Nothing
 
+export implementation Member e (e :: es)
+export implementation Member e es => Member e (e' :: es)
+
 export
 Members : List (Type -> Type) -> List (Type -> Type) -> Type
 Members [] _ = ()
@@ -51,15 +54,14 @@ Members (e :: es) ess = Member e ess
 -- | Discharge effect from front of signature
 export
 discharge :  EffectSum (e :: es) x    -- if Left, then 'es' must be non-empty. If Right, then 'es' is not necessarily non-empty.
-          -> Either ({auto ok : NonEmpty es} -> EffectSum es x) (e x)
+          -> Either (EffectSum es x) (e x)
 discharge (MkEffectSum Z Z t)         = Right t
 discharge (MkEffectSum (S n) (S k) t) = Left (MkEffectSum n k t)
 
 -- | Prepend effect to front of signature
 export
-weaken_op : {auto ok : NonEmpty es} -> EffectSum es x -> EffectSum (e :: es) x
-weaken_op {ok = IsNonEmpty} (MkEffectSum n m e) = (MkEffectSum (S n) (S m) e) 
-
+weaken_op : EffectSum es x -> EffectSum (e :: es) x
+weaken_op  (MkEffectSum n m e) = (MkEffectSum (S n) (S m) e) 
 
 -- | Program with effect signature
 public export
@@ -67,16 +69,19 @@ data Prog : (es : List (Type -> Type)) -> (a : Type) -> Type where
   Op  : {auto ok : NonEmpty es} -> (op : EffectSum es x) -> (k : x -> Prog es a) -> Prog es a
   Val : a -> Prog es a
 
-Functor (Prog es) where
+export
+implementation Functor (Prog es) where
   map f (Op op k) = Op op (map f . k)
   map f (Val a)   = Val (f a)
 
-Applicative (Prog es) where
+export
+implementation Applicative (Prog es) where
   pure = Val
   Op op k <*> p = Op op (\x => k x <*> p) 
   Val f   <*> p = map f p
 
-Monad (Prog es) where
+export
+implementation Monad (Prog es) where
   Op op k >>= f = Op op (assert_total (>>= f) . k)
   Val x   >>= f = f x
 
@@ -84,9 +89,23 @@ weaken : Prog es a -> Prog (e :: es) a
 weaken (Op op k) = Op (weaken_op op) (weaken . k)
 weaken (Val x)   = Val x
 
+export
 call : {e : Type -> Type} -> {es : List (Type -> Type)} -> {auto ok : NonEmpty es} -> Member e es 
     => e x -> Prog es x
 call op = Op (inj op) Val
 
 run : Prog [] a -> a
 run (Val x) = x
+
+data Id : a -> Type where
+  MkId : a -> Id a
+
+data IdB : a -> Type where
+  MkIdB : a -> IdB a
+
+partial
+handleId : {es : _} -> Prog (Id :: es) a -> Prog (IdB :: es) a
+handleId (Val a)   = Val a
+handleId (Op op k) with (discharge op)
+  _ | Right (MkId x) = do y <- call (MkIdB x)
+                          (handleId . k) y
