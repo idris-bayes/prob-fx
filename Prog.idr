@@ -50,9 +50,8 @@ Members (e :: es) ess = Member e ess
 
 -- | Discharge effect from front of signature
 export
-discharge : {auto ok : NonEmpty es} 
-          -> EffectSum (e :: es) x    -- if Left, then 'es' must be non-empty. If Right, then 'es' is not necessarily non-empty.
-          -> Either (EffectSum es x) (e x)
+discharge :  EffectSum (e :: es) x    -- if Left, then 'es' must be non-empty. If Right, then 'es' is not necessarily non-empty.
+          -> Either ({auto ok : NonEmpty es} -> EffectSum es x) (e x)
 discharge (MkEffectSum Z Z t)         = Right t
 discharge (MkEffectSum (S n) (S k) t) = Left (MkEffectSum n k t)
 
