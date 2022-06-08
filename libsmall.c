@@ -28,6 +28,6 @@ int addWithMessage(char* msg, int x, int y) {
 }
 
 
-double normal(double mu, double std) {
-
+double normal_pdf(double mu, double std) {
+    return (gsl_ran_gaussian_pdf(mu, std));
 }
