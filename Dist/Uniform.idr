@@ -7,5 +7,10 @@ randomDouble = randomIO
 
 uniform : Double -> Double -> IO Double
 uniform min max = do
-  y <- randomDouble
-  pure (y * (max - min) + min)
+  x <- randomDouble
+  pure (x * (max - min) + min)
+
+uniform_pdf : Double -> Double -> Double -> Double
+uniform_pdf min max y with (y < max && y > min)
+ _ | True = 1/(max - min)
+ _ | _    = 0
