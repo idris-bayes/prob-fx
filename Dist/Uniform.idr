@@ -1,6 +1,7 @@
 module Dist.Uniform
 
 import System.Random
+import System.FFI
 
 randomDouble : IO Double
 randomDouble = randomIO

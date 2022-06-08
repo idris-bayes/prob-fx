@@ -1,4 +1,6 @@
 *.ibc
+*.o
+*.out
 ttc
 *.ibc
 *.swp
