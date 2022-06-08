@@ -10,4 +10,4 @@ binomial n p = replicateM n (uniform 0 1) >>= (pure . length . filter (< p))
 binomial_pdf' : Int -> Double -> Int -> Double
 
 binomial_pdf : Nat -> Double -> Nat -> Double
-binomial_pdf n p y = binomial_pdf' (cast n) p (cast y)
+binomial_pdf n p y = binomial_pdf' (cast n) p (cast y) 

@@ -1,7 +1,6 @@
 module Dist.Normal
 
 import Dist.Uniform
-import Numeric.Constants
 import System.FFI
 
 ||| Box muller transform to sample from standard normal distribution of mean 0 and standard deviation 1.

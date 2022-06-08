@@ -1,4 +1,5 @@
 module Data.List
+-- libs/base/Data/List.idr
 
 import public Control.Function
 
@@ -455,8 +456,8 @@ replicate Z     _ = []
 replicate (S n) x = x :: replicate n x
 
 public export
-replicateM : Monad m => Nat -> m a -> m (List a)
-replicateM n = sequence . replicate n 
+replicateM : Monad m => (n : Nat) -> (x : m a) -> m (List a)
+replicateM n = sequence . replicate n
 
 ||| Compute the intersect of two lists by user-supplied equality predicate.
 export
