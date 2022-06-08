@@ -14,11 +14,10 @@ package bayes
 -- langversion
 
 -- packages to add to search path
--- depends =
+-- depends = effects
 
--- modules to install
--- modules = Freer.Prog,
---           Freer.EffectSum
+modules = Prog,
+          Effects.Dist
 
 -- main file (i.e. file to load at REPL)
 main = Main
