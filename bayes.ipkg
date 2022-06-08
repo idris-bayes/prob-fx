@@ -14,7 +14,7 @@ package bayes
 -- langversion
 
 -- packages to add to search path
--- depends = effects
+depends = contrib
 
 modules = Prog,
           Effects.Dist
