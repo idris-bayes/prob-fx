@@ -570,6 +570,11 @@ tail' : List a -> Maybe (List a)
 tail' []      = Nothing
 tail' (_::xs) = Just xs
 
+export
+defaultTail : List a -> List a
+defaultTail [] = []
+defaultTail (x :: xs) = xs 
+
 ||| Attempt to retrieve the last element of a non-empty list.
 |||
 ||| If the list is empty, return `Nothing`.

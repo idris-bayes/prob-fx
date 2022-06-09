@@ -1,4 +1,4 @@
-module Prog 
+module Wasabaye.Prog 
 
 import Decidable.Equality
 import Decidable.Equality.Core
