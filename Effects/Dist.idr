@@ -23,7 +23,7 @@ data Sample : a -> Type where
 handleDist : {es : _} -> Prog (Dist :: es) a -> Prog (Observe :: Sample :: es) a
 handleDist (Val a)   = Val a
 handleDist (Op op k) with (discharge op)
-  _ | Left op' = Op (weaken_op $ weaken_op op') (handleDist . k)
+  _ | Left (op', _) = Op (weaken_op $ weaken_op op') (handleDist . k)
   _ | Right d = case d.obs of Just y  => do x <- call (MkObserve d.dist y) 
                                             (handleDist . k) x
                               Nothing => call (MkSample d.dist) >>= (handleDist . k)
