@@ -1,6 +1,7 @@
 module Env
 
 import Data.List.Elem
+import Data.List.UniqueElem
 import Data.List
 
 data Assign : String -> Type -> Type where
@@ -25,3 +26,6 @@ get x (ECons other xvs) {prf = There later}     = get x xvs {prf = later}
 set : (x : String) -> (trace : List a) -> Env env -> {auto prf : Elem (x, a) env} -> Env env
 set x v (ECons (MkAssign x _) xvs) {prf = Here}   = ECons (x ::= v) xvs
 set x v (ECons other xvs) {prf = There later}     = ECons other (set x v xvs {prf = later})
+
+-- exampleEnv : Env [("x", Int), ("y", Int)]
+-- exampleEnv = ("x" ::= []) <:> ("y" ::= []) <:> ENil
