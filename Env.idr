@@ -28,3 +28,6 @@ set x v (ECons other xvs) {prf = There later}     = ECons other (set x v xvs {pr
 
 exampleEnv : Env [("x", Int), ("y", Int)]
 exampleEnv = ("x" ::= []) <:> ("y" ::= []) <:> ENil
+
+Observable : List (String, Type) -> String -> Type -> Type
+Observable env x a  = Elem (x, a) env
