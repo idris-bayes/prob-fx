@@ -5,9 +5,11 @@ import Data.List.Elem
 import Wasabaye.Env
 import Wasabaye.Prog
 
+public export
 Observable : (env : List (String, Type)) -> (var : String) -> (var_type : Type) -> Type
 Observable env x a = Elem (x, a) env
 
+public export
 data ObsReader : (env : List (String, Type)) -> (ret : Type) -> Type where 
   Ask : (x : String) -> (prf : Observable env x a) => ObsReader env (Maybe a)
 

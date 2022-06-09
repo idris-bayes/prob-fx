@@ -9,6 +9,7 @@ data PrimDist : a -> Type where
   Discrete  : List Double -> PrimDist Int
   Uniform   : Double -> Double -> PrimDist Double
 
+public export
 record Dist (a : Type) where
   constructor MkDist
   dist : PrimDist a
