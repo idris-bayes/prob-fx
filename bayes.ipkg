@@ -1,4 +1,9 @@
 package bayes
+
+
+-- pack --with-ipkg bayes.ipkg repl file-name.idr
+
+
 -- version =
 -- authors =
 -- maintainers =
@@ -12,9 +17,8 @@ package bayes
 -- sourcedir = "src"
 -- the Idris2 version required (e.g. langversion >= 0.5.1)
 -- langversion
-
 -- packages to add to search path
-depends = contrib
+depends = contrib, collie
 
 modules = Prog,
           Effects.Dist

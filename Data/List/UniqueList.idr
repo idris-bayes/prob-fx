@@ -1,4 +1,4 @@
-module Data.List.UniqueElem
+module Data.List.UniqueList
 
 import Data.List.Elem
 import Decidable.Equality
