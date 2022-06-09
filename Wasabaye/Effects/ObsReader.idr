@@ -1,9 +1,9 @@
-module Effects.ObsReader
+module Wasabaye.Effects.ObsReader
 
 import Data.List
 import Data.List.Elem
-import Env
-import Prog
+import Wasabaye.Env
+import Wasabaye.Prog
 
 Observable : (env : List (String, Type)) -> (var : String) -> (var_type : Type) -> Type
 Observable env x a = Elem (x, a) env

@@ -1,7 +1,7 @@
-module Effects.Dist
+module Wasabaye.Effects.Dist
 
 import Data.List.NonEmpty
-import Prog
+import Wasabaye.Prog
 
 data PrimDist : a -> Type where
   Normal    : Double -> Double -> PrimDist Double
