@@ -15,12 +15,15 @@ record Dist (a : Type) where
   dist : PrimDist a
   obs  : Maybe a
 
+public export
 data Observe : a -> Type where 
   MkObserve : PrimDist a -> a -> Observe a
 
+public export
 data Sample : a -> Type where
   MkSample  : PrimDist a -> Sample a
 
+public export
 handleDist : {es : _} -> Prog (Dist :: es) a -> Prog (Observe :: Sample :: es) a
 handleDist (Val a)   = Val a
 handleDist (Op op k) with (discharge op)

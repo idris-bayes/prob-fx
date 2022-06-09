@@ -43,8 +43,10 @@ interface FindElem e es
             Yes Refl => rewrite atIndexUnique p q in Just op
             No neq   => Nothing
 
-export implementation Member e (e :: es)
-export implementation Member e es => Member e (e' :: es)
+public export 
+implementation {e : _} -> {es : _} ->  Member e (e :: es)
+public export
+implementation {e : _} -> {es : _} ->  Member e es => Member e (e' :: es)
 
 export
 Members : List (Type -> Type) -> List (Type -> Type) -> Type
