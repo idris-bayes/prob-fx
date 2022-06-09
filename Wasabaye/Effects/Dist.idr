@@ -24,7 +24,7 @@ data Sample : a -> Type where
   MkSample  : PrimDist a -> Sample a
 
 public export
-handleDist : {es : _} -> Prog (Dist :: es) a -> Prog (Observe :: Sample :: es) a
+handleDist : {auto es : _} -> Prog (Dist :: es) a -> Prog (Observe :: Sample :: es) a
 handleDist (Val a)   = Val a
 handleDist (Op op k) with (discharge op)
   _ | Left (op', _) = Op (weaken_op $ weaken_op op') (handleDist . k)

@@ -14,7 +14,7 @@ data ObsReader : (env : List (String, Type)) -> (ret : Type) -> Type where
   Ask : (x : String) -> (prf : Observable env x a) => ObsReader env (Maybe a)
 
 public export
-handleObsRead : Env env -> Prog (ObsReader env :: es) a -> Prog es a
+handleObsRead :  Env env -> Prog (ObsReader env :: es) a -> Prog es a
 handleObsRead env (Val a) = Val a
 handleObsRead env (Op op k) with (discharge op)
   _ | Left (op', _) = Op op' (handleObsRead env . k)
