@@ -10,6 +10,7 @@ infixr 10 ::=
 (::=) : (x : String) -> (trace : List a) -> Assign x a
 (::=) x vs = MkAssign x vs
 
+public export
 data Env : List (String, Type)  -> Type where
   ENil  : Env []
   ECons : Assign x a -> Env env -> Env ((x, a) :: env)
@@ -28,6 +29,3 @@ set x v (ECons other xvs) {prf = There later}     = ECons other (set x v xvs {pr
 
 exampleEnv : Env [("x", Int), ("y", Int)]
 exampleEnv = ("x" ::= []) <:> ("y" ::= []) <:> ENil
-
-Observable : List (String, Type) -> String -> Type -> Type
-Observable env x a  = Elem (x, a) env

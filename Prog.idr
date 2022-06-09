@@ -3,7 +3,7 @@ module Prog
 import Decidable.Equality
 import Decidable.Equality.Core
 import Data.List.AtIndex
-import Data.List.NonEmpty
+import public Data.List.NonEmpty
 
 ------------------------------------------
 -- Infrastructure for Algebraic Effects --
@@ -51,12 +51,16 @@ Members : List (Type -> Type) -> List (Type -> Type) -> Type
 Members [] _ = ()
 Members (e :: es) ess = Member e ess
 
+atIndextoNonEmpty: AtIndex e es k -> NonEmpty es
+atIndextoNonEmpty Z     = IsNonEmpty
+atIndextoNonEmpty (S k) = IsNonEmpty
+
 -- | Discharge effect from front of signature
 export
 discharge :  EffectSum (e :: es) x    -- if Left, then 'es' must be non-empty. If Right, then 'es' is not necessarily non-empty.
-          -> Either (EffectSum es x) (e x)
+          -> Either (EffectSum es x, NonEmpty es) (e x)
 discharge (MkEffectSum Z Z t)         = Right t
-discharge (MkEffectSum (S n) (S k) t) = Left (MkEffectSum n k t)
+discharge (MkEffectSum (S n) (S k) t) = Left (MkEffectSum n k t, atIndextoNonEmpty k)
 
 -- | Prepend effect to front of signature
 export
