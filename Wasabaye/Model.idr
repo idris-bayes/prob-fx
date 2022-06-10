@@ -23,7 +23,8 @@ handleCore env = handleDist . handleObsRead env . runModel
 exampleHdlModel : Prog (Observe :: Sample :: []) Int
 exampleHdlModel = handleCore ENil exampleModel
 
--- -- Model as a data type, whose constructor prepends an abstract type `es` to a program with a concrete effect signature 
+
+{- -- -- Model as a data type, whose constructor prepends an abstract type `es` to a program with a concrete effect signature 
 
 data Model1 : (env : List (String, Type)) -> (0 es : List (Type -> Type)) -> (ret : Type) -> Type where
   MkModel1 : Prog (es ++ ObsReader env :: Dist :: Nil) a -> Model1 env es a
@@ -40,9 +41,10 @@ exampleModel1 = MkModel1 $ Val 5
 exampleHdlModel1 : Prog (Observe :: Sample :: []) Int
 exampleHdlModel1 = handleCore1 ENil exampleModel1
 
--- -- Model as a data type, whose constructor stores a Membership
+-}
 
-{-
+{- -- -- Model as a data type, whose constructor stores a Membership
+
 data Model2 : (env : List (String, Type)) -> (0 es : List (Type -> Type)) -> (ret : Type) -> Type where
   MkModel2 : (Member Dist es, Member (ObsReader env) es) => Prog es a -> Model2 env es a
 
@@ -52,6 +54,15 @@ runModel2 (MkModel2 prog) = prog
 handleCore2 : Env env -> Model2 env (ObsReader env :: Dist :: Nil) a -> Prog (Observe :: Sample :: []) a
 handleCore2 env = handleDist . handleObsRead env . runModel2
 
-exampleModel2 : Model2 env es Int
-exampleModel2 = MkModel2 $ Val 5 -- not possible, as we need to demonstrate a proof of Member
+%hint
+esHasDist : {es :_} -> Member Dist es
+esHasDist = MkMember inj prj
+
+%hint
+esHasObsReader : {auto env, es : _} -> Member (ObsReader env) es
+esHasObsReader = MkMember inj prj
+
+exampleModel2 : {auto es, env : _} -> Model2 env es Int
+exampleModel2 = MkModel2 $ Val 5
+
 -}

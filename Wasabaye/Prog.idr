@@ -30,9 +30,10 @@ data EffectSum : (es : List (Type -> Type)) -> Type -> Type where
   MkEffectSum : (k : Nat) -> (AtIndex e es k) -> e x -> EffectSum es x
 
 -- | Inject and project out of EffectSum
-export
+public export
 interface FindElem e es 
       => Member (e : Type -> Type) (es : List (Type -> Type)) where
+  constructor MkMember
   inj : {auto ok : NonEmpty es} -> e x -> EffectSum es x
   inj op = let MkElem n p = findElem {x = e} {xs = es} in MkEffectSum n p op
 
