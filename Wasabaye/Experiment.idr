@@ -36,21 +36,21 @@ I then have a function discharge that either 1) matches on 'e x', or 2) removes 
  But this runs into problems.
 -}
 
-data RowReader : Int -> Type -> Type where
+data RowReader : Type -> Type -> Type where
 
 -- data ReaderProg : (env : List (String, Type)) -> (es : List (Type -> Type)) -> Type -> Type where
 --   MkReaderProg : Has (RowReader env) es => Eff es a -> ReaderProg env es a
 
-ReaderProg : (env : Int) -> (es : List (Type -> Type)) -> (a : Type) -> Type
+ReaderProg : (env : Type) -> (es : List (Type -> Type)) -> (a : Type) -> Type
 ReaderProg env es a = Has (RowReader env) es => Eff es a
 
-handleRowReader : Eff (RowReader e :: es) a -> Eff es a
+handleRowReader : Eff (RowReader e :: es) a -> e -> Eff es a
 
-prog : Has (RowReader e) es => Eff es Int
+prog : {env : _} -> Has (RowReader env) es => Eff es Int
 prog = pure 5 
 
-runProg : Eff es' Int
--- runProg = handleRowReader prog
+runProg : Eff es Int
+runProg = handleRowReader (prog {env = Integer}) 5
 
 
 -- Functor (Model es) where
