@@ -96,9 +96,9 @@ implementation Monad (Prog es) where
   Op op k >>= f = Op op (assert_total (>>= f) . k)
   Val x   >>= f = f x
 
--- weaken : {auto e : _ } -> Prog es a -> Prog (e :: es) a
--- weaken (Op op k) = Op (weaken_op op) (weaken . k)
--- weaken (Val x)   = Val x
+weaken : Prog es a -> Prog (e :: es) a
+weaken (Op op k) = Op (weaken_op op) (weaken . k)
+weaken (Val x)   = Val x
 
 export
 call : {e : Type -> Type} -> {es : List (Type -> Type)} -> Member e es 
