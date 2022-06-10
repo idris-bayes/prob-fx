@@ -5,48 +5,53 @@ import Wasabaye.Prog
 import Wasabaye.Effects.Dist
 import Wasabaye.Effects.ObsReader
 
-data Model : (env : List (String, Type)) -> (0 es : List (Type -> Type)) -> (ret : Type) -> Type where
-  MkModel : Prog (es ++ ObsReader env :: Dist :: Nil) a -> Model env es a
+-- -- Model as a type-level function, specifying a program with two proofs of membership
 
-runModel : Model env es a -> Prog (es ++ ObsReader env :: Dist :: Nil) a
-runModel (MkModel prog) = prog
+Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (ret : Type) -> Type 
+Model env es a = (Member Dist es, Member (ObsReader env) es) => Prog es a 
 
-handleCore : Env env -> Model env [] a -> Prog (Observe :: Sample :: []) a
+exampleModel : {auto env : _ } -> Model env es Int
+exampleModel = Val 5
+
+runModel : (Member Dist es, Member (ObsReader env) es) => Model env es a -> Prog es a
+runModel m = m
+
+handleCore : { env : _} -> {auto es : _} 
+  -> Env env -> Model env (ObsReader env :: Dist :: es) a -> Prog (Observe :: Sample :: es) a
 handleCore env = handleDist . handleObsRead env . runModel
-
-exampleModel : Model env es Int
-exampleModel = MkModel $ Val 5
 
 exampleHdlModel : Prog (Observe :: Sample :: []) Int
 exampleHdlModel = handleCore ENil exampleModel
 
+-- -- Model as a data type, whose constructor prepends an abstract type `es` to a program with a concrete effect signature 
+
+data Model1 : (env : List (String, Type)) -> (0 es : List (Type -> Type)) -> (ret : Type) -> Type where
+  MkModel1 : Prog (es ++ ObsReader env :: Dist :: Nil) a -> Model1 env es a
+
+runModel1 : Model1 env es a -> Prog (es ++ ObsReader env :: Dist :: Nil) a
+runModel1 (MkModel1 prog) = prog
+
+handleCore1 : Env env -> Model1 env [] a -> Prog (Observe :: Sample :: []) a
+handleCore1 env = handleDist . handleObsRead env . runModel1
+
+exampleModel1 : Model1 env es Int
+exampleModel1 = MkModel1 $ Val 5
+
+exampleHdlModel1 : Prog (Observe :: Sample :: []) Int
+exampleHdlModel1 = handleCore1 ENil exampleModel1
+
+-- -- Model as a data type, whose constructor stores a Membership
+
 {-
-Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (ret : Type) -> Type 
-Model env es a =  (d : Member Dist es) => Member (ObsReader env) es => Prog es a 
+data Model2 : (env : List (String, Type)) -> (0 es : List (Type -> Type)) -> (ret : Type) -> Type where
+  MkModel2 : (Member Dist es, Member (ObsReader env) es) => Prog es a -> Model2 env es a
 
--- runModel : Model env es a -> Prog es a
--- runModel (MkModel prog) = prog
+runModel2 : Model2 env (ObsReader env :: Dist :: Nil) a -> Prog (ObsReader env :: Dist :: Nil) a
+runModel2 (MkModel2 prog) = prog
 
-progDist : (Member Dist es) => Prog es Int
-progDist = Val 5
+handleCore2 : Env env -> Model2 env (ObsReader env :: Dist :: Nil) a -> Prog (Observe :: Sample :: []) a
+handleCore2 env = handleDist . handleObsRead env . runModel2
 
-f1 : {es : _} -> Prog (Observe :: Sample :: es) Int
-f1 = handleDist progDist
-
-progReader : {auto env : _} -> (Member (ObsReader env) es) => Prog es Int
-progReader = Val 5
-
-f2 : {es : _} -> Prog es Int
-f2 = handleObsRead ENil progReader
-
-progModel : Model env es Int
-progModel = Val 5
-
-handleCore : {es : _} 
-  -> Env env -> Model env (ObsReader env :: Dist :: es) a -> Prog (Observe :: Sample :: es) a
-handleCore env = handleDist . handleObsRead env . cast
-
-f3 : {es : _} -> Prog (Observe :: Sample :: es) Int
-f3 = handleCore ENil progModel
-
+exampleModel2 : Model2 env es Int
+exampleModel2 = MkModel2 $ Val 5 -- not possible, as we need to demonstrate a proof of Member
 -}
