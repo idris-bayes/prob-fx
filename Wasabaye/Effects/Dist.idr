@@ -3,6 +3,7 @@ module Wasabaye.Effects.Dist
 import Data.List.NonEmpty
 import Wasabaye.Prog
 
+public export
 data PrimDist : a -> Type where
   Normal    : Double -> Double -> PrimDist Double
   Bernoulli : Double -> PrimDist Bool

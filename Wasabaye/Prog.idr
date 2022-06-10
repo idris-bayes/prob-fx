@@ -29,12 +29,16 @@ public export
 data EffectSum : (es : List (Type -> Type)) -> Type -> Type where
   MkEffectSum : (k : Nat) -> (AtIndex e es k) -> e x -> EffectSum es x
 
+public export
+Uninhabited (EffectSum [] t) where
+  uninhabited (MkEffectSum k ix v) = absurd ix
+
 -- | Inject and project out of EffectSum
 public export
 interface FindElem e es 
-      => Member (e : Type -> Type) (es : List (Type -> Type)) where
+      => Member (e : Type -> Type) (0 es : List (Type -> Type)) where
   constructor MkMember
-  inj : {auto ok : NonEmpty es} -> e x -> EffectSum es x
+  inj : e x -> EffectSum es x
   inj op = let MkElem n p = findElem {x = e} {xs = es} in MkEffectSum n p op
 
   prj : EffectSum es x -> Maybe (e x)
@@ -73,7 +77,7 @@ weaken_op  (MkEffectSum n m e) = (MkEffectSum (S n) (S m) e)
 -- | Program with effect signature
 public export
 data Prog : (es : List (Type -> Type)) -> (a : Type) -> Type where
-  Op  : {auto ok : NonEmpty es} -> (op : EffectSum es x) -> (k : x -> Prog es a) -> Prog es a
+  Op  : (op : EffectSum es x) -> (k : x -> Prog es a) -> Prog es a
   Val : a -> Prog es a
 
 export
@@ -92,17 +96,19 @@ implementation Monad (Prog es) where
   Op op k >>= f = Op op (assert_total (>>= f) . k)
   Val x   >>= f = f x
 
-weaken : Prog es a -> Prog (e :: es) a
-weaken (Op op k) = Op (weaken_op op) (weaken . k)
-weaken (Val x)   = Val x
+-- weaken : {auto e : _ } -> Prog es a -> Prog (e :: es) a
+-- weaken (Op op k) = Op (weaken_op op) (weaken . k)
+-- weaken (Val x)   = Val x
 
 export
-call : {e : Type -> Type} -> {es : List (Type -> Type)} -> {auto ok : NonEmpty es} -> Member e es 
+call : {e : Type -> Type} -> {es : List (Type -> Type)} -> Member e es 
     => e x -> Prog es x
 call op = Op (inj op) Val
 
+export
 run : Prog [] a -> a
 run (Val x) = x
+run (Op op k) = absurd op
 
 data Id : a -> Type where
   MkId : a -> Id a

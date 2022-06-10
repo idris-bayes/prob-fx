@@ -10,18 +10,28 @@ import Wasabaye.Effects.ObsReader
 Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (ret : Type) -> Type 
 Model env es a = (Member Dist es, Member (ObsReader env) es) => Prog es a 
 
-exampleModel : {auto env : _ } -> Model env es Int
-exampleModel = Val 5
-
 runModel : (Member Dist es, Member (ObsReader env) es) => Model env es a -> Prog es a
 runModel m = m
 
-handleCore : { env : _} -> {auto es : _} 
+handleCore : {env : _} -> {auto es : _} 
   -> Env env -> Model env (ObsReader env :: Dist :: es) a -> Prog (Observe :: Sample :: es) a
 handleCore env = handleDist . handleObsRead env . runModel
 
+exampleModel : {auto env : _ } -> Model env es Int
+exampleModel = Val 5
+
 exampleHdlModel : Prog (Observe :: Sample :: []) Int
 exampleHdlModel = handleCore ENil exampleModel
+
+----------------------
+--- Smart constructors 
+
+
+normal' : {es : _} -> Double -> Double -> Model env es Double
+normal' mu sigma = do
+  call (MkDist (Normal mu sigma) Nothing)
+
+
 
 
 {- -- -- Model as a data type, whose constructor prepends an abstract type `es` to a program with a concrete effect signature 
