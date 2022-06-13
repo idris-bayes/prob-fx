@@ -18,7 +18,7 @@ package wasabaye
 -- the Idris2 version required (e.g. langversion >= 0.5.1)
 -- langversion
 -- packages to add to search path
-depends = contrib, collie, tailrec, freer, eff
+depends = contrib, collie, tailec, freer, eff
 
 modules = Wasabaye.Model
 
