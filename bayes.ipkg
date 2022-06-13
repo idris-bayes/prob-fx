@@ -20,8 +20,7 @@ package bayes
 -- packages to add to search path
 depends = contrib, collie, tailrec, freer, eff
 
-modules = Wasabaye.Prog,
-          Wasabaye.Effects.Dist
+modules = Wasabaye.Model
 
 -- main file (i.e. file to load at REPL)
 main = Main
