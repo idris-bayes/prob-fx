@@ -1,9 +1,9 @@
 module Wasabaye.Old.Model
 
-import Wasabaye.Env
-import Wasabaye.Prog
-import Wasabaye.Effects.Dist
-import Wasabaye.Effects.ObsReader
+import Wasabaye.Old.Env
+import Wasabaye.Old.Prog
+import Wasabaye.Old.Dist
+import Wasabaye.Old.ObsReader
 
 -- -- Model as a type-level function, specifying a program with two proofs of membership
 

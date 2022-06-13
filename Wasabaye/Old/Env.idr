@@ -1,4 +1,4 @@
-module Wasabaye.Env
+module Wasabaye.Old.Env
 
 import Data.List
 import Data.List.Elem

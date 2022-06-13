@@ -17,13 +17,13 @@ runModel m = m
 
 public export
 handleCore : Env env -> Model env (Dist :: ObsReader env ::  es) a -> Eff (Observe :: Sample :: es) a
-handleCore env = handleDist . handleObsRead env . runModel
+handleCore env' = handleDist . handleObsRead env' . runModel
 
-exampleModel : {auto env : _} -> Model env es Int
+exampleModel : Model env es Int
 exampleModel = pure 5
 
 exampleHdlModel : Eff (Observe :: Sample :: []) Int
-exampleHdlModel = handleCore ENil exampleModel
+exampleHdlModel = handleCore ENil (exampleModel {env = []})
 
 -- Smart constructors
 

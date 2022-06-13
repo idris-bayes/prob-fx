@@ -12,3 +12,12 @@ linRegr xs = do
                     y <- normal (m * x + c) std "y"
                     pure y) xs
   pure ys
+
+LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
+
+env_instance : Env LinRegrEnv
+env_instance = ("m" ::= []) <:> ("c" ::= []) <:> ("std" ::=  []) <:> ("y" ::=  []) <:> ENil
+
+hdlLinRegr : Eff (Observe :: Sample :: []) (List Double)
+hdlLinRegr = 
+  handleCore env_instance (linRegr {env = LinRegrEnv} [])

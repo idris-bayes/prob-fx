@@ -2,9 +2,8 @@ module Wasabaye.Old.ObsReader
 
 import Data.List
 import public Data.List.Elem
-import Wasabaye.Env
-import Wasabaye.Prog
-import Control.Eff
+import Wasabaye.Old.Env
+import Wasabaye.Old.Prog
 
 public export
 Observable : (env : List (String, Type)) -> (var : String) -> (var_type : Type) -> Type

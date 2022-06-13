@@ -1,7 +1,7 @@
 module Wasabaye.Old.Dist
 
 import Data.List.NonEmpty
-import Wasabaye.Prog
+import Wasabaye.Old.Prog
 import Control.Eff
 import Control.Monad.Free
 
