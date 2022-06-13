@@ -2,6 +2,8 @@ module Wasabaye.Effects.Dist
 
 import Data.List.NonEmpty
 import Wasabaye.Prog
+import Control.Eff
+import Control.Monad.Free
 
 public export
 data PrimDist : a -> Type where
@@ -24,6 +26,7 @@ public export
 data Sample : a -> Type where
   MkSample  : PrimDist a -> Sample a
 
+-- Prog version
 public export
 handleDist : {auto es : _} -> Prog (Dist :: es) a -> Prog (Observe :: Sample :: es) a
 handleDist (Val a)   = Val a
@@ -32,3 +35,14 @@ handleDist (Op op k) with (discharge op)
   _ | Right d = case d.obs of Just y  => do x <- call (MkObserve d.dist y) 
                                             (handleDist . k) x
                               Nothing => call (MkSample d.dist) >>= (handleDist . k)
+
+-- Eff version
+public export
+handleDist' : (prf : Has Dist es) => Eff es a -> Eff (Observe :: Sample :: es - Dist) a
+handleDist' prog = case toView prog of
+  Pure x    => pure x
+  Bind op k => case decomp op {prf} of
+    Right d => case d.obs of Just y  => do x <- send (MkObserve d.dist y) 
+                                           (handleDist' . k) x
+                             Nothing => send (MkSample d.dist) >>= (handleDist' . k)
+    Left op' => fromView $ Bind (weaken $ weaken op') (handleDist' . k)
