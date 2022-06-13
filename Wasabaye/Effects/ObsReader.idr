@@ -1,7 +1,7 @@
 module Wasabaye.Effects.ObsReader
 
 import Data.List
-import Data.List.Elem
+import public Data.List.Elem
 import Wasabaye.Env
 import Wasabaye.Prog
 import Control.Eff

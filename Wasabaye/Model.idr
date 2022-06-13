@@ -26,6 +26,10 @@ exampleHdlModel = handleCore ENil exampleModel
 ----------------------
 --- Smart constructors 
 
+-- normal : Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
+-- normal mu sigma x = do
+--   maybe_v <- call (Ask {prf} x)
+--   call (MkDist (Normal mu sigma) maybe_v)
 
 normal' : {es : _} -> Double -> Double -> Model env es Double
 normal' mu sigma = do

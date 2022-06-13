@@ -22,3 +22,14 @@ exampleModel = pure 5
 exampleHdlModel : Eff (Observe :: Sample :: []) Int
 exampleHdlModel = handleCore ENil exampleModel
 
+-- Smart constructors
+
+normal : Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
+normal mu sigma x = do
+  maybe_v <- send (Ask {prf} x)
+  send (MkDist (Normal mu sigma) maybe_v)
+
+normal' : Double -> Double -> Model env es Double
+normal' mu sigma = do
+  send (MkDist (Normal mu sigma) Nothing)
+
