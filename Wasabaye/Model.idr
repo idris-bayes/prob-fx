@@ -28,7 +28,7 @@ exampleHdlModel = handleCore ENil exampleModel
 -- Smart constructors
 
 public export
-normal : Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
+normal : {auto 0 env : _} -> Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
 normal mu sigma x = do
   maybe_v <- send (Ask {prf} x)
   send (MkDist (Normal mu sigma) maybe_v)
@@ -38,3 +38,13 @@ normal' : Double -> Double -> Model env es Double
 normal' mu sigma = do
   send (MkDist (Normal mu sigma) Nothing)
 
+public export
+uniform : {auto 0 env : _} -> Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
+uniform min max x = do
+  maybe_v <- send (Ask {prf} x)
+  send (MkDist (Uniform min max) maybe_v)
+
+public export
+uniform' : Double -> Double -> Model env es Double
+uniform' min max = do
+  send (MkDist (Uniform min max) Nothing)
