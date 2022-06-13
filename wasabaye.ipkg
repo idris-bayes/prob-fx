@@ -1,4 +1,4 @@
-package bayes
+package wasabaye
 
 
 -- pack --with-ipkg bayes.ipkg repl file-name.idr
