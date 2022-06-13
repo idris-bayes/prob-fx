@@ -459,6 +459,10 @@ public export
 replicateM : Monad m => (n : Nat) -> (x : m a) -> m (List a)
 replicateM n = sequence . replicate n
 
+public export
+mapM : (Monad m, Traversable f) => (a -> m b) -> f a -> m (f b)
+mapM f = sequence . map f
+
 ||| Compute the intersect of two lists by user-supplied equality predicate.
 export
 intersectBy : (a -> a -> Bool) -> List a -> List a -> List a

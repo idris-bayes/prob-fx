@@ -18,10 +18,9 @@ package bayes
 -- the Idris2 version required (e.g. langversion >= 0.5.1)
 -- langversion
 -- packages to add to search path
-depends = contrib, collie
+depends = contrib, collie, tailrec, freer, eff
 
-modules = Wasabaye.Prog,
-          Wasabaye.Effects.Dist
+modules = Wasabaye.Model
 
 -- main file (i.e. file to load at REPL)
 main = Main
