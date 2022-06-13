@@ -27,7 +27,7 @@ main = Main
 
 -- name of executable
 -- executable = Main
--- opts =
+-- opts = s
 -- builddir = "./"
 -- outputdir =
 
