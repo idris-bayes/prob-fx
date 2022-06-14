@@ -8,7 +8,7 @@ public export
 data PrimDist : a -> Type where
   Normal    : Double -> Double -> PrimDist Double
   Bernoulli : Double -> PrimDist Bool
-  Discrete  : List Double -> PrimDist Int
+  Binomial  : Nat -> Double -> PrimDist Nat
   Uniform   : Double -> Double -> PrimDist Double
 
 public export
