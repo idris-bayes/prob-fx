@@ -2,6 +2,7 @@ module Wasabaye.Examples.LinRegr
 
 import Data.List
 import Wasabaye.Model 
+-- import Data.List.Elem
 
 linRegr : (prf : Observables env ["y", "m", "c", "std"] Double) => List Double -> Model env es (List Double)
 linRegr xs = do
