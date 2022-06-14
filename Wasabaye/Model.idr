@@ -23,7 +23,7 @@ exampleModel : Model env es Int
 exampleModel = pure 5
 
 exampleHdlModel : Eff (Observe :: Sample :: []) Int
-exampleHdlModel = handlseCore ENil (exampleModel {env = []})
+exampleHdlModel = handleCore ENil (exampleModel {env = []})
 
 -- Smart constructors
 
