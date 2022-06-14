@@ -34,4 +34,4 @@ handleDist prog = case toView prog of
     Right d => case d.obs of Just y  => do x <- send (MkObserve d.dist y) 
                                            (handleDist . k) x
                              Nothing => send (MkSample d.dist) >>= (handleDist . k)
-    Left op' => fromView $ Bind (weaken $ weaken op') (handleDist . k)
+    Left op' => fromView $ Bind (weaken1 $ weaken1 op') (handleDist . k)
