@@ -44,5 +44,6 @@ handleSample prog = case toView prog of
   Bind op k => case prj1 op of
     (MkSample d) => sample d >>= (handleSample . k)
 
+public export
 simulate : Env env -> Model env [Dist, ObsReader env] a -> IO a
 simulate env = handleSample . handleObserve . handleCore env 

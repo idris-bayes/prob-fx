@@ -2,7 +2,7 @@ module Wasabaye.Examples.LinRegr
 
 import Data.List
 import Wasabaye.Model 
--- import Data.List.Elem
+import Wasabaye.Inference.Sim
 
 linRegr : (prf : Observables env ["y", "m", "c", "std"] Double) => List Double -> Model env es (List Double)
 linRegr xs = do
@@ -16,12 +16,18 @@ linRegr xs = do
 
 LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
 
-env_instance : Env LinRegrEnv
-env_instance = ("m" ::= []) <:> ("c" ::= []) <:> ("std" ::=  []) <:> ("y" ::=  []) <:> ENil
+envExample : Env LinRegrEnv
+envExample = ("m" ::= [3]) <:> ("c" ::= [0]) <:> ("std" ::=  [1]) <:> ("y" ::=  [0, 2, 5]) <:> ENil
 
 hdlLinRegr : Eff (Observe :: Sample :: []) (List Double)
 hdlLinRegr = 
-  handleCore env_instance (linRegr {env = LinRegrEnv} [])
+  handleCore envExample (linRegr {env = LinRegrEnv} [])
+
+simLinRegr : IO ()
+simLinRegr = do
+  let xs = map cast [0 .. 10]
+  ys <- simulate envExample (linRegr {env = LinRegrEnv} xs) 
+  print ys
 
 {- We can omit specifying the 'env' type via {env = LinRegrEnv} if we make clear that the provided environment should unify with the `env` at a specific position in the effect signature:
 
