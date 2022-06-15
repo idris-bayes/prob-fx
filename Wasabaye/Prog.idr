@@ -1,5 +1,7 @@
 module Wasabaye.Prog
 
+-- ||| Incomplete re-implementation of Stefan's Eff, for experimenting and learning purposes.
+
 import Data.List.Elem 
 
 Effect = Type -> Type 
