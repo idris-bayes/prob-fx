@@ -1,4 +1,4 @@
-module Data.List.UniqueList
+module Wasabaye.Old.UniqueList
 
 import Data.List.Elem
 import Decidable.Equality

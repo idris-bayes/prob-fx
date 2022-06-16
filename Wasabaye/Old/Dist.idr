@@ -1,9 +1,7 @@
 module Wasabaye.Old.Dist
 
-import Data.List.NonEmpty
+import Wasabaye.Old.NonEmpty
 import Wasabaye.Old.Prog
-import Control.Eff
-import Control.Monad.Free
 
 public export
 data PrimDist : a -> Type where

@@ -12,6 +12,10 @@ Observable env x a = Elem (x, a) env
 public export
 data ObsReader : (env : List (String, Type)) -> (ret : Type) -> Type where 
   Ask : (x : String) -> (prf : Observable env x a) => ObsReader env (Maybe a)
+        
+defaultTail : List a -> List a
+defaultTail [] = []
+defaultTail (x :: xs) = xs 
 
 -- Prog version
 public export

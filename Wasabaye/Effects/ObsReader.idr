@@ -18,6 +18,10 @@ public export
 data ObsReader : (env : List (String, Type)) -> (ret : Type) -> Type where 
   Ask : (x : String) -> (prf : Observable env x a) => ObsReader env (Maybe a)
 
+defaultTail : List a -> List a
+defaultTail [] = []
+defaultTail (x :: xs) = xs 
+
 -- Eff version
 public export
 handleObsRead : (prf : Has (ObsReader env) es) => Env env -> Eff es a -> Eff (es - ObsReader env) a

@@ -21,7 +21,10 @@ package wasabaye
 depends = contrib, collie, tailrec, freer, eff, free, distributions, idris-monad-bayes
 
 modules = Wasabaye.Model,
-          Wasabaye.Inference.MBayes
+          Wasabaye.Inference.MBayes,
+          Wasabaye.Examples.LinRegr,
+          Wasabaye.Effects.Dist,
+          Wasabaye.Effects.ObsReader
 
 -- main file (i.e. file to load at REPL)
 main = Main

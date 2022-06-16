@@ -1,4 +1,4 @@
-module Data.List.Elem
+module Wasabaye.Old.Elem
 
 import Decidable.Equality
 import Control.Function

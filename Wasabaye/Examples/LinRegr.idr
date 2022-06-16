@@ -9,7 +9,7 @@ linRegr xs = do
   m   <- normal 0 3 "m"
   c   <- normal 0 5 "c"
   std <- uniform 1 3 "std"
-  ys <- mapM (\x => do
+  ys  <- sequence $ map (\x => do
                     y <- normal (m * x + c) std "y"
                     pure y) xs
   pure ys

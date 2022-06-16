@@ -1,4 +1,4 @@
-module Data.List.AtIndex
+module Wasabaye.Old.AtIndex
 
 import Data.DPair
 import Data.Nat
