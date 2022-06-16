@@ -1,6 +1,7 @@
 module Wasabaye.Examples.LinRegr
 
 import Data.List
+import Data.List.Elem
 import Wasabaye.Model 
 import Wasabaye.Inference.Sim
 

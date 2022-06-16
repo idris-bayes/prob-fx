@@ -1,6 +1,6 @@
 module Wasabaye.Old.Dist
 
-import Wasabaye.Old.NonEmpty
+import Data.List
 import Wasabaye.Old.Prog
 
 public export

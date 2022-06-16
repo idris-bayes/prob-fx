@@ -1,9 +1,9 @@
 module Wasabaye.Old.Prog 
 
+import Data.List
 import Decidable.Equality
 import Decidable.Equality.Core
 import Wasabaye.Old.AtIndex 
-import Wasabaye.Old.NonEmpty 
 
 ------------------------------------------
 -- Infrastructure for Algebraic Effects --
