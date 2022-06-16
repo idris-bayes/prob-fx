@@ -1,8 +1,8 @@
 module Wasabaye.Effects.Dist
 
-import Data.List.NonEmpty
 import Control.Eff
-import Control.Monad.Free
+import Statistics.Distribution.Normal 
+import Statistics.Distribution.Uniform 
 
 public export
 data PrimDist : a -> Type where
@@ -35,3 +35,7 @@ handleDist prog = case toView prog of
                                            (handleDist . k) x
                              Nothing => send (MkSample d.dist) >>= (handleDist . k)
     Left op' => fromView $ Bind (weaken1 $ weaken1 op') (handleDist . k)
+
+partial
+prob : PrimDist a -> a -> Double
+prob (Normal mu std) y = normal_pdf mu std y
