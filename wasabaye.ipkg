@@ -21,6 +21,8 @@ package wasabaye
 depends = contrib, collie, tailrec, freer, eff, free, distributions, idris-monad-bayes
 
 modules = Wasabaye.Model,
+          Wasabaye.Env,
+          Wasabaye.Inference.Sim,
           Wasabaye.Inference.MBayes,
           Wasabaye.Examples.LinRegr,
           Wasabaye.Effects.Dist,
