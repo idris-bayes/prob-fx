@@ -20,7 +20,7 @@ LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
 envExample : Env LinRegrEnv
 envExample = ("m" ::= [3]) <:> ("c" ::= [0]) <:> ("std" ::=  [1]) <:> ("y" ::=  [0, 2, 5]) <:> ENil
 
-hdlLinRegr : Eff (Observe :: Sample :: []) (List Double)
+hdlLinRegr : Prog (Observe :: Sample :: []) (List Double)
 hdlLinRegr = 
   handleCore envExample (linRegr {env = LinRegrEnv} [])
 

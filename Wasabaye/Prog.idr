@@ -2,9 +2,7 @@ module Wasabaye.Prog
 
 import public Data.List.Elem 
 
--- ||| Re-implementation of Stefan's Eff, for experimenting and learning purposes.
-
-{- Effect sums -}
+||| Effect sums 
 public export
 Effect : Type
 Effect = Type -> Type 
@@ -51,7 +49,7 @@ discharge {prf = There later1} {es = e' :: es'} (Sum (There later2) op) =
   let res : Either (EffectSum ((-) es' e) a) (e a) = discharge {prf=later1} (Sum later2 op)
   in  mapFst weaken1 res
 
-{- Prog -}
+||| Prog
 public export
 data Prog : (es : List Effect) -> (a : Type) -> Type where
   Op  : (op : EffectSum es x) -> (k : x -> Prog es a) -> Prog es a
@@ -72,3 +70,7 @@ export
 implementation Monad (Prog es) where
   Op op k >>= f = Op op (assert_total (>>= f) . k)
   Val x   >>= f = f x
+
+public export
+send : Elem f fs => f t -> Prog fs t
+send op = Op (inj op) Val

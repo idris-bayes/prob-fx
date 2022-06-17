@@ -3,7 +3,7 @@ module Wasabaye.Effects.ObsReader
 import Data.List
 import Data.List.Elem
 import Wasabaye.Env
-import Control.Eff
+import Wasabaye.Prog
 
 public export
 Observable : (env : List (String, Type)) -> (var : String) -> (var_type : Type) -> Type
@@ -15,20 +15,18 @@ Observables env (x :: xs) a = (Elem (x, a) env, Observables env xs a)
 Observables env [] a        = ()
 
 public export
-data ObsReader : (env : List (String, Type)) -> (ret : Type) -> Type where 
+data ObsReader : (env : List (String, Type)) -> Effect where 
   Ask : (x : String) -> (prf : Observable env x a) => ObsReader env (Maybe a)
 
 defaultTail : List a -> List a
 defaultTail [] = []
 defaultTail (x :: xs) = xs 
 
--- Eff version
 public export
-handleObsRead : (prf : Has (ObsReader env) es) => Env env -> Eff es a -> Eff (es - ObsReader env) a
-handleObsRead env prog = case toView prog of
-  Pure x    => pure x
-  Bind op k => case decomp op {prf} of
-    Left op' => fromView $ Bind op' (handleObsRead env . k)
+handleObsRead : (prf : Elem (ObsReader env) es) => Env env -> Prog es a -> Prog (es - ObsReader env) a
+handleObsRead env (Val x)  = pure x
+handleObsRead env (Op op k) = case discharge op {prf} of
+    Left op' => Op op' (handleObsRead env . k)
     Right (Ask x) => do
         let vs      = get x env 
             maybe_v = head' vs 

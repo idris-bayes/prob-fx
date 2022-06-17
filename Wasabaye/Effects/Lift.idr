@@ -1,21 +1,19 @@
 module Wasabaye.Effects.Lift
 
-import Control.Eff
-import Control.Monad.Free
+import Wasabaye.Prog
 
 public export
-data Lift : (m : Type -> Type) -> Type -> Type where
+data Lift : (m : Type -> Type) -> Effect where
   MkLift : m a -> Lift m a
 
-send_explicit : {prf : Has f fs} -> f t -> Eff fs t
-send_explicit = lift . inj
+send_with_prf : {prf : Elem f fs} -> f t -> Prog fs t
+send_with_prf = send 
 
 public export
-liftM : (prf : Has (Lift m) es) =>  m a -> Eff es a 
-liftM ma = send_explicit {prf} (MkLift ma)
+liftM : (prf : Elem (Lift m) es) =>  m a -> Prog es a 
+liftM ma = send_with_prf {prf} (MkLift ma)
 
 public export
-handleLift : Monad m => Eff [Lift m] a -> m a
-handleLift prog = case toView prog of
-  Pure x   => pure x
-  Bind op k => let MkLift ma = prj1 op in ma >>= handleLift . k
+handleLift : Monad m => Prog [Lift m] a -> m a
+handleLift (Val x)   = pure x
+handleLift (Op op k) = let MkLift ma = prj1 op in ma >>= handleLift . k

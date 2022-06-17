@@ -1,10 +1,10 @@
 module Wasabaye.Effects.Dist
 
-import Control.Eff
 import Data.List
 import Statistics.Distribution.Binomial 
 import Statistics.Distribution.Normal 
 import Statistics.Distribution.Uniform 
+import Wasabaye.Prog
 import System.Random
 
 public export
@@ -21,23 +21,22 @@ record Dist (a : Type) where
   obs  : Maybe a
 
 public export
-data Observe : a -> Type where 
+data Observe : Effect where 
   MkObserve : PrimDist a -> a -> Observe a
 
 public export
-data Sample : a -> Type where
+data Sample : Effect where
   MkSample  : PrimDist a -> Sample a
 
 public export
-handleDist : (prf : Has Dist es) => Eff es a -> Eff (Observe :: Sample :: es - Dist) a
-handleDist prog = case toView prog of
-  Pure x    => pure x
-  Bind op k => case decomp op {prf} of
-    Right d => case d.obs of Just y  => do x <- send (MkObserve d.dist y) 
-                                           (handleDist . k) x
-                             Nothing => send (MkSample d.dist) >>= (handleDist . k)
-    Left op' => fromView $ Bind (weaken1 $ weaken1 op') (handleDist . k)
-
+partial
+handleDist : (prf : Elem Dist es) => Prog es a -> Prog (Observe :: Sample :: es - Dist) a
+handleDist (Val x) = pure x 
+handleDist (Op op k) = case discharge op {prf} of
+  Right d => case d.obs of Just y  => do x <- send (MkObserve d.dist y) 
+                                         (handleDist . k) x
+                           Nothing => send (MkSample d.dist) >>= (handleDist . k)
+  Left op' => Op (weaken1 $ weaken1 op') (handleDist . k)
 
 ||| Density functions
 prob : PrimDist a -> a -> Double
