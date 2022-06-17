@@ -1,6 +1,6 @@
 module Wasabaye.Prog
 
-import Data.List.Elem 
+import public Data.List.Elem 
 
 -- ||| Re-implementation of Stefan's Eff, for experimenting and learning purposes.
 
@@ -34,23 +34,41 @@ prj1 (Sum Here op) = op
 prj1 (Sum (There later) op) impossible
 
 public export
-(-) : (es : List Effect) -> (e : Effect) -> {auto prf : Elem e es} -> List Effect
+(-) : (es : List a) -> (e : a) -> {auto prf : Elem e es} -> List a
 (-) (e :: es)  e {prf=Here}       = es
-(-) (e' :: es) e {prf=There prf'} = e' :: (Prog.(-) es e {prf=prf'})
+(-) (e' :: es) e {prf=There prf'} = e' :: ((-) es e {prf=prf'})
 
 public export
 weaken1 : EffectSum es a -> EffectSum (e :: es) a
 weaken1 (Sum prf op) = Sum (There prf) op
 
 public export 
-discharge : {auto prf : Elem e es} -> EffectSum es a -> Either (EffectSum (Prog.(-) es e) a) (e a)
-discharge {prf = Here} (Sum Here op)                = Right op
-discharge {prf = Here} (Sum (There later) op)       = Left (Sum later op)
+discharge : {auto prf : Elem e es} -> EffectSum es a -> Either (EffectSum (es - e) a) (e a)
+discharge {prf = Here} (Sum Here op)               = Right op
+discharge {prf = Here} (Sum (There later) op)      = Left (Sum later op)
 discharge {prf = There later} (Sum Here op)        = Left (Sum Here op) 
 discharge {prf = There later1} {es = e' :: es'} (Sum (There later2) op) = 
-  let res : Either (EffectSum (Prog.(-) es' e) a) (e a) = discharge {prf=later1} (Sum later2 op)
+  let res : Either (EffectSum ((-) es' e) a) (e a) = discharge {prf=later1} (Sum later2 op)
   in  mapFst weaken1 res
 
 {- Prog -}
--- data Prog : (es : List Effect) -> (a : Type) -> Type where
---   Op : EffectSum es 
+public export
+data Prog : (es : List Effect) -> (a : Type) -> Type where
+  Op  : (op : EffectSum es x) -> (k : x -> Prog es a) -> Prog es a
+  Val : a -> Prog es a
+
+export
+implementation Functor (Prog es) where
+  map f (Op op k) = Op op (map f . k)
+  map f (Val a)   = Val (f a)
+
+export
+implementation Applicative (Prog es) where
+  pure = Val
+  Op op k <*> p = Op op (\x => k x <*> p) 
+  Val f   <*> p = map f p
+
+export
+implementation Monad (Prog es) where
+  Op op k >>= f = Op op (assert_total (>>= f) . k)
+  Val x   >>= f = f x
