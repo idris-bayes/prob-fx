@@ -3,6 +3,8 @@ module Wasabaye.Inference.MBayes
 import Data.List
 import Control.Eff
 import Control.Monad.Bayes.Interface
+import Wasabaye.Env
+import Wasabaye.Model
 import Wasabaye.Effects.Lift
 import Wasabaye.Effects.Dist
 
@@ -31,3 +33,6 @@ handleSamp prog = case toView prog of
           xs <- sequence $ replicate n (Monad.Bayes.Interface.bernoulli p)
           pure $ length $ filter (== True) xs
         sampleBayes (Uniform min max)   = Monad.Bayes.Interface.uniform min max
+
+toMBayes : MonadInfer m => Env env -> Model env (Dist :: ObsReader env :: Lift m :: []) a -> m a
+toMBayes env = handleLift . handleSamp {m} . handleObs {m} . handleCore env
