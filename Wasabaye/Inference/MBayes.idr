@@ -24,11 +24,9 @@ handleSamp (Op op k) = case discharge op of
     Right (MkSample d)    => do y <- liftM {prf} (sampleBayes d)
                                 handleSamp {prf} (k y)
   where sampleBayes : PrimDist b -> m b
-        sampleBayes (Normal mu std) = Monad.Bayes.Interface.normal mu std
-        sampleBayes (Bernoulli p)   = Monad.Bayes.Interface.bernoulli p
-        sampleBayes (Binomial n p)  = do
-          xs <- sequence $ replicate n (Monad.Bayes.Interface.bernoulli p)
-          pure $ length $ filter (== True) xs
+        sampleBayes (Normal mu std)     = Monad.Bayes.Interface.normal mu std
+        sampleBayes (Bernoulli p)       = Monad.Bayes.Interface.bernoulli p
+        sampleBayes (Binomial n p)      = Monad.Bayes.Interface.binomial n p
         sampleBayes (Uniform min max)   = Monad.Bayes.Interface.uniform min max
 
 public export
