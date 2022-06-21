@@ -1,6 +1,6 @@
 module Wasabaye2.ModelIx
 
-import Data.Subset
+import Data.List.Elem
 import Data.List
 import Wasabaye2.Env
 
@@ -24,7 +24,7 @@ pure : a -> ModelIx [] a
 pure = Pure
 
 (>>=) : {env1, env2 : _} -> ModelIx env1 a -> (a -> ModelIx env2 b) -> ModelIx (env1 ++ env2) b
-(>>=) = Bind {env1} {env2}
+-- (>>=) = Bind {env1} {env2}
 
 normal    = Normal
 uniform   = Uniform
@@ -57,25 +57,32 @@ exampleModelIx3 = do
 
 
 namespace SubsetEnvTest
-
-  subsetConcat : Subset env (env ++ env')
-  subsetConcat = ?subsetConcat_rhs
+  data Subset : {0 a: Type} -> (xs, ys : List a) -> Type where
+    Nil : Subset [] ys
+    (::) : {0 x: a} -> (e : Elem x ys) -> Subset xs ys -> Subset (x::xs) ys
 
   %hint
   subsetConcatInv1 : Subset (env1 ++ env2) env  -> Subset env1 env
-  subsetConcatInv2 : Subset (env1 ++ env2) env  -> Subset env2 env
-
-  subsetCong   : Subset env env' -> Subset env' env'' -> Subset env env''
-
+  %hint
+  subsetConcatInv2 : Subset (env1 ++ env2) env  -> Subset env2 env  
+  %hint
+  subsetToElem     : Subset fs fs' -> Elem f fs -> Elem f fs'
+  
   partial
   evalModelIx : (prf : Subset env env_sup) => Env env_sup -> ModelIx env a -> a
   evalModelIx ENil (Pure x)   = x
   evalModelIx env (Bind x k) = 
     let v = evalModelIx {prf = subsetConcatInv1 prf} env x 
     in  evalModelIx {prf = subsetConcatInv2 prf} env (k v)
-  -- evalModelIx env (Normal mu std y) = head $ get "y" env
-  -- evalModelIx env (Uniform min max y) = ?r_15
-  -- evalModelIx env (Bernoulli p y) = True
+  evalModelIx env (Normal mu std y) = 
+    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
+                                                    []        => (-1)
+  evalModelIx env (Uniform min max y) =
+    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
+                                                    []        => (-1)
+  evalModelIx env (Bernoulli p y) = 
+    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
+                                                    []        => False
   -- evalModelIx env (If b m1 m2) = 
   --   if b then evalModelIx env m1 else evalModelIx env m2
 
@@ -83,6 +90,7 @@ namespace SubsetEnvTest
 namespace StrictEnvTest
 
   partial
+  public export
   evalModelIx : Env env -> ModelIx env a -> a
   evalModelIx ENil (Pure x)  = x
   -- evalModelIx env (Bind x k) = 
@@ -93,3 +101,5 @@ namespace StrictEnvTest
   -- evalModelIx env (Bernoulli p y) = True
   -- evalModelIx env (If b m1 m2) = 
   --   if b then evalModelIx env m1 else evalModelIx env m2
+
+  -- test = evalModelIx (ECons ("x" ::= [0]) ENil) exampleModelIx
