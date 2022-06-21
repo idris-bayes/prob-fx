@@ -55,26 +55,41 @@ exampleModelIx3 = do
   case m of (True ** m1)  => pure (True ** m1)
             (False ** m2) => pure (False ** m2)
 
-||| Environment
 
-subsetConcat : Subset env (env ++ env')
-subsetConcat = ?subsetConcat_rhs
+namespace SubsetEnvTest
 
-%hint
-subsetConcatInv1 : Subset (env1 ++ env2) env  -> Subset env1 env
-subsetConcatInv2 : Subset (env1 ++ env2) env  -> Subset env2 env
+  subsetConcat : Subset env (env ++ env')
+  subsetConcat = ?subsetConcat_rhs
 
-subsetCong   : Subset env env' -> Subset env' env'' -> Subset env env''
+  %hint
+  subsetConcatInv1 : Subset (env1 ++ env2) env  -> Subset env1 env
+  subsetConcatInv2 : Subset (env1 ++ env2) env  -> Subset env2 env
 
-partial
-interpretModelIx : (prf : Subset env env_sup) => Env env_sup -> ModelIx env a -> a
-interpretModelIx ENil (Pure x)   = x
-interpretModelIx env (Bind x k) = 
-  let v = interpretModelIx {prf = subsetConcatInv1 prf} env x 
-  in  interpretModelIx {prf = subsetConcatInv2 prf} env (k v)
--- interpretModelIx env (Normal mu std y) = head $ get "y" env
--- interpretModelIx env (Uniform min max y) = ?r_15
--- interpretModelIx env (Bernoulli p y) = True
--- interpretModelIx env (If b m1 m2) = 
---   if b then interpretModelIx env m1 else interpretModelIx env m2
+  subsetCong   : Subset env env' -> Subset env' env'' -> Subset env env''
 
+  partial
+  evalModelIx : (prf : Subset env env_sup) => Env env_sup -> ModelIx env a -> a
+  evalModelIx ENil (Pure x)   = x
+  evalModelIx env (Bind x k) = 
+    let v = evalModelIx {prf = subsetConcatInv1 prf} env x 
+    in  evalModelIx {prf = subsetConcatInv2 prf} env (k v)
+  -- evalModelIx env (Normal mu std y) = head $ get "y" env
+  -- evalModelIx env (Uniform min max y) = ?r_15
+  -- evalModelIx env (Bernoulli p y) = True
+  -- evalModelIx env (If b m1 m2) = 
+  --   if b then evalModelIx env m1 else evalModelIx env m2
+
+
+namespace StrictEnvTest
+
+  partial
+  evalModelIx : Env env -> ModelIx env a -> a
+  evalModelIx ENil (Pure x)  = x
+  -- evalModelIx env (Bind x k) = 
+  --   let v = evalModelIx {prf = subsetConcatInv1 prf} env x 
+  --   in  evalModelIx {prf = subsetConcatInv2 prf} env (k v)
+  evalModelIx (ECons (y ::= (x :: xs)) ENil) (Normal mu std y) = x
+  -- evalModelIx env (Uniform min max y) = ?r_15
+  -- evalModelIx env (Bernoulli p y) = True
+  -- evalModelIx env (If b m1 m2) = 
+  --   if b then evalModelIx env m1 else evalModelIx env m2
