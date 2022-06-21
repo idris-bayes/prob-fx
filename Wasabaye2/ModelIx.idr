@@ -24,7 +24,7 @@ pure : a -> ModelIx [] a
 pure = Pure
 
 (>>=) : {env1, env2 : _} -> ModelIx env1 a -> (a -> ModelIx env2 b) -> ModelIx (env1 ++ env2) b
--- (>>=) = Bind {env1} {env2}
+(>>=) = Bind {env1} {env2}
 
 normal    = Normal
 uniform   = Uniform
@@ -55,12 +55,37 @@ exampleModelIx3 = do
   case m of (True ** m1)  => pure (True ** m1)
             (False ** m2) => pure (False ** m2)
 
+namespace NoEnvTest
+  partial 
+  evalModelIx : ModelIx env a -> a                  -- | Although this is well-typed, I'm not really sure what we can do with it.
+  evalModelIx (Pure x)  = x
+  evalModelIx (Bind x k) =
+    let v = evalModelIx x 
+    in  evalModelIx (k v)
+  evalModelIx (If b m1 m2) = 
+    if b then evalModelIx m1 else evalModelIx m2
+
+namespace StrictEnvTest
+  partial
+  public export 
+  evalModelIx :  Env env ->  ModelIx env a -> a
+  evalModelIx ENil (Pure x)  = x
+  -- evalModelIx (env1 ++ env2) (Bind {env1, env2} x k) =     -- | Evaluation of Bind is tricky
+  --   let v = evalModelIx env1 x 
+  --   in  evalModelIx env (k v)
+  evalModelIx (ECons (y ::= (x :: xs)) ENil) (Normal mu std y) = x
+  -- evalModelIx env (If b m1 m2) =                           -- | Similarly, evaluation of If is tricky
+  --   if b then evalModelIx env m1 else evalModelIx env m2
 
 namespace SubsetEnvTest
+  public export
   data Subset : {0 a: Type} -> (xs, ys : List a) -> Type where
     Nil : Subset [] ys
     (::) : {0 x: a} -> (e : Elem x ys) -> Subset xs ys -> Subset (x::xs) ys
 
+  -- | These proofs are noisy, and i'm not sure it is possible to prove them
+  %hint
+  subsetId : Subset env env
   %hint
   subsetConcatInv1 : Subset (env1 ++ env2) env  -> Subset env1 env
   %hint
@@ -68,38 +93,24 @@ namespace SubsetEnvTest
   %hint
   subsetToElem     : Subset fs fs' -> Elem f fs -> Elem f fs'
   
-  partial
-  evalModelIx : (prf : Subset env env_sup) => Env env_sup -> ModelIx env a -> a
-  evalModelIx ENil (Pure x)   = x
-  evalModelIx env (Bind x k) = 
-    let v = evalModelIx {prf = subsetConcatInv1 prf} env x 
-    in  evalModelIx {prf = subsetConcatInv2 prf} env (k v)
-  evalModelIx env (Normal mu std y) = 
-    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
-                                                    []        => (-1)
-  evalModelIx env (Uniform min max y) =
-    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
-                                                    []        => (-1)
-  evalModelIx env (Bernoulli p y) = 
-    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
-                                                    []        => False
-  -- evalModelIx env (If b m1 m2) = 
-  --   if b then evalModelIx env m1 else evalModelIx env m2
-
-
-namespace StrictEnvTest
-
+  -- | Need to return environment as well for it to be updated.
   partial
   public export
-  evalModelIx : Env env -> ModelIx env a -> a
-  evalModelIx ENil (Pure x)  = x
-  -- evalModelIx env (Bind x k) = 
-  --   let v = evalModelIx {prf = subsetConcatInv1 prf} env x 
-  --   in  evalModelIx {prf = subsetConcatInv2 prf} env (k v)
-  evalModelIx (ECons (y ::= (x :: xs)) ENil) (Normal mu std y) = x
-  -- evalModelIx env (Uniform min max y) = ?r_15
-  -- evalModelIx env (Bernoulli p y) = True
-  -- evalModelIx env (If b m1 m2) = 
-  --   if b then evalModelIx env m1 else evalModelIx env m2
-
-  -- test = evalModelIx (ECons ("x" ::= [0]) ENil) exampleModelIx
+  ss_evalModelIx : (prf : Subset env env_sup) => Env env_sup -> ModelIx env a -> a
+  ss_evalModelIx ENil (Pure x)   = x
+  ss_evalModelIx env (Bind x k) = 
+    let v = ss_evalModelIx {prf = subsetConcatInv1 prf} env x  
+    in  ss_evalModelIx {prf = subsetConcatInv2 prf} env (k v)
+  ss_evalModelIx env (Normal mu std y) = 
+    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
+                                                    []        => (-1)
+  ss_evalModelIx env (Uniform min max y) =
+    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
+                                                    []        => (-1)
+  ss_evalModelIx env (Bernoulli p y) = 
+    case get y env {prf = subsetToElem prf Here} of (v :: vs) => v
+                                                    []        => False
+  ss_evalModelIx env (If b m1 m2) = 
+    if b 
+    then ss_evalModelIx {prf = subsetConcatInv1 prf} env m1 
+    else ss_evalModelIx {prf = subsetConcatInv2 prf} env m2
