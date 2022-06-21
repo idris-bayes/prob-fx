@@ -56,3 +56,15 @@ Some possible properties:
       When two models are combined but have RV name clashes, perhaps it could be interesting to try and implement a renaming mechanism.
 -}
 
+data Decomp : (xys : List a) -> Type where
+  MkDecomp : (xs, ys : _) -> Decomp (xs ++ ys)
+
+data MIx : (env : List String) -> (x : Type) -> Type where
+  Pure      : a -> MIx [] a
+  Bind      : MIx xs a -> (a -> MIx ys b) -> MIx (xs ++ ys) b
+
+-- interpretMIx : {env  : List String} -> Decomp env -> MIx env a -> a
+-- interpretMIx (MkDecomp [] []) (Pure x) = x
+-- interpretMIx (MkDecomp xs ys) (Bind x k {xs} {ys})  = 
+--   let v = interpretMIx env x 
+--   in  interpretMIx env (k v)
