@@ -2,6 +2,7 @@ module Wasabaye.Inference.MBayes
 
 import Data.List
 import Control.Monad.Bayes.Interface
+import Numeric.Log
 import Wasabaye.Env
 import Wasabaye.Model
 import Wasabaye.Effects.Lift
@@ -13,7 +14,7 @@ handleObs (Val x)   = pure x
 handleObs (Op op k) = case discharge op of
     Left op'              => Op op' (handleObs {prf} . k)
     Right (MkObserve d y) => do let log_p = log_prob d y
-                                liftM {prf} (score log_p)
+                                liftM {prf} (score (Exp log_p))
                                 handleObs {prf} (k y)
 
 handleSamp : MonadSample m => (Elem Sample es) => (prf : Elem (Lift m) (es - Sample)) =>

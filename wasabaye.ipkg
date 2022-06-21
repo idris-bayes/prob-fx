@@ -18,7 +18,7 @@ package wasabaye
 -- the Idris2 version required (e.g. langversion >= 0.5.1)
 -- langversion
 -- packages to add to search path
-depends = contrib, collie, tailrec, eff, free, distributions, idris-monad-bayes
+depends = contrib, collie, tailrec, eff, free, distributions, log-domain, idris-monad-bayes
 
 modules = Wasabaye.Model,
           Wasabaye.Env,
@@ -26,7 +26,8 @@ modules = Wasabaye.Model,
           Wasabaye.Inference.MBayes,
           Wasabaye.Examples.LinRegr,
           Wasabaye.Effects.Dist,
-          Wasabaye.Effects.ObsReader
+          Wasabaye.Effects.ObsReader,
+          Wasabaye2.ModelIx
 
 -- main file (i.e. file to load at REPL)
 main = Main
