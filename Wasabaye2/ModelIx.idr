@@ -4,6 +4,7 @@ import Data.List.Elem
 import Data.List
 import Wasabaye2.Env
 
+-- data Append : 
 
 ||| A model indexed by an environment of random variables
 data ModelIx : (env : List (String, Type)) -> (x : Type) -> Type where
@@ -59,17 +60,42 @@ namespace NoEnvTest
   evalModelIx (If b m1 m2) = 
     if b then evalModelIx m1 else evalModelIx m2
 
-namespace StrictEnvTest
+namespace ReaderEnvTest
+  partial 
+  evalModelIx : ModelIx env a -> (Env env -> a)                  -- | Although this is well-typed, I'm not really sure what we can do with it.
+  evalModelIx (Pure x)  = \_ => x
+  -- evalModelIx ((>>=)  mx k) =
+  --   let x = evalModelIx mx 
+  --   in  evalModelIx (k x)
+  -- evalModelIx (If b m1 m2) = 
+  --   if b then evalModelIx m1 else evalModelIx m2
+
+  
+namespace StrictEnvTestDecompVal  -- | Where "env" is literally a value of type List (String, Type)
   partial
   public export 
-  evalModelIx :  Env env ->  ModelIx env a -> a
+  evalModelIx : (env : _) ->  ModelIx env a -> a
+  evalModelIx Nil (Pure x)  = x
+  evalModelIx (env1 ++ env2) ((>>=) mx k) =                         -- | Evaluation of Bind is tricky
+    let v = evalModelIx env1 mx 
+    in  evalModelIx env2 (k v)
+  evalModelIx ((y, Double) :: Nil) (Normal mu std y) = 5
+
+namespace StrictEnvTestDecompTy  -- | Proving 
+
+  decompEnv : {xs : _} -> Env (xs ++ ys) -> (Env xs, Env ys)
+  decompEnv {xs = Nil} es = (ENil, es)
+  decompEnv {xs = ((str, ty) :: vs)} (ECons (str ::= val) envs) 
+    = let (xs_rest, ys) = decompEnv {xs=vs} envs
+      in  (ECons (str ::= val) xs_rest, ys)
+
+  partial
+  public export 
+  evalModelIx : (Env env) ->  ModelIx env a -> a
   evalModelIx ENil (Pure x)  = x
-  -- evalModelIx (env1 ++ env2) (Bind {env1, env2} x k) =           -- | Evaluation of Bind is tricky
-  --   let v = evalModelIx env1 x 
-  --   in  evalModelIx env (k v)
-  evalModelIx (ECons (y ::= (x :: xs)) ENil) (Normal mu std y) = x
-  -- evalModelIx env (If b m1 m2) =                                 -- | Similarly, evaluation of If is tricky
-  --   if b then evalModelIx env m1 else evalModelIx env m2
+  evalModelIx env ((>>=) mx k) with (decompEnv env)
+    _ | (env_xs, env_ys) = let x = evalModelIx env_xs mx 
+                           in  evalModelIx env_ys (k x)
 
 namespace SubsetEnvTest
   public export

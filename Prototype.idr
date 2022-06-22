@@ -56,15 +56,23 @@ Some possible properties:
       When two models are combined but have RV name clashes, perhaps it could be interesting to try and implement a renaming mechanism.
 -}
 
-data Decomp : (xys : List a) -> Type where
-  MkDecomp : (xs, ys : _) -> Decomp (xs ++ ys)
+data Env : (env : List (String, Type))  -> Type where
+  ENil  : Env []
+  ECons : (var : String) -> (val : ty) -> Env env -> Env ((var, ty) :: env)
 
-data MIx : (env : List String) -> (x : Type) -> Type where
-  Pure      : a -> MIx [] a
-  Bind      : MIx xs a -> (a -> MIx ys b) -> MIx (xs ++ ys) b
+data Prog : (env : List (String, Type)) -> (x : Type) -> Type where
+  Pure  : a -> Prog [] a
+  Bind  : {xs, ys : _} -> Prog xs a -> (a -> Prog ys b) -> Prog (xs ++ ys) b
 
--- interpretMIx : {env  : List String} -> Decomp env -> MIx env a -> a
--- interpretMIx (MkDecomp [] []) (Pure x) = x
--- interpretMIx (MkDecomp xs ys) (Bind x k {xs} {ys})  = 
---   let v = interpretMIx env x 
---   in  interpretMIx env (k v)
+decompEnv : (xs : _) -> Env (xs ++ ys) -> (Env xs, Env ys)
+decompEnv Nil es = (ENil, es)
+decompEnv ((str, ty) :: vs) (ECons str val envs) 
+  = let (xs_rest, ys) = decompEnv vs envs
+    in  (ECons str val xs_rest, ys)
+
+evalMIx : Env env -> Prog env a -> a
+evalMIx ENil (Pure x) = x
+evalMIx env (Bind mx k {xs} {ys}) = 
+  let (env_xs, env_ys) = decompEnv xs env
+      x = evalMIx env_xs mx 
+  in  evalMIx env_ys (k x)
