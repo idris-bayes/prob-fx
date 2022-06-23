@@ -2,14 +2,19 @@ module Wasabaye2.ModelIx
 
 import Data.List.Elem
 import Data.List
+import Data.Maybe
 
-||| A model indexed by an environment of random variables
+||| Primitive distributions
+data PrimDist : a -> Type where
+  Normal    : (mu : Double) -> (std : Double) -> PrimDist Double
+  Bernoulli : (p : Double) -> PrimDist Bool
+  Uniform   : (min : Double) -> (max : Double) -> PrimDist Double
+
+||| Model indexed by an environment of random variables
 data ModelIx : (env : List (String, Type)) -> (x : Type) -> Type where
   Pure      : a -> ModelIx [] a
   (>>=)     : {env1, env2 : _} -> ModelIx env1 a -> (a -> ModelIx env2 b) -> ModelIx (env1 ++ env2) b
-  Normal    : (mu : Double) -> (std : Double) -> (y : String) -> ModelIx [(y, Double)] Double
-  Uniform   : (min : Double) -> (max : Double) -> (y : String) -> ModelIx [(y, Double)] Double
-  Bernoulli : (p : Double) -> (y : String) -> ModelIx [(y, Bool)] Bool
+  Dist      : PrimDist a -> (y : String) -> ModelIx [(y, a)] a
 -- | "If" returns a model indexed by both branches' sample spaces.
   If        : {env1, env2 : _} -> (b : Bool) -> (m1 : ModelIx env1 a) -> (m2 : ModelIx env2 a) -> ModelIx (env1 ++ env2) a
 
@@ -18,9 +23,9 @@ iF : Bool -> (ModelIx omega1 a) -> (ModelIx omega2 a) -> (b ** ModelIx (if b the
 iF True m1 m2  = (True ** m1)
 iF False m1 m2 = (False ** m2)
 
-normal    = Normal
-uniform   = Uniform
-bernoulli = Bernoulli
+normal mu std y    = Dist (Normal mu std) y
+uniform min max y  = Dist (Uniform min max) y
+bernoulli p y      = Dist (Bernoulli p) y
 
 -- | Example models
 -- Example 1
@@ -37,14 +42,14 @@ exampleModelIx1Impl = do
 exampleModelIx2 : ModelIx [("b", Bool), ("y_0", Double), ("y_1", Double)] Double
 exampleModelIx2 = do
   b <- bernoulli 0.5 "b"
-  y <- If b (Normal 1 1 "y_0") (Normal 0 1 "y_1")
+  y <- If b (normal 1 1 "y_0") (normal 0 1 "y_1")
   Pure y
 
 -- Example 3
 exampleModelIx3 : ModelIx [("b", Bool)] (b ** ModelIx (if b then [("y_0", Double)] else [("y_1", Double)]) Double)
 exampleModelIx3 = do
-  b <- Bernoulli 0.5 "b"
-  let m = iF b (Normal 1 1 "y_0") (Normal 0 1 "y_1")
+  b <- bernoulli 0.5 "b"
+  let m = iF b (normal 1 1 "y_0") (normal 0 1 "y_1")
   case m of (True ** m1)  => Pure (True ** m1)
             (False ** m2) => Pure (False ** m2)
 
@@ -52,7 +57,7 @@ exampleModelIx3 = do
 public export
 data Env : List (String, Type)  -> Type where
   ENil  : Env []
-  ECons : (var : String) -> (val : a) -> Env env -> Env ((var, a) :: env)
+  ECons : (var : String) -> (val : Maybe a) -> Env env -> Env ((var, a) :: env)
 
 decompEnv : {xs : _} -> Env (xs ++ ys) -> (Env xs, Env ys)
 decompEnv {xs = Nil} es = (ENil, es)
@@ -70,20 +75,25 @@ evalModelIx ((>>=) mx k) env with (decompEnv env)
 evalModelIx (If b m1 m2) env with (decompEnv env)
   _ | (env_xs, env_ys) = if b then evalModelIx m1 env_xs 
                          else evalModelIx m2 env_ys
-evalModelIx (Normal mu std var)   (ECons var val ENil) = val
-evalModelIx (Uniform min max var) (ECons var val ENil) = val
-evalModelIx (Bernoulli p var)     (ECons var val ENil) = val
+evalModelIx (Dist (Normal mu std) var)   (ECons var val ENil) = fromMaybe (-1) val
+evalModelIx (Dist (Uniform min max) var) (ECons var val ENil) = fromMaybe (-1) val
+evalModelIx (Dist (Bernoulli p) var)     (ECons var val ENil) = fromMaybe True val
 
--- | Examples: evaluating a model under an environment
+-- | Examples: Test evaluating a concrete ModelIx example under an environment instance.
 test_evalModelIx2 : Double
-test_evalModelIx2 = evalModelIx exampleModelIx2 (ECons "b" True (ECons "y_0" 1.0 (ECons "y_1" 0.0 ENil)))
+test_evalModelIx2 = evalModelIx exampleModelIx2 (ECons "b" (Just True) (ECons "y_0" (Just 1.0) (ECons "y_1" Nothing ENil)))
 
 test_evalModelIx3 : Double
 test_evalModelIx3 = 
   let branchedModel : (b ** ModelIx (if b then [("y_0", Double)] else [("y_1", Double)]) Double) 
-        = evalModelIx exampleModelIx3 (ECons "b" True ENil)
-  in  case branchedModel of (True  ** m1) => evalModelIx m1 (ECons "y_0" 1.0 ENil)
-                            (False ** m2) => evalModelIx m2 (ECons "y_1" 0.0 ENil)
+        = evalModelIx exampleModelIx3 (ECons "b" (Just True) ENil)
+  in  case branchedModel of (True  ** m1) => evalModelIx m1 (ECons "y_0" (Just 1.0) ENil)
+                            (False ** m2) => evalModelIx m2 (ECons "y_1" Nothing ENil)
+
+||| Probabilistic program 
+data ProbProg : (env : List (String, Type)) -> (x : Type) -> Type where
+  Sample  : PrimDist a -> ProbProg env a
+  Observe : PrimDist a -> a -> ProbProg env a
 
 -- ||| To think about:
 -- 1. a) Test evaluating a concrete ModelIx example under an environment instance.
