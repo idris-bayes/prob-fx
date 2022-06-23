@@ -80,9 +80,11 @@ evalModelIx (Dist (Uniform min max) var) (ECons var val ENil) = fromMaybe (-1) v
 evalModelIx (Dist (Bernoulli p) var)     (ECons var val ENil) = fromMaybe True val
 
 -- | Examples: Test evaluating a concrete ModelIx example under an environment instance.
+-- Example 2
 test_evalModelIx2 : Double
 test_evalModelIx2 = evalModelIx exampleModelIx2 (ECons "b" (Just True) (ECons "y_0" (Just 1.0) (ECons "y_1" Nothing ENil)))
 
+-- Example 3
 test_evalModelIx3 : Double
 test_evalModelIx3 = 
   let branchedModel : (b ** ModelIx (if b then [("y_0", Double)] else [("y_1", Double)]) Double) 
@@ -90,10 +92,45 @@ test_evalModelIx3 =
   in  case branchedModel of (True  ** m1) => evalModelIx m1 (ECons "y_0" (Just 1.0) ENil)
                             (False ** m2) => evalModelIx m2 (ECons "y_1" Nothing ENil)
 
-||| Probabilistic program 
-data ProbProg : (env : List (String, Type)) -> (x : Type) -> Type where
-  Sample  : PrimDist a -> ProbProg env a
-  Observe : PrimDist a -> a -> ProbProg env a
+
+namespace ProbProg
+  ||| Probabilistic program 
+  data ProbProg : (env : List (String, Type)) -> (x : Type) -> Type where
+    Pure    : a -> ProbProg [] a
+    (>>=)   : {env1, env2 : _} -> ProbProg env1 a -> (a -> ProbProg env2 b) -> ProbProg (env1 ++ env2) b
+    Sample  : PrimDist a -> (y : String) -> ProbProg env a
+    Observe : PrimDist a -> a -> (y : String) -> ProbProg env a
+    If      : {env1, env2 : _} -> (b : Bool) -> (m1 : ProbProg env1 a) -> (m2 : ProbProg env2 a) -> ProbProg (env1 ++ env2) a
+
+  translateModelIx : ModelIx env a -> (Env env -> ProbProg env a)
+  translateModelIx (Pure x) ENil = Pure x
+  translateModelIx ((>>=) mx k) env with (decompEnv env)
+    _ | (env_xs, env_ys) = let px = translateModelIx mx env_xs
+                               pk = \x => translateModelIx (k x) env_ys
+                           in  (>>=) px pk
+  translateModelIx (If b m1 m2) env with (decompEnv env)
+    _ | (env_xs, env_ys) = If b (translateModelIx m1 env_xs)
+                                (translateModelIx m2 env_ys)
+  translateModelIx (Dist d var) (ECons var maybe_val ENil) = case maybe_val of
+    Just val  => Observe d val var
+    Nothing   => Sample  d var
+
+  -- | Examples: Test translating a concrete ModelIx example to a Sample and Observe probabilistic program.
+  -- Example 2
+  test_translateModelIx2 : ProbProg  [("b", Bool), ("y_0", Double), ("y_1", Double)] Double
+  test_translateModelIx2 = translateModelIx exampleModelIx2 (ECons "b" (Just True) (ECons "y_0" (Just 1.0) (ECons "y_1" Nothing ENil)))
+
+  -- Example 3
+  test_translateModelIx3 : ProbProg [("b", Bool)] (b ** ProbProg (if b then [("y_0", Double)] else [("y_1", Double)]) Double)
+  test_translateModelIx3 = do
+    let branchedModel = translateModelIx exampleModelIx3 (ECons "b" (Just True) ENil)
+    branchedModel >>= (\dp => case dp of
+                        (True ** m1) =>  let probProg1 : ProbProg [("y_0", Double)] Double 
+                                                              = translateModelIx m1 (ECons "y_0" (Just 1.0) ENil) 
+                                         in  Pure (True ** probProg1)
+                        (False ** m2) => let probProg2 : ProbProg [("y_1", Double)] Double 
+                                                             = translateModelIx m2 (ECons "y_1" (Just 1.0) ENil) 
+                                         in  Pure (False ** probProg2))
 
 -- ||| To think about:
 -- 1. a) Test evaluating a concrete ModelIx example under an environment instance.
