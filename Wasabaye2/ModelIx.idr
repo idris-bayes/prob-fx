@@ -22,28 +22,29 @@ normal    = Normal
 uniform   = Uniform
 bernoulli = Bernoulli
 
+-- | Example models
 -- Example 1
-exampleModelIx : ModelIx [("x", Double)] Double
-exampleModelIx = do
+exampleModelIx1 : ModelIx [("x", Double)] Double
+exampleModelIx1 = do
   x <- normal 0 2 "x"
   Pure x
 
-exampleModelIxImpl : ModelIx [("x", Double)] Double
-exampleModelIxImpl = do
+exampleModelIx1Impl : ModelIx [("x", Double)] Double
+exampleModelIx1Impl = do
   ((>>=) {env1 = [("x", Double)]}) (normal 0 2 "x")  (\x => Pure x)
 
 -- Example 2 
-exampleModelIx2 : ModelIx [("p", Bool), ("y", Double)] Double
+exampleModelIx2 : ModelIx [("b", Bool), ("y_0", Double), ("y_1", Double)] Double
 exampleModelIx2 = do
-  b <- bernoulli 0.5 "p"
-  y <- If b (Pure 6) (Normal 0 1 "y")
+  b <- bernoulli 0.5 "b"
+  y <- If b (Normal 1 1 "y_0") (Normal 0 1 "y_1")
   Pure y
 
 -- Example 3
-exampleModelIx3 : ModelIx [("b", Bool)] (b ** ModelIx (if b then [] else [("y", Double)]) Double)
+exampleModelIx3 : ModelIx [("b", Bool)] (b ** ModelIx (if b then [("y_0", Double)] else [("y_1", Double)]) Double)
 exampleModelIx3 = do
   b <- Bernoulli 0.5 "b"
-  let m = iF b (Pure 6) (Normal 0 1 "y")
+  let m = iF b (Normal 1 1 "y_0") (Normal 0 1 "y_1")
   case m of (True ** m1)  => Pure (True ** m1)
             (False ** m2) => Pure (False ** m2)
 
@@ -73,6 +74,16 @@ evalModelIx (Normal mu std var)   (ECons var val ENil) = val
 evalModelIx (Uniform min max var) (ECons var val ENil) = val
 evalModelIx (Bernoulli p var)     (ECons var val ENil) = val
 
+-- | Examples: evaluating a model under an environment
+test_evalModelIx2 : Double
+test_evalModelIx2 = evalModelIx exampleModelIx2 (ECons "b" True (ECons "y_0" 1.0 (ECons "y_1" 0.0 ENil)))
+
+test_evalModelIx3 : Double
+test_evalModelIx3 = 
+  let branchedModel : (b ** ModelIx (if b then [("y_0", Double)] else [("y_1", Double)]) Double) 
+        = evalModelIx exampleModelIx3 (ECons "b" True ENil)
+  in  case branchedModel of (True  ** m1) => evalModelIx m1 (ECons "y_0" 1.0 ENil)
+                            (False ** m2) => evalModelIx m2 (ECons "y_1" 0.0 ENil)
 
 -- ||| To think about:
 -- 1. a) Test evaluating a concrete ModelIx example under an environment instance.
