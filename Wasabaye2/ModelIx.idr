@@ -53,6 +53,25 @@ exampleModelIx3 = do
   case m of (True ** m1)  => Pure (True ** m1)
             (False ** m2) => Pure (False ** m2)
 
+{- Generating variable names dynamically, or having them occur multiple times via iteration or recursion, is a problem.
+
+-- Example 4: Recursion is a problem.
+exampleModelIx4 : ModelIx [("y", Double)] Double
+exampleModelIx4 = do
+  let loop : Nat -> ModelIx [("y", Double)] Double
+      loop 0     = normal 0 1 "y"
+      loop (S k) = do normal 0 1 "y"
+                      loop k
+  loop 5
+
+-- Example 5: Iteration is a problem, seeing as how we do not have a proper monad yet. 
+exampleModelIx5 : List String -> ModelIx [("y", Double)] Double
+exampleModelIx5 xs = do
+  let mapModel : List (ModelIx [(s, Double)] Double)
+      mapModel = map (\s => normal 0 1 s) xs
+  ?ho
+-}
+
 ||| Environment
 public export
 data Env : List (String, Type)  -> Type where
@@ -124,7 +143,7 @@ namespace ProbProg
   test_translateModelIx3 : ProbProg [("b", Bool)] (b ** ProbProg (if b then [("y_0", Double)] else [("y_1", Double)]) Double)
   test_translateModelIx3 = do
     let branchedModel = translateModelIx exampleModelIx3 (ECons "b" (Just True) ENil)
-    branchedModel >>= (\dp => case dp of
+    branchedModel >>= (\case
                         (True ** m1) =>  let probProg1 : ProbProg [("y_0", Double)] Double 
                                                               = translateModelIx m1 (ECons "y_0" (Just 1.0) ENil) 
                                          in  Pure (True ** probProg1)
@@ -133,8 +152,6 @@ namespace ProbProg
                                          in  Pure (False ** probProg2))
 
 -- ||| To think about:
--- 1. a) Test evaluating a concrete ModelIx example under an environment instance.
---    b) Test translating a concrete ModelIx example to a Sample and Observe probabilistic program.
 -- 2. How to implement environments that assign traces of values to single variable names. 
 --      - Is it possible to read the first value from a variable's trace, put the trace back in the environment, and read the next value from the trace the next time we encounter the variable again? 
 --      - Maybe trying to use lists defeats the purpose of this research; perhaps we're translating ideas from Haskell wasabaye too hard, whereas we want to see how expressively we can capture the sample space; perhaps we can't really take advantage of dependent types in the list-approach. Assuming we stick to assigning single values to observable variables, each call to a primitive distribution should have a unique variable name. When we want to have a RV represent multiple values, we could instead provide a multivariate primitive distribution.
