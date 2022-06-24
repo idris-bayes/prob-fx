@@ -1,7 +1,9 @@
 module Wasabaye.Env
 
+import public Data.So
 import Data.List
 import Data.List.Elem
+import Decidable.Equality
 
 data Assign : String -> Type -> Type where
   MkAssign : (x : String) -> (trace : List a) -> Assign x a
@@ -12,13 +14,20 @@ public export
 (::=) x vs = MkAssign x vs
 
 public export
+UniqueVar : (var : String) -> (env : List (String, Type)) -> Bool
+UniqueVar x env = find x (map fst env) == False
+  where find : Eq a => a -> List a -> Bool
+        find x []        = False
+        find x (y :: xs) = (x == y) || (find x xs)
+
+public export
 data Env : List (String, Type)  -> Type where
   ENil  : Env []
-  ECons : Assign x a -> Env env -> Env ((x, a) :: env)
+  ECons : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 
 infixr 10 <:>
 public export
-(<:>) : Assign x a -> Env env -> Env ((x, a) :: env)
+(<:>) : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 (<:>) xv env = ECons xv env
 
 public export
