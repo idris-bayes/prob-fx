@@ -27,7 +27,8 @@ modules = Wasabaye.Model,
           Wasabaye.Examples.LinRegr,
           Wasabaye.Effects.Dist,
           Wasabaye.Effects.ObsReader,
-          Wasabaye2.ModelIx
+          Wasabaye2.ModelIx,
+          Wasabaye2.Examples
 
 -- main file (i.e. file to load at REPL)
 main = Main
