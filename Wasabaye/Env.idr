@@ -45,5 +45,11 @@ update : (x : String) -> (List a -> List a) -> Env env -> {auto prf : Elem (x, a
 update x f (ECons (MkAssign x v) xvs) {prf = Here}   = ECons (x ::= f v) xvs
 update x f (ECons other xvs) {prf = There later}     = ECons other (update x f xvs {prf = later})
 
+public export
+updateIf : (x : String) -> (List a -> List a) -> Env env -> {auto prf : Elem (x, a) env} -> Env env
+updateIf _ _ ENil = ENil
+updateIf x f (ECons (MkAssign x v) xvs) {prf = Here}   = ECons (x ::= f v) xvs
+updateIf x f (ECons other xvs) {prf = There later}     = ECons other (update x f xvs {prf = later})
+
 exampleEnv : Env [("x", Int), ("y", Int)]
 exampleEnv = ("x" ::= []) <:> ("y" ::= []) <:> ENil
