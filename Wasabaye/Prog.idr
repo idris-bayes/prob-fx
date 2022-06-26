@@ -49,6 +49,22 @@ discharge {prf = There later1} {es = e' :: es'} (Sum (There later2) op) =
   let res : Either (EffectSum ((-) es' e) a) (e a) = discharge {prf=later1} (Sum later2 op)
   in  mapFst weaken1 res
 
+||| Subset
+public export
+data Subset : {0 a: Type} -> (xs, ys : List a) -> Type where
+  Nil : Subset [] ys
+  (::) : {0 x: a} -> (e : Elem x ys) -> Subset xs ys -> Subset (x::xs) ys
+
+public export
+lemma_subset : Subset fs fs' -> Elem f fs -> Elem f fs'
+lemma_subset Nil has0 impossible
+lemma_subset (e :: _     ) Here = e
+lemma_subset (_ :: subset) (There has) = lemma_subset subset has
+
+public export
+weaken : (subset : Subset fs fs') => EffectSum fs a -> EffectSum fs' a
+weaken (Sum ix val) = Sum (lemma_subset subset ix) val
+
 ||| Prog
 public export
 data Prog : (es : List Effect) -> (a : Type) -> Type where

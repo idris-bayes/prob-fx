@@ -4,6 +4,7 @@ import Data.List
 import Control.Monad.Bayes.Interface
 import Numeric.Log
 import Wasabaye.Env
+import Wasabaye.PrimDist
 import Wasabaye.Model
 import Wasabaye.Effects.Lift
 import Wasabaye.Effects.Dist
@@ -24,11 +25,6 @@ handleSamp (Op op k) = case discharge op of
     Left op'              => Op op' (handleSamp {prf} . k) 
     Right (MkSample d)    => do y <- liftM {prf} (sampleBayes d)
                                 handleSamp {prf} (k y)
-  where sampleBayes : PrimDist b -> m b
-        sampleBayes (Normal mu std)     = Monad.Bayes.Interface.normal mu std
-        sampleBayes (Bernoulli p)       = Monad.Bayes.Interface.bernoulli p
-        sampleBayes (Binomial n p)      = Monad.Bayes.Interface.binomial n p
-        sampleBayes (Uniform min max)   = Monad.Bayes.Interface.uniform min max
 
 public export
 toMBayes : MonadInfer m => Env env -> Model env (Dist :: ObsReader env :: Lift m :: []) a -> m a

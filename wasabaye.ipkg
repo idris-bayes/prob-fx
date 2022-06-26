@@ -22,11 +22,14 @@ depends = contrib, collie, tailrec, eff, free, distributions, log-domain, monad-
 
 modules = Wasabaye.Model,
           Wasabaye.Env,
+          Wasabaye.PrimDist,
           Wasabaye.Inference.Sim,
           Wasabaye.Inference.MBayes,
           Wasabaye.Examples.LinRegr,
           Wasabaye.Effects.Dist,
           Wasabaye.Effects.ObsReader,
+          Wasabaye.Effects.Lift,
+          Wasabaye.Effects.Trace,
           Wasabaye2.ModelIx,
           Wasabaye2.Examples
 

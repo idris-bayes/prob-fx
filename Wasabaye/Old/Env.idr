@@ -38,3 +38,4 @@ update x f (ECons other xvs) {prf = There later}     = ECons other (update x f x
 
 exampleEnv : Env [("x", Int), ("y", Int)]
 exampleEnv = ("x" ::= []) <:> ("y" ::= []) <:> ENil
+

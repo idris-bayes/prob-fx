@@ -1,6 +1,7 @@
 module Wasabaye.Model
 
 import public Wasabaye.Env
+import public Wasabaye.PrimDist
 import public Wasabaye.Effects.Dist
 import public Wasabaye.Effects.ObsReader
 import public Wasabaye.Prog
@@ -29,20 +30,20 @@ public export
 normal : {auto 0 env : _} -> Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
 normal mu sigma x = do
   maybe_v <- send (Ask {prf} x)
-  send (MkDist (Normal mu sigma) maybe_v)
+  send (MkDist (Normal mu sigma) maybe_v (Just x))
 
 public export
 normal' : Double -> Double -> Model env es Double
 normal' mu sigma = do
-  send (MkDist (Normal mu sigma) Nothing)
+  send (MkDist (Normal mu sigma) Nothing Nothing)
 
 public export
 uniform : {auto 0 env : _} -> Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
 uniform min max x = do
   maybe_v <- send (Ask {prf} x)
-  send (MkDist (Uniform min max) maybe_v)
+  send (MkDist (Uniform min max) maybe_v (Just x))
 
 public export
 uniform' : Double -> Double -> Model env es Double
 uniform' min max = do
-  send (MkDist (Uniform min max) Nothing)
+  send (MkDist (Uniform min max) Nothing Nothing)
