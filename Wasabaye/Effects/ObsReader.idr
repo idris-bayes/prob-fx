@@ -6,15 +6,6 @@ import Wasabaye.Env
 import Wasabaye.Prog
 
 public export
-Observable : (env : List (String, Type)) -> (var : String) -> (var_type : Type) -> Type
-Observable env x a = Elem (x, a) env
-
-public export
-Observables : (env : List (String, Type)) -> (var : List String) -> (var_type : Type) -> Type
-Observables env (x :: xs) a = (Elem (x, a) env, Observables env xs a)
-Observables env [] a        = ()
-
-public export
 data ObsReader : (env : List (String, Type)) -> Effect where 
   Ask : (x : String) -> (prf : Observable env x a) => ObsReader env (Maybe a)
 

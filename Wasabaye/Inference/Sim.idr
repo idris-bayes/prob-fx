@@ -4,7 +4,7 @@ import Wasabaye.Effects.Dist
 import Wasabaye.Env
 import Wasabaye.Model
 
-||| Handlers for simulation
+--| Handlers for simulation
 handleObserve : (Elem Observe es) => Prog es a -> Prog (es - Observe) a
 handleObserve (Val x)    = pure x
 handleObserve (Op op k) = case discharge op of

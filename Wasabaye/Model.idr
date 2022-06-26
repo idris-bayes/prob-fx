@@ -6,7 +6,7 @@ import public Wasabaye.Effects.Dist
 import public Wasabaye.Effects.ObsReader
 import public Wasabaye.Prog
 
--- Model as a type-level function, specifying a program with two proofs of membership
+-- | Model as a type-level function, specifying a program with two proofs of membership
 public export
 Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (ret : Type) -> Type 
 Model env es a = (Elem Dist es, Elem (ObsReader env) es) => Prog es a 
@@ -25,7 +25,7 @@ exampleModel = pure 5
 exampleHdlModel : Prog (Observe :: Sample :: []) Int
 exampleHdlModel = handleCore ENil (exampleModel {env = []})
 
--- Smart constructors
+-- | Distribution smart constructors
 public export
 normal : {auto 0 env : _} -> Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
 normal mu sigma x = do

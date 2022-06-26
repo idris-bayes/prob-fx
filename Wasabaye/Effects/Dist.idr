@@ -8,6 +8,7 @@ import Wasabaye.Prog
 import Wasabaye.PrimDist
 import System.Random
 
+-- | Distribution effect
 public export
 record Dist (a : Type) where
   constructor MkDist
@@ -15,10 +16,12 @@ record Dist (a : Type) where
   obs  : Maybe a
   tag  : Maybe String
 
+-- | Observe effect
 public export
 data Observe : Effect where 
   MkObserve : PrimDist a -> a -> Maybe String -> Observe a
 
+-- | Sample effect
 public export
 data Sample : Effect where
   MkSample  : PrimDist a -> Maybe String -> Sample a

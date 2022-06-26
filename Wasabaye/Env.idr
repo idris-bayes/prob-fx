@@ -5,6 +5,7 @@ import Data.List
 import Data.List.Elem
 import Decidable.Equality
 
+-- | Assign
 data Assign : String -> Type -> Type where
   MkAssign : (x : String) -> (trace : List a) -> Assign x a
 
@@ -20,11 +21,23 @@ UniqueVar x env = find x (map fst env) == False
         find x []        = False
         find x (y :: xs) = (x == y) || (find x xs)
 
+-- | Environment
 public export
 data Env : List (String, Type)  -> Type where
   ENil  : Env []
   ECons : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 
+-- | Environment constraints
+public export
+Observable : (env : List (String, Type)) -> (var : String) -> (var_type : Type) -> Type
+Observable env x a = Elem (x, a) env
+
+public export
+Observables : (env : List (String, Type)) -> (var : List String) -> (var_type : Type) -> Type
+Observables env (x :: xs) a = (Elem (x, a) env, Observables env xs a)
+Observables env [] a        = ()
+
+-- | Environment constructors and modifiers
 infixr 10 <:>
 public export
 (<:>) : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
