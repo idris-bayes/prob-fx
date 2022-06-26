@@ -17,18 +17,18 @@ record Dist (a : Type) where
 
 public export
 data Observe : Effect where 
-  MkObserve : PrimDist a -> a -> Observe a
+  MkObserve : PrimDist a -> a -> Maybe String -> Observe a
 
 public export
 data Sample : Effect where
-  MkSample  : PrimDist a -> Sample a
+  MkSample  : PrimDist a -> Maybe String -> Sample a
 
 public export
 partial
 handleDist : (prf : Elem Dist es) => Prog es a -> Prog (Observe :: Sample :: es - Dist) a
 handleDist (Val x) = pure x 
 handleDist (Op op k) = case discharge op {prf} of
-  Right d => case d.obs of Just y  => do x <- send (MkObserve d.dist y) 
+  Right d => case d.obs of Just y  => do x <- send (MkObserve d.dist y d.tag) 
                                          (handleDist . k) x
-                           Nothing => send (MkSample d.dist) >>= (handleDist . k)
+                           Nothing => send (MkSample d.dist d.tag) >>= (handleDist . k)
   Left op' => Op (weaken1 $ weaken1 op') (handleDist . k)

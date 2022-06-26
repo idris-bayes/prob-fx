@@ -14,16 +14,16 @@ handleObs : MonadCond m => (Elem Observe es) => (prf : Elem (Lift m) (es - Obser
 handleObs (Val x)   = pure x
 handleObs (Op op k) = case discharge op of
     Left op'              => Op op' (handleObs {prf} . k)
-    Right (MkObserve d y) => do let log_p = log_prob d y
-                                liftM {prf} (score (Exp log_p))
-                                handleObs {prf} (k y)
+    Right (MkObserve d y _) => do let log_p = log_prob d y
+                                  liftM {prf} (score (Exp log_p))
+                                  handleObs {prf} (k y)
 
 handleSamp : MonadSample m => (Elem Sample es) => (prf : Elem (Lift m) (es - Sample)) =>
              Prog es a -> Prog (es - Sample) a
 handleSamp (Val x)   = pure x  
 handleSamp (Op op k) = case discharge op of
     Left op'              => Op op' (handleSamp {prf} . k) 
-    Right (MkSample d)    => do y <- liftM {prf} (sampleBayes d)
+    Right (MkSample d _)  => do y <- liftM {prf} (sampleBayes d)
                                 handleSamp {prf} (k y)
 
 public export

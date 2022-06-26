@@ -11,7 +11,7 @@ import Wasabaye.Effects.Dist
 traceSamples : (prf : Elem Dist es) =>  Prog es a -> Prog es a
 traceSamples (Val x)  = pure x
 traceSamples (Op op k) = case prj op {prf} of
-  Nothing                     => ?hole
+  Nothing                     => (Op op (traceSamples . k))
   Just (MkDist d maybe_y tag) => ?hole1
 
 
