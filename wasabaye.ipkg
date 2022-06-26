@@ -29,7 +29,6 @@ modules = Wasabaye.Model,
           Wasabaye.Effects.Dist,
           Wasabaye.Effects.ObsReader,
           Wasabaye.Effects.Lift,
-          Wasabaye.Effects.Trace,
           Wasabaye.Effects.Writer,
           Wasabaye2.ModelIx,
           Wasabaye2.Examples
