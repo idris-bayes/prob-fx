@@ -63,8 +63,8 @@ simLinRegr n_datapoints = do
       linRegrInstance = linRegr {env = LinRegrEnv} 
                                 {es = [Writer (List LinRegrParams), Dist, ObsReader LinRegrEnv]} 
                                 xs
-  (ys, params) <- the (IO (List Double, List LinRegrParams)) 
-                      (simulate envExampleSim (handleWriter $ linRegrInstance))
+  ((ys, params), _) <- the (IO ((List Double, List LinRegrParams), _)) 
+                           (simulate envExampleSim (handleWriter $ linRegrInstance))
   print ys >> pure ys
 
 -- | Simulating linear regression, using monad bayes

@@ -1,8 +1,10 @@
 module Wasabaye.Inference.Sim
 
 import Wasabaye.Effects.Dist
+import Wasabaye.Effects.Trace
 import Wasabaye.Env
 import Wasabaye.Model
+import Control.Arrow
 
 --| Handlers for simulation
 handleObserve : (Elem Observe es) => Prog es a -> Prog (es - Observe) a
@@ -17,5 +19,5 @@ handleSample (Op op k) = case prj1 op of
   (MkSample d _) => sample d >>= (handleSample . k)
 
 public export
-simulate : Env env -> Model env [Dist, ObsReader env] a -> IO a
-simulate env = handleSample . handleObserve . handleCore env 
+simulate : {env : _} -> Env env -> Model env [Dist, ObsReader env] a -> IO (a, Env env)
+simulate env_instance = (map (map (fromTrace env))) . handleSample . handleObserve . traceSamples . handleCore env_instance

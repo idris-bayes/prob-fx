@@ -44,7 +44,7 @@ hdlLinRegr =
 simLinRegr : (n_datapoints : Nat) -> IO (List Double)
 simLinRegr n_datapoints = do
   let xs = map cast [0 .. n_datapoints]
-  ys <- simulate envExampleSim (linRegr {env = LinRegrEnv} xs) 
+  (ys, strace) <- simulate envExampleSim (linRegr {env = LinRegrEnv} xs) 
   print ys >> pure ys
 
 -- | Simulating linear regression, using monad bayes

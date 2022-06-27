@@ -12,7 +12,6 @@ tell : (prf : Elem (Writer w) es) => Monoid w => w -> Prog es ()
 tell = send . Tell 
 
 -- | 
-public export
 handleWriter' : (prf : Elem (Writer w) es) => w -> Prog es a -> Prog (es - Writer w) (a, w)
 handleWriter' w (Val x)   = pure (x, w)
 handleWriter' w (Op op k) = case discharge op {prf} of

@@ -29,18 +29,21 @@ insertTrace (x, val) ((y, vals) :: rest) with (x == y)
 insertTrace (x, val) [] = [(x, [val])]
 
 ||| Handler for recording samples 
-public export
-traceSamples : (prf : Elem Sample es) => Trace -> Prog es a -> Prog es (a, Trace)
-traceSamples strace (Val x) = pure (x, strace) 
-traceSamples strace (Op op k) with (prj op {prf})
+traceSamples' : (prf : Elem Sample es) => Trace -> Prog es a -> Prog es (a, Trace)
+traceSamples' strace (Val x) = pure (x, strace) 
+traceSamples' strace (Op op k) with (prj op {prf})
   _ | Just (MkSample d maybe_tag) with (maybe_tag)
     _ | Just tag = do y <- send (MkSample d maybe_tag) 
                       let p = primDistToPrimVal d y
                           strace' = insertTrace (tag, p) strace 
-                      (traceSamples strace' . k) y
+                      (traceSamples' strace' . k) y
     _ | Nothing  = do y <- send (MkSample d maybe_tag)
-                      (traceSamples strace . k) y
-  _ | Nothing = Op op (traceSamples strace . k)
+                      (traceSamples' strace . k) y
+  _ | Nothing = Op op (traceSamples' strace . k)
+
+public export
+traceSamples : (prf : Elem Sample es) => Prog es a -> Prog es (a, Trace)
+traceSamples = traceSamples' []
 
 ||| Converting sample traces to output environments
 fromPrimVal : {ty : Type} -> PrimVal -> Maybe ty 
@@ -55,8 +58,8 @@ fromPrimVals pvs with (sequence $ map (fromPrimVal {ty}) pvs)
   _ | Nothing   = x ::= []
 
 public export
-traceToEnv : (env : List (String, Type)) -> {auto prf : Env env} -> Trace -> Env env
-traceToEnv Nil               {prf = ENil}      _ = ENil
-traceToEnv ((x, ty) :: rest) {prf = ECons _ _} strace with (lookup x strace)
-  _ | Just prim_vals = ECons (fromPrimVals {x} {ty} prim_vals) (traceToEnv rest strace) 
-  _ | Nothing        = ECons (x ::= []) (traceToEnv rest strace) 
+fromTrace : (env : List (String, Type)) -> {auto prf : Env env} -> Trace -> Env env
+fromTrace Nil               {prf = ENil}      _ = ENil
+fromTrace ((x, ty) :: rest) {prf = ECons _ _} strace with (lookup x strace)
+  _ | Just prim_vals = ECons (fromPrimVals {x} {ty} prim_vals) (fromTrace rest strace) 
+  _ | Nothing        = ECons (x ::= []) (fromTrace rest strace) 
