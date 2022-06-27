@@ -6,6 +6,7 @@ import Data.List.Elem
 import Decidable.Equality
 
 -- | Assign
+public export
 data Assign : String -> Type -> Type where
   MkAssign : (x : String) -> (trace : List a) -> Assign x a
 

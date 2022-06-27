@@ -32,6 +32,7 @@ modules = Wasabaye.Model,
           Wasabaye.Effects.ObsReader,
           Wasabaye.Effects.Lift,
           Wasabaye.Effects.Writer,
+          Wasabaye.Effects.Trace,
           Wasabaye2.ModelIx,
           Wasabaye2.Examples
 

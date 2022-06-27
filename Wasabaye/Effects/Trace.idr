@@ -1,5 +1,7 @@
 module Wasabaye.Effects.Trace
 
+import Data.List
+import Wasabaye.Env
 import Wasabaye.Prog
 import Wasabaye.PrimDist
 import Wasabaye.Effects.Dist
@@ -26,6 +28,7 @@ insertTrace (x, val) ((y, vals) :: rest) with (x == y)
     _ | False = (y, vals) :: insertTrace (x, val) rest
 insertTrace (x, val) [] = [(x, [val])]
 
+||| Handler for recording samples 
 public export
 traceSamples : (prf : Elem Sample es) => Trace -> Prog es a -> Prog es (a, Trace)
 traceSamples strace (Val x) = pure (x, strace) 
@@ -38,3 +41,22 @@ traceSamples strace (Op op k) with (prj op {prf})
     _ | Nothing  = do y <- send (MkSample d maybe_tag)
                       (traceSamples strace . k) y
   _ | Nothing = Op op (traceSamples strace . k)
+
+||| Converting sample traces to output environments
+fromPrimVal : {ty : Type} -> PrimVal -> Maybe ty 
+fromPrimVal {ty=Double} (PrimDouble x) = Just x 
+fromPrimVal {ty=Nat}    (PrimNat x)    = Just x
+fromPrimVal {ty=Bool}   (PrimBool x)   = Just x
+fromPrimVal _                          = Nothing 
+
+fromPrimVals : {x : String} -> {ty : Type} -> List PrimVal -> Assign x ty
+fromPrimVals pvs with (sequence $ map (fromPrimVal {ty}) pvs) 
+  _ | Just vals = x ::= vals 
+  _ | Nothing   = x ::= []
+
+public export
+traceToEnv : (env : List (String, Type)) -> {auto prf : Env env} -> Trace -> Env env
+traceToEnv Nil               {prf = ENil}      _ = ENil
+traceToEnv ((x, ty) :: rest) {prf = ECons _ _} strace with (lookup x strace)
+  _ | Just prim_vals = ECons (fromPrimVals {x} {ty} prim_vals) (traceToEnv rest strace) 
+  _ | Nothing        = ECons (x ::= []) (traceToEnv rest strace) 
