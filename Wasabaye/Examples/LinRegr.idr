@@ -5,8 +5,13 @@ import Data.List.Elem
 import Wasabaye.Model 
 import Wasabaye.Inference.Sim
 import Wasabaye.Inference.MBayes
+import Control.Monad.Bayes.Interface
+import Control.Monad.Bayes.Sampler
+import Control.Monad.Bayes.Weighted
+import Wasabaye.Effects.Lift
 
 -- | Linear regression model
+
 linRegr : (prf : Observables env ["y", "m", "c", "std"] Double) => List Double -> Model env es (List Double)
 linRegr xs = do
   m   <- normal 0 3 "m"
@@ -18,6 +23,7 @@ linRegr xs = do
   pure ys
 
 -- | Linear regression environment
+LinRegrEnv : List (String, Type)
 LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
 
 envExample : Env LinRegrEnv
@@ -29,14 +35,19 @@ hdlLinRegr =
   handleCore envExample (linRegr {env = LinRegrEnv} [])
 
 -- | Simulating linear regression, using effect handlers
-simLinRegr : IO ()
+simLinRegr : IO (List Double)
 simLinRegr = do
-  let xs = map cast [0 .. 10]
+  let xs = map cast [0 .. (the Int 10)]
   ys <- simulate envExample (linRegr {env = LinRegrEnv} xs) 
-  print ys
+  print ys >> pure ys
 
 -- | Simulating linear regression, using monad bayes
-
+simLinRegrMB : IO (List Double)
+simLinRegrMB = do 
+  let xs = map cast [0 .. (the Int 10)]
+      linRegrMB = toMBayes envExample (linRegr {env = LinRegrEnv} xs) 
+  ys <- sampleIO $ prior linRegrMB
+  print ys >> pure ys
 
 -- | MH inference on linear regression, using monad bayes
 
