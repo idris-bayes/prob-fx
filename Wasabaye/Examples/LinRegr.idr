@@ -12,8 +12,7 @@ import Control.Monad.Bayes.Weighted
 import Control.Monad.Bayes.Traced.Static
 import Wasabaye.Effects.Lift
 
--- | Linear regression model
-
+-- | Model
 linRegr : (prf : Observables env ["y", "m", "c", "std"] Double) => List Double -> Model env es (List Double)
 linRegr xs = do
   m   <- normal 0 3 "m"
@@ -24,7 +23,7 @@ linRegr xs = do
                     pure y) xs
   pure ys
 
--- | Linear regression environment
+-- | Environment
 LinRegrEnv : List (String, Type)
 LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
 
@@ -60,13 +59,13 @@ simLinRegrMB n_datapoints = do
 mhLinRegrMB : (n_datapoints : Nat) -> (n_samples : Nat) -> IO (Vect (S n_samples) (List Double))
 mhLinRegrMB n_datapoints n_samples = do 
   let xs        = map cast [0 .. n_datapoints]
-      ys        = envExampleInf xs
-      linRegrMB = toMBayes ys (linRegr {env = LinRegrEnv} xs) 
+      linRegrMB = toMBayes (envExampleInf xs) (linRegr {env = LinRegrEnv} xs) 
   ys <- the (IO (Vect (S n_samples) (List Double))) (sampleIO $ prior $ mh n_samples linRegrMB )
   print ys >> pure ys
 
-{- We can omit specifying the 'env' type via {env = LinRegrEnv} if we make clear that the provided environment should unify with the `env` at a specific position in the effect signature:
 
+  
+{- We can omit specifying the 'env' type via {env = LinRegrEnv} if we make clear that the provided environment should unify with the `env` at a specific position in the effect signature:
     linRegr : (prf : Observables env ["y", "m", "c", "std"] Double) => List Double -> Model env (Dist :: ObsReader env :: es) (List Double)
     linRegr xs = do
       m   <- normal 0 3 "m"
@@ -76,18 +75,12 @@ mhLinRegrMB n_datapoints n_samples = do
                         y <- normal (m * x + c) std "y"
                         pure y) xs
       pure ys
-
     handleCore : Env env -> Model env (Dist :: ObsReader env ::  es) a -> Eff (Observe :: Sample :: es) a
     handleCore env' = handleDist . handleObsRead env' . runModel
-
     LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
-
     env_instance : Env LinRegrEnv
     env_instance = ("m" ::= []) <:> ("c" ::= []) <:> ("std" ::=  []) <:> ("y" ::=  []) <:> ENil
-
     hdlLinRegr : Eff (Observe :: Sample :: []) (List Double)
     hdlLinRegr =   handleCore env_instance (linRegr [])
-
 Without this, the env_instance provided could be referring to a different ObsReader env effect.
-
 -}
