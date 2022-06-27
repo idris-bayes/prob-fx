@@ -1,5 +1,6 @@
 module Wasabaye.Examples.LinRegr
 
+import Data.Vect
 import Data.List
 import Data.List.Elem
 import Wasabaye.Model 
@@ -8,6 +9,7 @@ import Wasabaye.Inference.MBayes
 import Control.Monad.Bayes.Interface
 import Control.Monad.Bayes.Sampler
 import Control.Monad.Bayes.Weighted
+import Control.Monad.Bayes.Traced.Static
 import Wasabaye.Effects.Lift
 
 -- | Linear regression model
@@ -26,31 +28,42 @@ linRegr xs = do
 LinRegrEnv : List (String, Type)
 LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
 
-envExample : Env LinRegrEnv
-envExample = ("m" ::= [3]) <:> ("c" ::= [0]) <:> ("std" ::=  [1]) <:> ("y" ::=  [0, 2, 5]) <:> ENil
+envExampleSim : Env LinRegrEnv
+envExampleSim = ("m" ::= [3]) <:> ("c" ::= [0]) <:> ("std" ::=  [1]) <:> ("y" ::=  []) <:> ENil
+
+envExampleInf : List Double -> Env LinRegrEnv
+envExampleInf xs = 
+  let ys = map (*3) xs
+  in  ("m" ::= []) <:> ("c" ::= []) <:> ("std" ::=  []) <:> ("y" ::=  ys) <:> ENil
 
 -- | Linear regression as a probabilistic program
 hdlLinRegr : Prog (Observe :: Sample :: []) (List Double)
 hdlLinRegr = 
-  handleCore envExample (linRegr {env = LinRegrEnv} [])
+  handleCore envExampleSim (linRegr {env = LinRegrEnv} [])
 
 -- | Simulating linear regression, using effect handlers
-simLinRegr : IO (List Double)
-simLinRegr = do
-  let xs = map cast [0 .. (the Int 10)]
-  ys <- simulate envExample (linRegr {env = LinRegrEnv} xs) 
+simLinRegr : (n_datapoints : Nat) -> IO (List Double)
+simLinRegr n_datapoints = do
+  let xs = map cast [0 .. n_datapoints]
+  ys <- simulate envExampleSim (linRegr {env = LinRegrEnv} xs) 
   print ys >> pure ys
 
 -- | Simulating linear regression, using monad bayes
-simLinRegrMB : IO (List Double)
-simLinRegrMB = do 
-  let xs = map cast [0 .. (the Int 10)]
-      linRegrMB = toMBayes envExample (linRegr {env = LinRegrEnv} xs) 
+simLinRegrMB : (n_datapoints : Nat) -> IO (List Double)
+simLinRegrMB n_datapoints = do 
+  let xs        = map cast [0 .. n_datapoints]
+      linRegrMB = toMBayes envExampleSim (linRegr {env = LinRegrEnv} xs) 
   ys <- sampleIO $ prior linRegrMB
   print ys >> pure ys
 
 -- | MH inference on linear regression, using monad bayes
-
+mhLinRegrMB : (n_datapoints : Nat) -> (n_samples : Nat) -> IO (Vect (S n_samples) (List Double))
+mhLinRegrMB n_datapoints n_samples = do 
+  let xs        = map cast [0 .. n_datapoints]
+      ys        = envExampleInf xs
+      linRegrMB = toMBayes ys (linRegr {env = LinRegrEnv} xs) 
+  ys <- the (IO (Vect (S n_samples) (List Double))) (sampleIO $ prior $ mh n_samples linRegrMB )
+  print ys >> pure ys
 
 {- We can omit specifying the 'env' type via {env = LinRegrEnv} if we make clear that the provided environment should unify with the `env` at a specific position in the effect signature:
 
