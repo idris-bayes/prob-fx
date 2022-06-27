@@ -15,24 +15,6 @@ data PrimDist : a -> Type where
   Binomial  : Nat -> Double -> PrimDist Nat
   Uniform   : Double -> Double -> PrimDist Double
 
-||| Primitive values
-public export
-data PrimVal = PrimDouble (List Double) | PrimNat (List Nat) | PrimBool (List Bool)
-
-public export
-Trace : Type
-Trace = List (String, PrimVal)
-
-export
-primDistToPrimVal : PrimDist a -> (a -> PrimVal)
-primDistToPrimVal (Normal _ _)   = PrimDouble . singleton
-primDistToPrimVal (Uniform _ _)  = PrimDouble . singleton
-primDistToPrimVal (Bernoulli _)  = PrimBool . singleton
-primDistToPrimVal (Binomial _ _) = PrimNat . singleton
-
--- insertTrace : String -> 
--- insertTrace x = 
-
 ||| Density functions
 prob : PrimDist a -> a -> Double
 prob (Bernoulli p) y     = if y then p else (1 - p)
