@@ -1,7 +1,7 @@
 package wasabaye
 
 
--- pack --with-ipkg bayes.ipkg repl file-name.idr
+-- pack --with-ipkg wasabaye.ipkg repl file-name.idr
 
 
 -- version =

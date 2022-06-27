@@ -8,6 +8,7 @@ import Wasabaye.PrimDist
 import Wasabaye.Model
 import Wasabaye.Effects.Lift
 import Wasabaye.Effects.Dist
+import Wasabaye.Effects.Trace
 
 handleObs : MonadCond m => (Elem Observe es) => (prf : Elem (Lift m) (es - Observe)) => 
             Prog es a -> Prog (es - Observe) a
@@ -27,5 +28,6 @@ handleSamp (Op op k) = case discharge op of
                                 handleSamp {prf} (k y)
 
 public export
-toMBayes : MonadInfer m => Env env -> Model env (Dist :: ObsReader env :: Lift m :: []) a -> m a
-toMBayes env = handleLift . handleSamp {m} . handleObs {m} . handleCore env
+toMBayes : MonadInfer m => {env : _} 
+        -> Env env -> Model env (Dist :: ObsReader env :: Lift m :: []) a -> m (a, Env env)
+toMBayes env_instance = (map (map (fromTrace env))) . handleLift . handleSamp {m} . handleObs {m} . traceSamples . handleCore env_instance

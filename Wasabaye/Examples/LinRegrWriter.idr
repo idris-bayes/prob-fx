@@ -75,7 +75,7 @@ simLinRegrMB n_datapoints = do
                                 {es = [Writer (List LinRegrParams), Dist, ObsReader LinRegrEnv, Lift (Weighted SamplerIO)]} 
                                 xs
       linRegrMB = toMBayes envExampleSim (handleWriter $ linRegrInstance) 
-  (ys, params) <- the (IO (List Double, List LinRegrParams)) 
+  ((ys, params), _) <- the (IO ((List Double, List LinRegrParams), Env LinRegrEnv)) 
                       (sampleIO $ prior linRegrMB)
   print ys >> pure ys
   
@@ -87,7 +87,7 @@ mhLinRegrMB n_datapoints n_samples = do
                                 {es = [Writer (List LinRegrParams), Dist, ObsReader LinRegrEnv, Lift (Traced $ Weighted SamplerIO)]} 
                                 xs
       linRegrMB = toMBayes (envExampleInf xs) (handleWriter $ linRegrInstance) 
-  vect_ys_params <- the (IO (Vect (S n_samples) (List Double, List LinRegrParams))) 
+  vect_ys_params <- the (IO (Vect (S n_samples) ((List Double, List LinRegrParams), Env LinRegrEnv))) 
                         (sampleIO $ prior $ mh n_samples linRegrMB )
-  let params = (join . toList . map snd)  vect_ys_params
+  let params = (join . toList . map (snd . fst))  vect_ys_params
   print params >> pure params
