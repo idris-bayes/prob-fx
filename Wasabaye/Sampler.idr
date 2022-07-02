@@ -11,7 +11,7 @@ import Statistics.Distribution.Poisson
 import Statistics.Distribution.Test
 import System.Random
 
-||| WARNING: Only works with local copy of the `distributions.so` file, copied over from the `distributions` Idris package. Need to work out how to avoid requiring a local copy. 
+||| A Sampler that threads a provided GSL RNG seed through a computation. Warning: only works with local copy of the `distributions.so` file, copied over from the `distributions` Idris package. Need to work out how to avoid requiring a local copy. 
 export
 record Sampler (a : Type) where 
   constructor MkSampler 
@@ -32,6 +32,7 @@ Monad Sampler where
     x <- runSampler' mx
     runSampler' (k x)
 
+||| Constructing and running a Sampler
 export
 mkSampler : (GslRng -> IO a) -> Sampler a
 mkSampler f = MkSampler $ MkReaderT  f
@@ -42,6 +43,7 @@ runSampler m = do
   let rng_seed = init_rng
   runReaderT rng_seed (runSampler' m)
 
+||| Sampling functions
 export
 uniform : Double -> Double -> Sampler Double
 uniform min max = mkSampler (\seed => pure (uniform_gsl min max seed))
@@ -69,7 +71,6 @@ gamma a b       = mkSampler (\seed => pure (gamma_gsl a b seed))
 export
 poisson : Double -> Sampler Nat
 poisson p       = mkSampler (\seed => pure (poisson_gsl p seed))
-
 
 private
 testSeed : IO () 

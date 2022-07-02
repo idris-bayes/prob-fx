@@ -6,7 +6,7 @@ import Numeric.Log
 import Wasabaye.Env
 import Wasabaye.PrimDist
 import Wasabaye.Model
-import Wasabaye.Trace
+import Wasabaye.Effects.Trace
 import Wasabaye.Effects.Lift
 import Wasabaye.Effects.Dist
 import Wasabaye.Inference.Sim

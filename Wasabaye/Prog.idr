@@ -53,7 +53,7 @@ discharge {prf = There later1} {es = e' :: es'} (Sum (There later2) op) =
 public export
 data Subset : {0 a: Type} -> (xs, ys : List a) -> Type where
   Nil : Subset [] ys
-  (::) : {0 x: a} -> (e : Elem x ys) -> Subset xs ys -> Subset (x::xs) ys
+  (::) : {auto 0 x: a} -> (e : Elem x ys) -> Subset xs ys -> Subset (x::xs) ys
 
 public export
 lemma_subset : Subset fs fs' -> Elem f fs -> Elem f fs'

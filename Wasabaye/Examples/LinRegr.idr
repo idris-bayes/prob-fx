@@ -5,6 +5,7 @@ import Data.List
 import Data.List.Elem
 import Wasabaye.Env 
 import Wasabaye.Model 
+import Wasabaye.Sampler
 import Wasabaye.Inference.Sim
 import Wasabaye.Inference.MBayes
 import Wasabaye.Effects.Lift
@@ -45,7 +46,7 @@ hdlLinRegr =
 simLinRegr : (n_datapoints : Nat) -> IO (List Double)
 simLinRegr n_datapoints = do
   let xs = map cast [0 .. n_datapoints]
-  (ys, strace) <- simulate envExampleSim (linRegr {env = LinRegrEnv} xs) 
+  (ys, strace) <- runSampler (simulate envExampleSim (linRegr {env = LinRegrEnv} xs) )
   let env_ys : List Double = Env.get "y" strace
   print ("ys: " <+> show ys <+> ", ys from env: " ++ show env_ys) >> pure ys
 
@@ -61,12 +62,12 @@ simLinRegrMB n_datapoints = do
 
 -- | MH inference on linear regression, using monad bayes
 mhLinRegrMB : (n_datapoints : Nat) -> (n_samples : Nat) -> IO (List Double)
-mhLinRegrMB n_datapoints n_samples = do 
+mhLinRegrMB n_datapoints n_mhsteps = do 
   let xs        = map cast [0 .. n_datapoints]
       linRegrMB = toMBayes (envExampleInf xs) (linRegr {env = LinRegrEnv} xs) 
       
-  mh_output <- the (IO (Vect (S n_samples) (List Double, Env LinRegrEnv))) 
-                   (sampleIO $ prior $ mh n_samples linRegrMB )
+  mh_output <- the (IO (Vect (S n_mhsteps) (List Double, Env LinRegrEnv))) 
+                   (sampleIO $ prior $ mh n_mhsteps linRegrMB )
   let mh_env_outs : List (Env LinRegrEnv) = map snd (toList mh_output)
       mh_mus      : List Double           = (join . map (\env => Env.get "m" env)) mh_env_outs
   print ("mu's: " <+> show mh_mus) >> pure mh_mus

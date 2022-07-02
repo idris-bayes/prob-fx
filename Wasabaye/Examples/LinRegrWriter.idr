@@ -4,6 +4,7 @@ import Data.Vect
 import Data.List
 import Data.List.Elem
 import Wasabaye.Model 
+import Wasabaye.Sampler 
 import Wasabaye.Inference.Sim
 import Wasabaye.Inference.MBayes
 import Wasabaye.Effects.Lift
@@ -64,7 +65,7 @@ simLinRegr n_datapoints = do
                                 {es = [Writer (List LinRegrParams), Dist, ObsReader LinRegrEnv]} 
                                 xs
   ((ys, params), _) <- the (IO ((List Double, List LinRegrParams), _)) 
-                           (simulate envExampleSim (handleWriter $ linRegrInstance))
+                           (runSampler $ simulate envExampleSim (handleWriter $ linRegrInstance))
   print ys >> pure ys
 
 -- | Simulating linear regression, using monad bayes

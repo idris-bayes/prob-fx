@@ -5,7 +5,7 @@ import Data.List
 import Data.List.Elem
 import Decidable.Equality
 
--- | Assign
+||| Assign an observable variable name to a trace of values
 public export
 data Assign : String -> Type -> Type where
   MkAssign : (x : String) -> (trace : List a) -> Assign x a
@@ -15,6 +15,7 @@ public export
 (::=) : (x : String) -> (trace : List a) -> Assign x a
 (::=) x vs = MkAssign x vs
 
+||| Model environment
 public export
 UniqueVar : (var : String) -> (env : List (String, Type)) -> Bool
 UniqueVar x env = find x (map fst env) == False
@@ -22,13 +23,12 @@ UniqueVar x env = find x (map fst env) == False
         find x []        = False
         find x (y :: xs) = (x == y) || (find x xs)
 
--- | Environment
 public export
 data Env : List (String, Type)  -> Type where
   ENil  : Env []
   ECons : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 
--- | Environment constraints
+||| Environment constraints
 public export
 Observable : (env : List (String, Type)) -> (var : String) -> (var_type : Type) -> Type
 Observable env x a = Elem (x, a) env
@@ -38,11 +38,11 @@ Observables : (env : List (String, Type)) -> (var : List String) -> (var_type : 
 Observables env (x :: xs) a = (Elem (x, a) env, Observables env xs a)
 Observables env [] a        = ()
 
--- | Environment constructors and modifiers
-infixr 10 <:>
+||| Environment constructors and modifiers
 public export
 (<:>) : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 (<:>) xv env = ECons xv env
+infixr 10 <:>
 
 public export
 get : (x : String) -> Env env -> {auto prf : Elem (x, a) env} -> List a
