@@ -8,7 +8,7 @@ data Lift : (m : Type -> Type) -> Effect where
   MkLift : m a -> Lift m a
 
 sendWithPrf : {prf : Elem f fs} -> f t -> Prog fs t
-sendWithPrf = send 
+sendWithPrf = call 
 
 public export
 liftM : (prf : Elem (Lift m) es) =>  m a -> Prog es a 

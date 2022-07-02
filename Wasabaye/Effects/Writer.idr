@@ -9,7 +9,7 @@ data Writer : (w : Type) -> (a : Type) -> Type where
 
 public export
 tell : (prf : Elem (Writer w) es) => Monoid w => w -> Prog es ()
-tell = send . Tell 
+tell = call . Tell 
 
 -- | 
 handleWriter' : (prf : Elem (Writer w) es) => w -> Prog es a -> Prog (es - Writer w) (a, w)

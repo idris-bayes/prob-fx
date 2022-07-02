@@ -29,21 +29,46 @@ exampleHdlModel = handleCore ENil (exampleModel {env = []})
 public export
 normal : {auto 0 env : _} -> Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
 normal mu sigma x = do
-  maybe_v <- send (Ask {prf} x)
-  send (MkDist (Normal mu sigma) maybe_v (Just x))
+  maybe_v <- call (Ask {prf} x)
+  call (MkDist (Normal mu sigma) maybe_v (Just x))
 
 public export
 normal' : Double -> Double -> Model env es Double
 normal' mu sigma = do
-  send (MkDist (Normal mu sigma) Nothing Nothing)
+  call (MkDist (Normal mu sigma) Nothing Nothing)
 
-public export
+public export 
 uniform : {auto 0 env : _} -> Double -> Double -> (x : String) -> (prf : Observable env x Double) => Model env es Double
 uniform min max x = do
-  maybe_v <- send (Ask {prf} x)
-  send (MkDist (Uniform min max) maybe_v (Just x))
+  maybe_v <- call (Ask {prf} x)
+  call (MkDist (Uniform min max) maybe_v (Just x))
 
 public export
 uniform' : Double -> Double -> Model env es Double
 uniform' min max = do
-  send (MkDist (Uniform min max) Nothing Nothing)
+  call (MkDist (Uniform min max) Nothing Nothing)
+
+public export
+discrete' : List Double -> Model env es Int
+discrete' xs = do
+  call (Dist (DiscreteDist xs) Nothing Nothing)
+
+-- public export
+-- discrete : [Double] -> x -> Observable env x Int
+--   -> Model env es Int
+-- discrete xs field = Model $ do
+--   let tag = Just $ varToStr field
+--   maybe_y <- ask @env field
+--   call (Dist (DiscreteDist xs) maybe_y tag)
+
+-- categorical : forall env es v x. (Eq v, Show v, OpenSum.Member v PrimVal) => Observable env x v
+--   => List (v, Double) -> ObsVar x
+--   -> Model env es v
+-- categorical xs field = Model $ do
+--   let tag = Just $ varToStr field
+--   maybe_y <- ask @env field
+--   call (Dist (CategoricalDist xs) maybe_y tag)
+
+-- categorical' : (Eq v, Show v, OpenSum.Member v PrimVal) => [(v, Double)] -> Model env es v
+-- categorical' xs = Model $ do
+--   call (Dist (CategoricalDist xs) Nothing Nothing)

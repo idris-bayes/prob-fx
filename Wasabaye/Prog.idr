@@ -88,5 +88,5 @@ implementation Monad (Prog es) where
   Val x   >>= f = f x
 
 public export
-send : Elem f fs => f t -> Prog fs t
-send op = Op (inj op) Val
+call : Elem f fs => f t -> Prog fs t
+call op = Op (inj op) Val
