@@ -39,7 +39,21 @@ Observables env (x :: xs) a = (Elem (x, a) env, Observables env xs a)
 Observables env [] a        = ()
 
 ||| Environment constructors and modifiers
-public export
+export
+emptyEnv : {auto prf : Env env} -> Env env
+emptyEnv {prf = ENil}                      = ENil
+emptyEnv {prf = ECons (MkAssign x _) rest} = ECons (MkAssign x []) (emptyEnv {prf = rest})
+
+export
+maybeEmptyEnv : {env : _} -> Maybe (Env env)
+maybeEmptyEnv {env = Nil}            = pure ENil
+maybeEmptyEnv {env = (x, _) :: rest} {} = do
+  v <- maybeEmptyEnv {env = rest}
+  case choose (UniqueVar x rest) of 
+    Left   p => pure $ ECons (x ::= []) v {prf = p}
+    Right  _ => Nothing
+
+export
 (<:>) : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 (<:>) xv env = ECons xv env
 infixr 10 <:>

@@ -31,7 +31,8 @@ partial
 handleDist : (prf : Elem Dist es) => Prog es a -> Prog (Observe :: Sample :: es - Dist) a
 handleDist (Val x) = pure x 
 handleDist (Op op k) = case discharge op {prf} of
-  Right d => case d.obs of Just y  => do x <- call (MkObserve d.dist y d.tag) 
-                                         (handleDist . k) x
-                           Nothing => call (MkSample d.dist d.tag) >>= (handleDist . k)
+  Right d => case d.obs of Just y  => do v <- call (MkObserve d.dist y d.tag) 
+                                         (handleDist . k) v
+                           Nothing => do v <- call (MkSample d.dist d.tag) 
+                                         (handleDist . k) v
   Left op' => Op (weaken1 $ weaken1 op') (handleDist . k)

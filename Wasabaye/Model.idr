@@ -4,21 +4,21 @@ import Data.Vect
 import public Wasabaye.Env
 import public Wasabaye.PrimDist
 import public Wasabaye.Effects.Dist
-import public Wasabaye.Effects.ObsReader
+import public Wasabaye.Effects.ObsRW
 import public Wasabaye.Prog
 
 ||| Model as a type-level function, specifying a program with two proofs of membership
 public export
 Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (ret : Type) -> Type 
-Model env es a = (Elem Dist es, Elem (ObsReader env) es) => Prog es a 
+Model env es a = (Elem Dist es, Elem (ObsRW env) es) => Prog es a 
 
 public export
-runModel : (Elem Dist es, Elem (ObsReader env) es) => Model env es a -> Prog es a
+runModel : (Elem Dist es, Elem (ObsRW env) es) => Model env es a -> Prog es a
 runModel m = m
 
 public export
-handleCore : Env env -> Model env (Dist :: ObsReader env :: es) a -> Prog (Observe :: Sample :: es) a
-handleCore env' = handleDist . handleObsRead env' . runModel
+handleCore : Env env -> Model env (Dist :: ObsRW env :: es) a -> Prog (Observe :: Sample :: es) a
+handleCore env' = handleDist . handleObsRW env' . runModel
 
 exampleModel : Model env es Int
 exampleModel = pure 5
@@ -27,10 +27,19 @@ exampleHdlModel : Prog (Observe :: Sample :: []) Int
 exampleHdlModel = handleCore ENil (exampleModel {env = []})
 
 ||| Distribution smart constructors
+traceSample : (x : String) -> (prf : Observable env x a) 
+            => (Maybe a -> Maybe String -> Model env es a)
+            -> Model env es a
+traceSample x dist_op = do
+  maybe_v <- call (Read {prf} x)
+  v       <- call (dist_op maybe_v (Just x))
+  call (Write {prf} x v)
+  pure v
+
 export 
 uniform : Double -> Double -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x Double) => Model env es Double
 uniform min max x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Uniform min max) maybe_v (Just x))
 
 export
@@ -41,7 +50,7 @@ uniform' min max = do
 export 
 bernoulli : Double -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x Bool) => Model env es Bool
 bernoulli p x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Bernoulli p) maybe_v (Just x))
 
 export
@@ -52,7 +61,7 @@ bernoulli' p = do
 export 
 binomial : Nat -> Double -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x Nat) => Model env es Nat
 binomial n p x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Binomial n p) maybe_v (Just x))
 
 export
@@ -63,7 +72,7 @@ binomial' n p = do
 export
 normal : Double -> Double -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x Double) => Model env es Double
 normal mu sigma x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Normal mu sigma) maybe_v (Just x))
 
 export
@@ -74,7 +83,7 @@ normal' mu sigma = do
 export
 beta : Double -> Double -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x Double) => Model env es Double
 beta a b x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Beta a b) maybe_v (Just x))
 
 export
@@ -85,7 +94,7 @@ beta' a b = do
 export
 gamma : Double -> Double -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x Double) => Model env es Double
 gamma a b x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Gamma a b) maybe_v (Just x))
 
 export
@@ -96,7 +105,7 @@ gamma' a b = do
 export
 poisson : Double -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x Nat) => Model env es Nat
 poisson p x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Poisson p) maybe_v (Just x))
 
 export
@@ -107,7 +116,7 @@ poisson' p = do
 export
 categorical : {n : Nat} -> Vect n Double -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x (Fin n)) => Model env es (Fin n)
 categorical ps x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Categorical ps) maybe_v (Just x))
   
 export
@@ -118,7 +127,7 @@ categorical' ps = do
 export
 discrete : {n : Nat} -> Vect n (Double, a) -> (x : String) -> {auto 0 env : _} -> (prf : Observable env x a) => Eq a => Model env es a
 discrete yps x = do
-  maybe_v <- call (Ask {prf} x)
+  maybe_v <- call (Read {prf} x)
   call (MkDist (Discrete yps) maybe_v (Just x))
   
 export
