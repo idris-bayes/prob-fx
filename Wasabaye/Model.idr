@@ -50,8 +50,8 @@ uniform' min max = do
 
 public export
 discrete' : List Double -> Model env es Int
-discrete' xs = do
-  call (Dist (DiscreteDist xs) Nothing Nothing)
+discrete' ps = do
+  call (Dist (Discrete ps) Nothing Nothing)
 
 -- public export
 -- discrete : [Double] -> x -> Observable env x Int

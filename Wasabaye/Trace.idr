@@ -21,6 +21,12 @@ toPrimVal (Normal _ _)   = PrimDouble
 toPrimVal (Uniform _ _)  = PrimDouble 
 toPrimVal (Bernoulli _)  = PrimBool 
 toPrimVal (Binomial _ _) = PrimNat 
+toPrimVal (Beta _ _) = ?toPrimVal_missing_case_1
+toPrimVal (Gamma _ _) = ?toPrimVal_missing_case_2
+toPrimVal (UniformD _ _) = ?toPrimVal_missing_case_3
+toPrimVal (Discrete _) = ?toPrimVal_missing_case_4
+toPrimVal (Poisson _) = ?toPrimVal_missing_case_5
+toPrimVal (Categorical _) = ?toPrimVal_missing_case_6
 
 export
 insertTrace : (String, PrimVal) -> Trace -> Trace
