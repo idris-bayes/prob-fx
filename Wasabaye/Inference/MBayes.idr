@@ -30,7 +30,5 @@ handleSample (Op op k) = case discharge op of
                                 handleSample {prf} (k y)
 
 public export
-toMBayes : MonadInfer m => {env : _} 
-        -> Env env -> Model env (Dist :: ObsReader env :: Lift m :: []) a -> m (a, Env env)
-toMBayes env_instance = (map (map (fromTrace env))) . handleLift . handleSample {m} 
-                                    . handleObserve {m} . traceSamples . handleCore env_instance
+toMBayes : MonadInfer m => Env env -> Model env (Dist :: ObsRW env :: Lift m :: []) a -> m (a, Env env)
+toMBayes env_instance = handleLift . handleSample {m} . handleObserve {m} . handleCore env_instance

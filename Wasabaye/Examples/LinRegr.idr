@@ -38,7 +38,7 @@ envExampleInf xs =
   in  ("m" ::= []) <:> ("c" ::= []) <:> ("std" ::=  []) <:> ("y" ::=  ys) <:> ENil
 
 -- | Linear regression as a probabilistic program
-hdlLinRegr : Prog (Observe :: Sample :: []) (List Double)
+hdlLinRegr : Prog (Observe :: Sample :: []) (List Double, Env LinRegrEnv)
 hdlLinRegr = 
   handleCore envExampleSim (linRegr {env = LinRegrEnv} [])
 

@@ -17,23 +17,23 @@ runModel : (Elem Dist es, Elem (ObsRW env) es) => Model env es a -> Prog es a
 runModel m = m
 
 public export
-handleCore : Env env -> Model env (Dist :: ObsRW env :: es) a -> Prog (Observe :: Sample :: es) a
+handleCore : Env env -> Model env (Dist :: ObsRW env :: es) a -> Prog (Observe :: Sample :: es) (a, Env env)
 handleCore env' = handleDist . handleObsRW env' . runModel
 
 exampleModel : Model env es Int
 exampleModel = pure 5
 
-exampleHdlModel : Prog (Observe :: Sample :: []) Int
+exampleHdlModel : Prog (Observe :: Sample :: []) (Int, Env [])
 exampleHdlModel = handleCore ENil (exampleModel {env = []})
 
 ||| Distribution smart constructors
-traceSample : (x : String) -> (prf : Observable env x a) 
-            => (Maybe a -> Maybe String -> Model env es a)
-            -> Model env es a
+export
+traceSample : (x : String) -> (Maybe a -> Maybe String -> Model env es a)
+           -> (prf : Observable env x a) => Model env es a
 traceSample x dist_op = do
   maybe_v <- call (Read {prf} x)
-  v       <- call (dist_op maybe_v (Just x))
-  call (Write {prf} x v)
+  v       <- dist_op maybe_v (Just x)
+  ()      <- call (Write {prf} x v)
   pure v
 
 export 

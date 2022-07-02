@@ -50,10 +50,10 @@ envExampleInf xs =
   in  ("m" ::= []) <:> ("c" ::= []) <:> ("std" ::=  []) <:> ("y" ::=  ys) <:> ENil
 
 -- | Linear regression as a probabilistic program
-hdlLinRegr : Prog (Observe :: Sample :: []) (List Double, List LinRegrParams)
+hdlLinRegr : Prog (Observe :: Sample :: []) ((List Double, List LinRegrParams), Env LinRegrEnv)
 hdlLinRegr = do
   let linRegrInstance = linRegr {env = LinRegrEnv} 
-                                {es = [Writer (List LinRegrParams), Dist, ObsReader LinRegrEnv]} 
+                                {es = [Writer (List LinRegrParams), Dist, ObsRW LinRegrEnv]} 
                                 []
   handleCore envExampleSim (handleWriter $ linRegrInstance)
 
@@ -62,7 +62,7 @@ simLinRegr : (n_datapoints : Nat) -> IO (List Double)
 simLinRegr n_datapoints = do
   let xs              = map cast [0 .. n_datapoints]
       linRegrInstance = linRegr {env = LinRegrEnv} 
-                                {es = [Writer (List LinRegrParams), Dist, ObsReader LinRegrEnv]} 
+                                {es = [Writer (List LinRegrParams), Dist, ObsRW LinRegrEnv]} 
                                 xs
   ((ys, params), _) <- the (IO ((List Double, List LinRegrParams), _)) 
                            (runSampler $ simulate envExampleSim (handleWriter $ linRegrInstance))
@@ -73,7 +73,7 @@ simLinRegrMB : (n_datapoints : Nat) -> IO (List Double)
 simLinRegrMB n_datapoints = do 
   let xs              = map cast [0 .. n_datapoints]
       linRegrInstance = linRegr {env = LinRegrEnv} 
-                                {es = [Writer (List LinRegrParams), Dist, ObsReader LinRegrEnv, Lift (Weighted SamplerIO)]} 
+                                {es = [Writer (List LinRegrParams), Dist, ObsRW LinRegrEnv, Lift (Weighted SamplerIO)]} 
                                 xs
       linRegrMB = toMBayes envExampleSim (handleWriter $ linRegrInstance) 
   ((ys, params), _) <- the (IO ((List Double, List LinRegrParams), Env LinRegrEnv)) 
@@ -85,7 +85,7 @@ mhLinRegrMB : (n_datapoints : Nat) -> (n_samples : Nat) -> IO (List LinRegrParam
 mhLinRegrMB n_datapoints n_samples = do 
   let xs        = map cast [0 .. n_datapoints]
       linRegrInstance = linRegr {env = LinRegrEnv} 
-                                {es = [Writer (List LinRegrParams), Dist, ObsReader LinRegrEnv, Lift (Traced $ Weighted SamplerIO)]} 
+                                {es = [Writer (List LinRegrParams), Dist, ObsRW LinRegrEnv, Lift (Traced $ Weighted SamplerIO)]} 
                                 xs
       linRegrMB = toMBayes (envExampleInf xs) (handleWriter $ linRegrInstance) 
   vect_ys_params <- the (IO (Vect (S n_samples) ((List Double, List LinRegrParams), Env LinRegrEnv))) 

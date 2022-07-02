@@ -21,5 +21,5 @@ handleSample (Op op k) = case prj1 op of
 
 ||| Top-level simulation
 public export
-simulate : {env : _} -> Env env -> Model env [Dist, ObsReader env] a -> Sampler (a, Env env)
-simulate env_instance = (map (map (fromTrace env))) . handleSample . handleObserve . traceSamples . handleCore env_instance
+simulate : {env : _} -> Env env -> Model env [Dist, ObsRW env] a -> Sampler (a, Env env)
+simulate env_instance = handleSample . handleObserve . handleCore env_instance
