@@ -5,7 +5,7 @@ import ProbFX.Env
 import ProbFX.PropEq
 import ProbFX.Util
 
-||| Using model environments as Traces
+||| Using (statically-typed) model environments as traces
 
 ||| A sample trace that only contains variables that are "named" by the user
 STrace : (env : List (String, Type)) -> Type
