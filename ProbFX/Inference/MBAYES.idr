@@ -11,7 +11,7 @@ import ProbFX.Effects.Lift
 import ProbFX.Effects.Dist
 import ProbFX.Inference.SIM
 
-
+||| Handlers for monad-bayes
 handleObserve : MonadCond m => (Elem Observe es) => (prf : Elem (Lift m) (es - Observe)) => 
             Prog es a -> Prog (es - Observe) a
 handleObserve (Val x)   = pure x
@@ -29,6 +29,7 @@ handleSample (Op op k) = case discharge op of
     Right (MkSample d _)  => do y <- liftM {prf} (sampleBayes d)
                                 handleSample {prf} (k y)
 
+||| Translate a model into a monad-bayes program
 public export
 toMBayes : MonadInfer m => Env env -> Model env (ObsRW env :: Dist :: Lift m :: []) a -> m (a, Env env)
 toMBayes env_instance = handleLift . handleSample {m} . handleObserve {m} . handleCore env_instance
