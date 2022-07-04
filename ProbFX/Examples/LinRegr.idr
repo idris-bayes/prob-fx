@@ -43,6 +43,7 @@ hdlLinRegr =
   handleCore envExampleSim (linRegr {env = LinRegrEnv} [])
 
 -- | Simulating linear regression, using effect handlers
+export
 simLinRegr : (n_datapoints : Nat) -> IO (List Double)
 simLinRegr n_datapoints = do
   let xs = map cast [0 .. n_datapoints]
@@ -51,6 +52,7 @@ simLinRegr n_datapoints = do
   print ("ys: " <+> show ys <+> ", ys from env: " ++ show env_ys) >> pure ys
 
 -- | Simulating linear regression, using monad bayes
+export
 simLinRegrMB : (n_datapoints : Nat) -> IO (List Double)
 simLinRegrMB n_datapoints = do 
   let xs        = map cast [0 .. n_datapoints]
@@ -61,6 +63,7 @@ simLinRegrMB n_datapoints = do
   print ("ys: " <+> show ys <+> ", ys from env: " ++ show env_ys) >> pure ys
 
 -- | MH inference on linear regression, using monad bayes
+export
 mhLinRegrMB : (n_datapoints : Nat) -> (n_mhsteps : Nat) -> IO (List Double)
 mhLinRegrMB n_datapoints n_mhsteps = do 
   let xs        = map cast [0 .. n_datapoints]
