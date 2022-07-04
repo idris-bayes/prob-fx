@@ -8,7 +8,7 @@ sourceloc   = "www.github.com/idris-bayes/prob-fx"
 
 depends = contrib, collie, tailrec, eff, free, distributions, log-domain, monad-bayes
 
-
+executable  = prob-fx
 main        = Main
 
 modules = ProbFX.Effects.Dist,
@@ -23,4 +23,5 @@ modules = ProbFX.Effects.Dist,
           ProbFX.Model,
           ProbFX.PrimDist,
           ProbFX.Sampler,
-          ProbFX.Util
+          ProbFX.Util,
+          Main

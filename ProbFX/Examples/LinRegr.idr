@@ -44,23 +44,20 @@ hdlLinRegr =
 
 -- | Simulating linear regression, using effect handlers
 export
-simLinRegr : (n_datapoints : Nat) -> IO (List Double)
+simLinRegr : (n_datapoints : Nat) -> IO (List (Double, Double))
 simLinRegr n_datapoints = do
   let xs = map cast [0 .. n_datapoints]
   (ys, strace) <- runSampler (simulate envExampleSim (linRegr {env = LinRegrEnv} xs) )
-  let env_ys : List Double = Env.get "y" strace
-  print ("ys: " <+> show ys <+> ", ys from env: " ++ show env_ys) >> pure ys
+  pure (zip xs ys)
 
 -- | Simulating linear regression, using monad bayes
 export
-simLinRegrMB : (n_datapoints : Nat) -> IO (List Double)
+simLinRegrMB : (n_datapoints : Nat) -> IO (List (Double, Double))
 simLinRegrMB n_datapoints = do 
   let xs        = map cast [0 .. n_datapoints]
       linRegrMB = toMBayes envExampleSim (linRegr {env = LinRegrEnv} xs) 
-
   (ys, strace) <- sampleIO $ prior linRegrMB
-  let env_ys : List Double = Env.get "y" strace
-  print ("ys: " <+> show ys <+> ", ys from env: " ++ show env_ys) >> pure ys
+  pure (zip xs ys)
 
 -- | MH inference on linear regression, using monad bayes
 export

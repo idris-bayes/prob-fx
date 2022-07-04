@@ -1,4 +1,6 @@
 *.ibc
+model-output.txt
+.vscode
 *.o
 *.out
 ttc
