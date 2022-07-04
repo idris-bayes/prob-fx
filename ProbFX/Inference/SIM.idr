@@ -1,4 +1,4 @@
-module ProbFX.Inference.Sim
+module ProbFX.Inference.SIM
 
 import ProbFX.Effects.Dist
 import ProbFX.Effects.Trace

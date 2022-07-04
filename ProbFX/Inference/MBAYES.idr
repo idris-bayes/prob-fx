@@ -1,4 +1,4 @@
-module ProbFX.Inference.MBayes
+module ProbFX.Inference.MBAYES
 
 import Data.List
 import Control.Monad.Bayes.Interface
@@ -9,7 +9,7 @@ import ProbFX.Model
 import ProbFX.Effects.Trace
 import ProbFX.Effects.Lift
 import ProbFX.Effects.Dist
-import ProbFX.Inference.Sim
+import ProbFX.Inference.SIM
 
 
 handleObserve : MonadCond m => (Elem Observe es) => (prf : Elem (Lift m) (es - Observe)) => 

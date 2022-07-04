@@ -5,8 +5,8 @@ import Data.List
 import Data.List.Elem
 import ProbFX.Model 
 import ProbFX.Sampler 
-import ProbFX.Inference.Sim
-import ProbFX.Inference.MBayes
+import ProbFX.Inference.SIM
+import ProbFX.Inference.MBAYES
 import ProbFX.Effects.Lift
 import ProbFX.Effects.Writer
 import Control.Monad.Bayes.Interface
