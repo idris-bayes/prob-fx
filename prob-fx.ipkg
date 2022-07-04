@@ -24,5 +24,6 @@ modules = ProbFX.Effects.Dist,
           ProbFX.PrimDist,
           ProbFX.PropEq,
           ProbFX.Sampler,
+          ProbFX.Util,
           ProbFX2.Examples,
           ProbFX2.ModelIx

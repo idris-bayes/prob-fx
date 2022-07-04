@@ -3,6 +3,7 @@ module ProbFX.Trace.EnvTrace
 import Data.List.Elem
 import ProbFX.Env
 import ProbFX.PropEq
+import ProbFX.Util
 
 ||| Using model environments as Traces
 
@@ -16,7 +17,12 @@ LPTrace = Env . map (map (const Double))
 
 ||| Attempt to look up the trace of an observable variable of a particular type
 export
-lookup : {env : _} -> PropEq a => (x : String) -> (a : Type) -> Env env -> Maybe (List a)  
+lookup : String -> (a : Type) -> PropEq a => {env : _} -> STrace env -> Maybe (List a)  
 lookup x a xas with (PropEq.isElem (x, a) env)
   _ | Just prf = Just (get x xas {prf})
   _ | Nothing  = Nothing
+
+||| Attempt to index-lookup a value in a trace of an observable variable
+export
+lookupAt : (String, Nat) -> (a : Type) -> PropEq a => {env : _} -> STrace env -> Maybe a
+lookupAt (x, i) a xas = lookup x a xas >>= maybeIndex i
