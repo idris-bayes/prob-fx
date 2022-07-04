@@ -19,7 +19,7 @@ runModel m = m
 ||| Interpret the two effects `Dist` and `ObsRW` of a model under an input model environment,
 ||| yielding a probabilistic program of Observe and Sample operations that also produces an output environment
 public export
-handleCore : (env_in : Env env) -> (model : Model env (Dist :: ObsRW env :: es) a) -> Prog (Observe :: Sample :: es) (a, Env env)
+handleCore : (env_in : Env env) -> (model : Model env (ObsRW env :: Dist :: es) a) -> Prog (Observe :: Sample :: es) (a, Env env)
 handleCore env_in = handleDist . handleObsRW env_in . runModel
 
 exampleModel : Model env es Int

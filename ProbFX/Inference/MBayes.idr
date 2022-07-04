@@ -17,7 +17,7 @@ handleObserve : MonadCond m => (Elem Observe es) => (prf : Elem (Lift m) (es - O
 handleObserve (Val x)   = pure x
 handleObserve (Op op k) = case discharge op of
     Left op'              => Op op' (handleObserve {prf} . k)
-    Right (MkObserve d y _) => do let log_p = log_prob d y
+    Right (MkObserve d y _) => do let log_p = logProb d y
                                   liftM {prf} (score (Exp log_p))
                                   handleObserve {prf} (k y)
 
@@ -30,5 +30,5 @@ handleSample (Op op k) = case discharge op of
                                 handleSample {prf} (k y)
 
 public export
-toMBayes : MonadInfer m => Env env -> Model env (Dist :: ObsRW env :: Lift m :: []) a -> m (a, Env env)
+toMBayes : MonadInfer m => Env env -> Model env (ObsRW env :: Dist :: Lift m :: []) a -> m (a, Env env)
 toMBayes env_instance = handleLift . handleSample {m} . handleObserve {m} . handleCore env_instance

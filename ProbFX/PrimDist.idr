@@ -39,8 +39,8 @@ prob (Discrete yps) y     = case (find ((== y) . snd) yps)
                                 Nothing     => 0.0
 
 export
-log_prob : PrimDist a -> a -> Double
-log_prob d = log . prob d
+logProb : PrimDist a -> a -> Double
+logProb d = log . prob d
 
 ||| Sampling functions
 export
