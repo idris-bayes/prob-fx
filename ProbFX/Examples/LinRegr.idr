@@ -4,7 +4,6 @@ import Data.Vect
 import Data.List
 import Data.List.Elem
 import ProbFX.Env 
-import ProbFX.Model 
 import ProbFX.Sampler
 import ProbFX.Inference.SIM
 import ProbFX.Inference.MBAYES
@@ -15,15 +14,16 @@ import Control.Monad.Bayes.Weighted
 import Control.Monad.Bayes.Traced.Static
 import Control.Monad.Bayes.Inference.SMC
 import Control.Monad.Bayes.Inference.RMSMC
+import ProbFX.Model 
 
 -- | Model
 linRegr : (prf : Observables env ["y", "m", "c", "std"] Double) => List Double -> Model env es (List Double)
 linRegr xs = do
-  m   <- normal 0 3 "m"
-  c   <- normal 0 5 "c"
-  std <- uniform 1 3 "std"
+  m   <- Model.normal 0 3 "m"
+  c   <- Model.normal 0 5 "c"
+  std <- Model.uniform 1 3 "std"
   ys  <- sequence $ map (\x => do
-                    y <- normal (m * x + c) std "y"
+                    y <- Model.normal (m * x + c) std "y"
                     pure y) xs
   pure ys
 

@@ -31,5 +31,5 @@ handleSample (Op op k) = case discharge op of
 
 ||| Translate a model into a monad-bayes program
 public export
-toMBayes : MonadInfer m => Env env -> Model env (ObsRW env :: Dist :: Lift m :: []) a -> m (a, Env env)
+toMBayes : MonadInfer m => Env env -> Model env [Lift m] a -> m (a, Env env)
 toMBayes env_instance = handleLift . handleSample {m} . handleObserve {m} . handleCore env_instance

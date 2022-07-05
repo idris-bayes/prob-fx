@@ -10,16 +10,18 @@ import public ProbFX.Prog
 ||| Model as a type-level function, specifying a program with two proofs of membership
 public export
 Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (ret : Type) -> Type 
-Model env es a = (Elem Dist es, Elem (ObsRW env) es) => Prog es a 
+Model env es a = Prog (ObsRW env :: Dist :: es) a 
+
+
 
 public export
-runModel : (Elem Dist es, Elem (ObsRW env) es) => Model env es a -> Prog es a
+runModel : Model env es a -> Prog (ObsRW env :: Dist :: es) a 
 runModel m = m
 
 ||| Interpret the two effects `Dist` and `ObsRW` of a model under an input model environment,
 ||| yielding a probabilistic program of Observe and Sample operations that also produces an output environment
 public export
-handleCore : (env_in : Env env) -> (model : Model env (ObsRW env :: Dist :: es) a) -> Prog (Observe :: Sample :: es) (a, Env env)
+handleCore : (env_in : Env env) -> (model : Model env es a) -> Prog (Observe :: Sample :: es) (a, Env env)
 handleCore env_in = handleDist . handleObsRW env_in . runModel
 
 exampleModel : Model env es Int

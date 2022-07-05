@@ -23,5 +23,5 @@ handleSample (Op op k) = case prj1 op of
 
 ||| Simulate from a model
 public export
-simulate : Env env -> Model env [ObsRW env, Dist] a -> Sampler (a, Env env)
+simulate : Env env -> Model env [] a -> Sampler (a, Env env)
 simulate env_instance = handleSample . handleObserve . handleCore env_instance
