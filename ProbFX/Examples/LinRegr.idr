@@ -13,6 +13,8 @@ import Control.Monad.Bayes.Interface
 import Control.Monad.Bayes.Sampler
 import Control.Monad.Bayes.Weighted
 import Control.Monad.Bayes.Traced.Static
+import Control.Monad.Bayes.Inference.SMC
+import Control.Monad.Bayes.Inference.RMSMC
 
 -- | Model
 linRegr : (prf : Observables env ["y", "m", "c", "std"] Double) => List Double -> Model env es (List Double)
@@ -62,7 +64,7 @@ simLinRegrMB n_datapoints = do
 
 -- | MH inference on linear regression, using monad bayes
 export
-mhLinRegrMB : (n_datapoints : Nat) -> (n_mhsteps : Nat) -> IO (List Double, List Double)
+mhLinRegrMB : (n_mhsteps : Nat) -> (n_datapoints : Nat) -> IO (List Double, List Double)
 mhLinRegrMB n_datapoints n_mhsteps = do 
   let xs        = map cast [0 .. n_datapoints]
       linRegrMB = toMBayes (envExampleInf xs) (linRegr {env = LinRegrEnv} xs) 
@@ -70,6 +72,35 @@ mhLinRegrMB n_datapoints n_mhsteps = do
   mh_output <- the (IO (Vect (S n_mhsteps) (List Double, Env LinRegrEnv))) 
                    (sampleIO $ prior $ mh n_mhsteps linRegrMB )
   let mh_env_outs : List (Env LinRegrEnv) = map snd (toList mh_output)
+      mus : List Double                   = gets "m" mh_env_outs
+      cs  : List Double                   = gets "c" mh_env_outs
+  pure (mus, cs)
+
+-- | SMC inference on linear regression, using monad bayes
+export
+smcLinRegrMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_datapoints : Nat) -> IO (List Double, List Double)
+smcLinRegrMB n_timesteps n_particles n_datapoints = do 
+  let xs        = map cast [0 .. n_datapoints]
+      linRegrMB = toMBayes (envExampleInf xs) (linRegr {env = LinRegrEnv} xs) 
+      
+  mh_output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv)))) 
+                   (sampleIO $ runPopulation $ smcSystematic n_timesteps n_particles linRegrMB )
+  let mh_env_outs : List (Env LinRegrEnv) = map (snd . snd) (toList mh_output)
+      mus : List Double                   = gets "m" mh_env_outs
+      cs  : List Double                   = gets "c" mh_env_outs
+  pure (mus, cs)
+
+
+-- | SMC inference on linear regression, using monad bayes
+export
+rmsmcLinRegrMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> (n_datapoints : Nat) -> IO (List Double, List Double)
+rmsmcLinRegrMB  n_timesteps n_particles n_mhsteps n_datapoints = do 
+  let xs        = map cast [0 .. n_datapoints]
+      linRegrMB = toMBayes (envExampleInf xs) (linRegr {env = LinRegrEnv} xs) 
+      
+  mh_output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv)))) 
+                   (sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps linRegrMB )
+  let mh_env_outs : List (Env LinRegrEnv) = map (snd . snd) (toList mh_output)
       mus : List Double                   = gets "m" mh_env_outs
       cs  : List Double                   = gets "c" mh_env_outs
   pure (mus, cs)

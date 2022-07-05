@@ -9,9 +9,11 @@ printThenWrite x = print (show x) >> writeFile "model-output.txt" (show x)
 
 parseArgs : String -> IO (Either FileError ())
 parseArgs cmd = case cmd of
-  "simLinRegr"    => LinRegr.simLinRegr   50    >>= printThenWrite
-  "simLinRegrMB"  => LinRegr.simLinRegrMB 50    >>= printThenWrite
-  "mhLinRegrMB"   => LinRegr.mhLinRegrMB 50 5000 >>= printThenWrite
+  "simLinRegr"        => LinRegr.simLinRegr   50    >>= printThenWrite
+  "simLinRegrMB"      => LinRegr.simLinRegrMB 50    >>= printThenWrite
+  "mhLinRegrMB"       => LinRegr.mhLinRegrMB 5000 50  >>= printThenWrite
+  "smcLinRegrMB"      => LinRegr.smcLinRegrMB 100 100 20  >>= printThenWrite
+  "rmsmcLinRegrMB"    => LinRegr.rmsmcLinRegrMB 100 100 10 20  >>= printThenWrite
 
   _               => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 
