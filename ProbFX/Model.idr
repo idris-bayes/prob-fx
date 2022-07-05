@@ -9,10 +9,8 @@ import public ProbFX.Prog
 
 ||| Model as a type-level function, specifying a program with two proofs of membership
 public export
-Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (ret : Type) -> Type 
+Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (a : Type) -> Type 
 Model env es a = Prog (ObsRW env :: Dist :: es) a 
-
-
 
 public export
 runModel : Model env es a -> Prog (ObsRW env :: Dist :: es) a 
