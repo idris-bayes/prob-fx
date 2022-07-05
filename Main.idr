@@ -1,6 +1,7 @@
 module Main
 
 import ProbFX.Examples.LinRegr
+import ProbFX.Examples.HMM
 import System
 import System.File.ReadWrite
 
@@ -16,6 +17,10 @@ parseArgs cmd = case cmd of
   "smcLinRegrMB"      => LinRegr.smcLinRegrMB 100 100 20  >>= printThenWrite
   "rmsmcLinRegrMB"    => LinRegr.rmsmcLinRegrMB 100 100 10 20  >>= printThenWrite
 
+  -- | Examples for hidden markov model
+  "simHmm"          => HMM.simHmm   50    >>= printThenWrite
+  "simHmmMB"        => HMM.simHmmMB 50    >>= printThenWrite
+  "mhHmmMB"         => HMM.mhHmmMB 5000  50    >>= printThenWrite
   _               => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 
 main : IO ()

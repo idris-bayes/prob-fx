@@ -55,5 +55,24 @@ def main():
     axs2.set_ylabel("frequency")
     axs2.hist(cs, bins=25)
     plt.show()
+  if arg in ["simHmm", "simHmmMB"]:
+    xs = [xy[0] for xy in data]
+    ys = [xy[1] for xy in data]
+    plt.scatter(xs, ys)
+    plt.xlabel('x data points')
+    plt.ylabel('y data points')
+    plt.show()
+  if arg in ["mhHmmMB"]: # Remove duplicates from mh trace
+    trans_ps = removeDuplicates(data[0]) 
+    obs_ps   = removeDuplicates(data[1])
+    fig1, axs1 = plt.subplots(nrows=1)
+    axs1.set_xlabel("trans_p values", fontsize=12)
+    axs1.set_ylabel("frequency")
+    axs1.hist(trans_ps,bins=25)
+    fig2, axs2 = plt.subplots(nrows=1)
+    axs2.set_xlabel("obs_p values", fontsize=12)
+    axs2.set_ylabel("frequency")
+    axs2.hist(obs_ps, bins=25)
+    plt.show()
 if __name__ == "__main__":
   main()

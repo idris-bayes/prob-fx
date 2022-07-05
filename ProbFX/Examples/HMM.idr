@@ -6,8 +6,9 @@ import ProbFX.Model as PFX
 import ProbFX.Sampler
 import ProbFX.Inference.SIM
 import ProbFX.Inference.MBAYES
-import Control.Monad.Bayes.Interface as I
+import Control.Monad.Bayes.Interface
 import Control.Monad.Bayes.Sampler
+import Control.Monad.Bayes.Traced.Static
 import Control.Monad.Bayes.Weighted
 
 ||| A generic transition model
@@ -37,7 +38,7 @@ hmmChain transPrior obsPrior transModel obsModel n x_0 = do
             pure (x' ::: (x :: xs)) 
   foldl (>=>) pure (List.replicate n hmmNode) (x_0 ::: [])
 
-||| Example hidden Markov model
+||| Example HMM
 boolToNat : Bool -> Nat
 boolToNat True  = 1
 boolToNat False = 0
@@ -62,40 +63,45 @@ hmm : (Observables env ["trans_p", "obs_p"] Double, Observable env "y" Nat)
   => (len : Nat) -> (input : Nat) -> Model env es (List1 Nat) 
 hmm = hmmChain transPrior obsPrior transModel obsModel
 
-||| Example environment
+||| Example HMM environment and data
 HMMEnv : List (String, Type)
 HMMEnv =  [("trans_p", Double), ("obs_p", Double), ("y", Nat)]
 
 envExampleSim : Env HMMEnv
-envExampleSim = ("trans_p" ::= [0.9]) <:> ("obs_p" ::= [0.2]) <:> ("y" ::=  []) <:> ENil
+envExampleSim = ("trans_p" ::= [0.9]) <:> ("obs_p" ::= [0.4]) <:> ("y" ::=  []) <:> ENil
 
 envExampleInf: List Nat -> Env HMMEnv
 envExampleInf ys = ("trans_p" ::= []) <:> ("obs_p" ::= []) <:> ("y" ::= ys) <:> ENil
 
+example_ys : List Nat  -- | using trans_p = 0.9, obs_p = 0.4
+example_ys = [0, 0, 0, 2, 1, 2, 1, 2, 3, 2, 1, 3, 4, 5, 5, 4, 3, 7, 7, 8, 5, 6, 5, 9, 8, 7, 7, 11, 10, 10, 9, 13, 9, 13, 14, 9, 10, 10, 17, 17, 16, 19, 19, 13, 13, 18, 20, 16, 21, 20] 
+  
+x_0 : Nat -- | Starting latent state
+x_0 = 0 
+
+||| Executing example HMM 
 export
-simHmm : Nat -> IO (List (Nat, Nat))
+simHmm : (hmm_length : Nat) -> IO (List (Nat, Nat))
 simHmm hmm_length = do
-  let x_0 = 0 
   (xs, env_out) <- runSampler (simulate envExampleSim (hmm hmm_length x_0) )
   let ys = get "y" env_out
   pure (zip (List1.forget xs) ys)
 
 export
-simHmmMB : Nat -> IO (List (Nat, Nat))
+simHmmMB : (hmm_length : Nat) -> IO (List (Nat, Nat))
 simHmmMB hmm_length = do 
-  let x_0   = 0 
-      hmmMB = toMBayes envExampleSim (hmm hmm_length x_0) 
+  let hmmMB = toMBayes envExampleSim (hmm hmm_length x_0) 
   (xs, env_out) <- sampleIO $ prior hmmMB
   let ys = get "y" env_out
   pure (zip (List1.forget xs) ys)
 
--- export
--- mhHmmMB : Nat -> IO (List (Nat, Nat))
--- mhHmmMB hmm_length = do 
---   ys <- map snd <$> simHmmMB hmm_length
---   let 
+export
+mhHmmMB : (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
+mhHmmMB n_mhsteps hmm_length = do 
+  let hmmMB = toMBayes (envExampleInf example_ys) (hmm hmm_length x_0) 
 
---   (xs, env_out) <- sampleIO $ prior hmmMB
---   let ys = get "y" env_out
---   pure (zip (List1.forget xs) ys)
-
+  mh_output <- sampleIO $ prior $ mh n_mhsteps hmmMB
+  let mh_env_outs : List (Env HMMEnv) = map snd (toList mh_output)
+      trans_ps : List Double          = gets "trans_p" mh_env_outs
+      obs_ps   : List Double          = gets "obs_p" mh_env_outs
+  pure (trans_ps, obs_ps)
