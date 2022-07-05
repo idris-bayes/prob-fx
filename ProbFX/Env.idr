@@ -63,7 +63,11 @@ maybeEmptyEnv {env = (x, _) :: rest} {} = do
 export
 get : (x : String) -> Env env -> {auto prf : Elem (x, a) env} -> List a
 get x (ECons (MkAssign x v) xvs) {prf = Here}   = v
-get x (ECons other xvs) {prf = There later}     = get x xvs {prf = later} 
+get x (ECons other xvs) {prf = There later}     = get x xvs {prf = later}
+
+export
+gets : (x : String) -> List (Env env) -> {auto prf : Elem (x, a) env} -> List a
+gets x envs = (join . map (\env => Env.get x env)) envs
 
 ||| Set the trace of an observable variable
 export

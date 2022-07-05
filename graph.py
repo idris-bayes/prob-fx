@@ -1,5 +1,3 @@
-# importing the required module
-from re import X
 import sys
 import matplotlib.pyplot as plt
 import ast

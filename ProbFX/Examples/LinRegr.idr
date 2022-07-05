@@ -32,6 +32,7 @@ LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
 envExampleSim : Env LinRegrEnv
 envExampleSim = ("m" ::= [3]) <:> ("c" ::= [0]) <:> ("std" ::=  [1]) <:> ("y" ::=  []) <:> ENil
 
+-- | An environment that represents the gradient m = 3 and intercept c = 0
 envExampleInf : List Double -> Env LinRegrEnv
 envExampleInf xs = 
   let ys = map (*3) xs
@@ -61,7 +62,7 @@ simLinRegrMB n_datapoints = do
 
 -- | MH inference on linear regression, using monad bayes
 export
-mhLinRegrMB : (n_datapoints : Nat) -> (n_mhsteps : Nat) -> IO (List Double)
+mhLinRegrMB : (n_datapoints : Nat) -> (n_mhsteps : Nat) -> IO (List Double, List Double)
 mhLinRegrMB n_datapoints n_mhsteps = do 
   let xs        = map cast [0 .. n_datapoints]
       linRegrMB = toMBayes (envExampleInf xs) (linRegr {env = LinRegrEnv} xs) 
@@ -69,8 +70,9 @@ mhLinRegrMB n_datapoints n_mhsteps = do
   mh_output <- the (IO (Vect (S n_mhsteps) (List Double, Env LinRegrEnv))) 
                    (sampleIO $ prior $ mh n_mhsteps linRegrMB )
   let mh_env_outs : List (Env LinRegrEnv) = map snd (toList mh_output)
-      mh_mus      : List Double           = (join . map (\env => Env.get "m" env)) mh_env_outs
-  print ("mu's: " <+> show mh_mus) >> pure mh_mus
+      mus : List Double                   = gets "m" mh_env_outs
+      cs  : List Double                   = gets "c" mh_env_outs
+  pure (mus, cs)
 
 
 {- We can omit specifying the 'env' type via {env = LinRegrEnv} if we make clear that the provided environment should unify with the `env` at a specific position in the effect signature:
