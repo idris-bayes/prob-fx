@@ -21,7 +21,9 @@ parseArgs cmd = case cmd of
   "simHmm"          => HMM.simHmm   50    >>= printThenWrite
   "simHmmMB"        => HMM.simHmmMB 50    >>= printThenWrite
   "mhHmmMB"         => HMM.mhHmmMB 5000  50    >>= printThenWrite
-  _               => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
+  "smcHmmMB"        => HMM.smcHmmMB 100 100 50  >>= printThenWrite
+  "rmsmcHmmMB"      => HMM.rmsmcHmmMB 100 100 10 50  >>= printThenWrite
+  _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 
 main : IO ()
 main = do

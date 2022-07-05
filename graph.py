@@ -31,30 +31,23 @@ def main():
     plt.xlabel('x data points')
     plt.ylabel('y data points')
     plt.show()
-  if arg in ["mhLinRegrMB"]: # Remove duplicates from mh trace
-    mus = removeDuplicates(data[0]) 
-    cs  = removeDuplicates(data[1])
-    fig1, axs1 = plt.subplots(nrows=1)
+  if arg in ["mhLinRegrMB", "smcLinRegrMB", "rmsmcLinRegrMB"]: # Remove duplicates from mh trace
+    if arg in ["mhLinRegrMB"]:
+      mus = removeDuplicates(data[0]) 
+      cs  = removeDuplicates(data[1])
+    elif arg in ["smcLinRegrMB", "rmsmcLinRegrMB"]:
+      mus = data[0]
+      cs  = data[1]
+    _, axs1 = plt.subplots(nrows=1)
     axs1.set_xlabel("mu values", fontsize=12)
     axs1.set_ylabel("frequency")
     axs1.hist(mus,bins=25)
-    fig2, axs2 = plt.subplots(nrows=1)
+    _, axs2 = plt.subplots(nrows=1)
     axs2.set_xlabel("c values", fontsize=12)
     axs2.set_ylabel("frequency")
     axs2.hist(cs, bins=25)
     plt.show()
-  if arg in ["smcLinRegrMB", "rmsmcLinRegrMB"]:
-    mus = data[0]
-    cs  = data[1]
-    fig1, axs1 = plt.subplots(nrows=1)
-    axs1.set_xlabel("mu values", fontsize=12)
-    axs1.set_ylabel("frequency")
-    axs1.hist(mus,bins=25)
-    fig2, axs2 = plt.subplots(nrows=1)
-    axs2.set_xlabel("c values", fontsize=12)
-    axs2.set_ylabel("frequency")
-    axs2.hist(cs, bins=25)
-    plt.show()
+  
   if arg in ["simHmm", "simHmmMB"]:
     xs = [xy[0] for xy in data]
     ys = [xy[1] for xy in data]
@@ -62,9 +55,13 @@ def main():
     plt.xlabel('x data points')
     plt.ylabel('y data points')
     plt.show()
-  if arg in ["mhHmmMB"]: # Remove duplicates from mh trace
-    trans_ps = removeDuplicates(data[0]) 
-    obs_ps   = removeDuplicates(data[1])
+  if arg in ["mhHmmMB", "smcHmmMB", "rmsmcHmmMB"]: # Remove duplicates from mh trace
+    if arg in ["mhHmmMB"]:
+      trans_ps = removeDuplicates(data[0]) 
+      obs_ps   = removeDuplicates(data[1])
+    elif arg in ["smcHmmMB", "rmsmcHmmMB"]:
+      trans_ps = data[0]
+      obs_ps  = data[1]
     fig1, axs1 = plt.subplots(nrows=1)
     axs1.set_xlabel("trans_p values", fontsize=12)
     axs1.set_ylabel("frequency")

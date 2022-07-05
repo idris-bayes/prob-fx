@@ -9,6 +9,8 @@ import ProbFX.Inference.MBAYES
 import Control.Monad.Bayes.Interface
 import Control.Monad.Bayes.Sampler
 import Control.Monad.Bayes.Traced.Static
+import Control.Monad.Bayes.Inference.SMC
+import Control.Monad.Bayes.Inference.RMSMC
 import Control.Monad.Bayes.Weighted
 
 ||| A generic transition model
@@ -100,8 +102,30 @@ mhHmmMB : (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Doubl
 mhHmmMB n_mhsteps hmm_length = do 
   let hmmMB = toMBayes (envExampleInf example_ys) (hmm hmm_length x_0) 
 
-  mh_output <- sampleIO $ prior $ mh n_mhsteps hmmMB
-  let mh_env_outs : List (Env HMMEnv) = map snd (toList mh_output)
-      trans_ps : List Double          = gets "trans_p" mh_env_outs
-      obs_ps   : List Double          = gets "obs_p" mh_env_outs
+  output <- sampleIO $ prior $ mh n_mhsteps hmmMB
+  let env_outs : List (Env HMMEnv) = map snd (toList output)
+      trans_ps : List Double       = gets "trans_p" env_outs
+      obs_ps   : List Double       = gets "obs_p" env_outs
+  pure (trans_ps, obs_ps)
+
+export
+smcHmmMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
+smcHmmMB n_timesteps n_particles  hmm_length = do 
+  let hmmMB = toMBayes (envExampleInf example_ys) (hmm hmm_length x_0) 
+
+  output <- sampleIO $ runPopulation $ smc n_timesteps n_particles hmmMB
+  let env_outs : List (Env HMMEnv) = map (snd . snd) (toList output)
+      trans_ps : List Double       = gets "trans_p" env_outs
+      obs_ps   : List Double       = gets "obs_p" env_outs
+  pure (trans_ps, obs_ps)
+
+export
+rmsmcHmmMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
+rmsmcHmmMB n_timesteps n_particles n_mhsteps hmm_length = do 
+  let hmmMB = toMBayes (envExampleInf example_ys) (hmm hmm_length x_0) 
+
+  output <- sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps hmmMB
+  let env_outs : List (Env HMMEnv) = map (snd . snd) (toList output)
+      trans_ps : List Double       = gets "trans_p" env_outs
+      obs_ps   : List Double       = gets "obs_p" env_outs
   pure (trans_ps, obs_ps)

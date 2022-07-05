@@ -69,11 +69,11 @@ mhLinRegrMB n_datapoints n_mhsteps = do
   let xs        = map cast [0 .. n_datapoints]
       linRegrMB = toMBayes (envExampleInf xs) (linRegr xs) 
       
-  mh_output <- the (IO (Vect (S n_mhsteps) (List Double, Env LinRegrEnv))) 
+  output <- the (IO (Vect (S n_mhsteps) (List Double, Env LinRegrEnv))) 
                    (sampleIO $ prior $ mh n_mhsteps linRegrMB )
-  let mh_env_outs : List (Env LinRegrEnv) = map snd (toList mh_output)
-      mus : List Double                   = gets "m" mh_env_outs
-      cs  : List Double                   = gets "c" mh_env_outs
+  let env_outs : List (Env LinRegrEnv) = map snd (toList output)
+      mus : List Double                   = gets "m" env_outs
+      cs  : List Double                   = gets "c" env_outs
   pure (mus, cs)
 
 -- | SMC inference on linear regression, using monad bayes
@@ -83,11 +83,11 @@ smcLinRegrMB n_timesteps n_particles n_datapoints = do
   let xs        = map cast [0 .. n_datapoints]
       linRegrMB = toMBayes (envExampleInf xs) (linRegr xs) 
       
-  mh_output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv)))) 
-                   (sampleIO $ runPopulation $ smcSystematic n_timesteps n_particles linRegrMB )
-  let mh_env_outs : List (Env LinRegrEnv) = map (snd . snd) (toList mh_output)
-      mus : List Double                   = gets "m" mh_env_outs
-      cs  : List Double                   = gets "c" mh_env_outs
+  output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv)))) 
+                   (sampleIO $ runPopulation $ smc n_timesteps n_particles linRegrMB )
+  let env_outs : List (Env LinRegrEnv) = map (snd . snd) (toList output)
+      mus : List Double                   = gets "m" env_outs
+      cs  : List Double                   = gets "c" env_outs
   pure (mus, cs)
 
 
@@ -98,11 +98,11 @@ rmsmcLinRegrMB  n_timesteps n_particles n_mhsteps n_datapoints = do
   let xs        = map cast [0 .. n_datapoints]
       linRegrMB = toMBayes (envExampleInf xs) (linRegr xs) 
       
-  mh_output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv)))) 
+  output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv)))) 
                    (sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps linRegrMB )
-  let mh_env_outs : List (Env LinRegrEnv) = map (snd . snd) (toList mh_output)
-      mus : List Double                   = gets "m" mh_env_outs
-      cs  : List Double                   = gets "c" mh_env_outs
+  let env_outs : List (Env LinRegrEnv) = map (snd . snd) (toList output)
+      mus : List Double                   = gets "m" env_outs
+      cs  : List Double                   = gets "c" env_outs
   pure (mus, cs)
 
 
