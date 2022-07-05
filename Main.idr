@@ -9,6 +9,7 @@ printThenWrite x = print (show x) >> writeFile "model-output.txt" (show x)
 
 parseArgs : String -> IO (Either FileError ())
 parseArgs cmd = case cmd of
+  -- | Examples for linear regression
   "simLinRegr"        => LinRegr.simLinRegr   50    >>= printThenWrite
   "simLinRegrMB"      => LinRegr.simLinRegrMB 50    >>= printThenWrite
   "mhLinRegrMB"       => LinRegr.mhLinRegrMB 5000 50  >>= printThenWrite
