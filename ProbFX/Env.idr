@@ -4,7 +4,6 @@ import public Data.So
 import Data.List
 import Data.List.Elem
 import Decidable.Equality
-import ProbFX.PropEq
 
 ||| Assign an observable variable name to a trace of values
 public export

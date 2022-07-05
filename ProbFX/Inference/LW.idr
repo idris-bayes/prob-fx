@@ -4,7 +4,7 @@ import ProbFX.Effects.Dist
 import ProbFX.Effects.Trace
 import ProbFX.Effects.ObsRW
 import ProbFX.Effects.Lift
-import ProbFX.Inference.Sim
+import ProbFX.Inference.SIM
 import ProbFX.Env
 import ProbFX.PrimDist
 import ProbFX.Model
@@ -20,7 +20,7 @@ handleObserve logp (Op op k) = case discharge op of
 
 export
 handleLW : Prog [Observe, Sample] a -> Sampler (a, Double)
-handleLW = Sim.handleSample . handleObserve 0
+handleLW = SIM.handleSample . handleObserve 0
 
 ||| Likelihood weighting on a probabilistic program
 export
