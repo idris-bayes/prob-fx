@@ -10,9 +10,13 @@ from sklearn.preprocessing import scale
 from scipy.special import expit
 import numpy as np
 from functools import reduce
-import itertools
+from itertools import groupby
 from scipy.stats import gaussian_kde
 from scipy.interpolate import make_interp_spline
+
+# Remove consecutive duplicates
+def removeDuplicates(xs):
+  return [v for i, v in enumerate(xs) if i == 0 or v != xs[i-1]]
 
 def main():
   arg  = sys.argv[1]
@@ -29,11 +33,16 @@ def main():
     plt.title('Linear regression')
     plt.show()
   if arg in ["mhLinRegrMB"]:
-    mus = data
+    mus = removeDuplicates(data[0])
+    cs  = removeDuplicates(data[1])
     fig1, axs1 = plt.subplots(nrows=1)
     axs1.set_xlabel("mu values", fontsize=12)
     axs1.set_ylabel("frequency")
-    axs1.hist(mus, bins=25)
+    axs1.hist(mus,bins=25)
+    fig1, axs2 = plt.subplots(nrows=1)
+    axs2.set_xlabel("c values", fontsize=12)
+    axs2.set_ylabel("frequency")
+    axs2.hist(cs, bins=25)
     axs1.set_title('Linear regression - Metropolis Hastings')
     plt.show()
   
