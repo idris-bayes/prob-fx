@@ -128,3 +128,12 @@ discrete yps x = callWithObs (Discrete yps) x
 export
 discrete' : {n : Nat} -> Vect (S n) (Double, a) -> Eq a => Model env es a
 discrete' yps = callWithoutObs (Discrete yps)
+
+export
+dirichlet : {n : Nat} -> Vect (S n) Double -> (x : String) 
+  -> {auto 0 env : _} -> (prf : Observable env x (Vect (S n) Double)) => Model env es (Vect (S n) Double)
+dirichlet ps x = callWithObs (Dirichlet ps) x
+
+export
+dirichlet' : {n : Nat} -> Vect (S n) Double -> Model env es (Vect (S n) Double)
+dirichlet' ps = callWithoutObs (Dirichlet ps)
