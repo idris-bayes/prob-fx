@@ -65,7 +65,7 @@ simLinRegrMB n_datapoints = do
 -- | MH inference on linear regression, using monad bayes
 export
 mhLinRegrMB : (n_mhsteps : Nat) -> (n_datapoints : Nat) -> IO (List Double, List Double)
-mhLinRegrMB n_datapoints n_mhsteps = do 
+mhLinRegrMB n_mhsteps n_datapoints  = do 
   let xs        = map cast [0 .. n_datapoints]
       linRegrMB = toMBayes (envExampleInf xs) (linRegr xs) 
       

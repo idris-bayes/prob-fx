@@ -28,8 +28,9 @@ parseArgs cmd = case cmd of
 main : IO ()
 main = do
   args <- getArgs
-  case args of []       => print "no arguments provided to ProbFX"
-               (a::as)  => (parseArgs a) >>= \_ => pure ()
+  case args of 
+               (_::a::as) => (parseArgs a) >>= \_ => pure ()
+               _          => print "no arguments provided to ProbFX"
   pure ()
 
 {-
