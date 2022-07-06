@@ -118,11 +118,13 @@ mhLdaMB n_mhsteps  = do
       
   output <- sampleIO $ prior $ mh n_mhsteps ldaMB
   let env_outs : List (Env (LDAEnv 2 4)) = map snd (toList output)
-
-  case env_outs of 
-    -- | Get the most recent trace value to use as a predicted topic distribution
-    (env_latest :: _) => let doc_topic_ps :  List (Vect 2 Double)   = (gets "θ") env_outs
-                             topic_word_ps : Maybe (List (Vect 2 (Vect 4 Double))) = sequence $ map (\env_out => toVect 2 $ Env.get "φ" env_out ) env_outs
-                         in  pure (doc_topic_ps, case topic_word_ps of Just xs => xs
-                                                                       Nothing => assert_total $ idris_crash "again")
-    []                => assert_total $ idris_crash "what"
+      -- | Get trace of document-topic distributions, where each trace value is of the form:
+      --   [prob of topic_1, prob of topic_2]
+      doc_topic_ps  : List (Vect 2 Double) 
+            = gets "θ" env_outs
+      -- | Get trace of topic-word distributions, where each trace value is reified into the form:
+      --   [word dist for topic 1, word dist for topic 2]
+      topic_word_ps : Maybe (List (Vect 2 (Vect 4 Double))) 
+            = mapM (\env_out => toVect 2 $ Env.get "φ" env_out ) env_outs
+  pure (doc_topic_ps, case topic_word_ps of Just xs => xs
+                                            Nothing => assert_total $ idris_crash "failed to convert 'topic_word_ps : List (List (Vect 4 Double))' into 'List (Vect 2 (Vect 4 Double))' form")

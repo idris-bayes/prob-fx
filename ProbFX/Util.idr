@@ -18,7 +18,10 @@ namespace List
   export
   replicateM : Monad m => Nat -> m a -> m (List a)
   replicateM n = sequence . replicate n
-
+  
+  export
+  mapM : Monad m => (a -> m b) -> List a -> m (List b)
+  mapM f = sequence . map f
 
 namespace Vect
   export
