@@ -121,12 +121,12 @@ categorical' : {n : Nat} -> Vect (S n) Double -> Model env es (Fin (S n))
 categorical' ps = callWithoutObs (Categorical ps)
 
 export
-discrete : {n : Nat} -> Vect (S n) (Double, a) -> (x : String) 
+discrete : {n : Nat} -> Vect (S n) (a, Double) -> (x : String) 
   -> {auto 0 env : _} -> (prf : Observable env x a) => Eq a => Model env es a
 discrete yps x = callWithObs (Discrete yps) x
 
 export
-discrete' : {n : Nat} -> Vect (S n) (Double, a) -> Eq a => Model env es a
+discrete' : {n : Nat} -> Vect (S n) (a, Double) -> Eq a => Model env es a
 discrete' yps = callWithoutObs (Discrete yps)
 
 export

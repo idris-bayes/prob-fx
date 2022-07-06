@@ -22,7 +22,7 @@ data PrimDist : a -> Type where
   Binomial    : Nat -> Double -> PrimDist Nat
   Poisson     : Double -> PrimDist Nat
   Categorical : {n : Nat} -> Vect (S n) Double -> PrimDist (Fin (S n))
-  Discrete    : {n : Nat} -> Vect (S n) (Double, a) -> Eq a => PrimDist a
+  Discrete    : {n : Nat} -> Vect (S n) (a, Double) -> Eq a => PrimDist a
   Dirichlet   : {n : Nat} -> Vect (S n) Double -> PrimDist (Vect (S n) Double)
 
 ||| Density functions
@@ -36,8 +36,8 @@ prob (Beta a b) y         = beta_pdf a b y
 prob (Gamma a b) y        = gamma_pdf a b y
 prob (Poisson p) y        = poisson_pdf p y
 prob (Categorical ps) y   = index y ps
-prob (Discrete yps) y     = case (find ((== y) . snd) yps)
-                            of  Just (p, _) => p
+prob (Discrete yps) y     = case (find ((== y) . fst) yps)
+                            of  Just (_, p) => p
                                 Nothing     => 0.0
 prob (Dirichlet ps) ys    = dirichlet_pdf ps ys                             
 
@@ -68,7 +68,7 @@ sample (Categorical {n} ps) = do
     Just i  => pure i
     Nothing => assert_total $ idris_crash $ "categorical: bad weights!" ++ show ps
 sample (Discrete pxs) = do 
-  let (ps, xs) = unzip pxs
+  let (xs, ps) = unzip pxs
   sample (Categorical ps) >>= pure . flip index xs
 sample (Dirichlet ps) = Sampler.dirichlet ps
 
@@ -83,6 +83,6 @@ sampleBayes (Gamma a b)       = Monad.Bayes.Interface.gamma a b
 sampleBayes (Poisson p)       = Monad.Bayes.Interface.poisson p
 sampleBayes (Categorical ps)  = Monad.Bayes.Interface.categorical ps
 sampleBayes (Discrete pxs)    = do
-  let (ps, xs) = unzip pxs
+  let (xs, ps) = unzip pxs
   Monad.Bayes.Interface.categorical ps >>=  pure . flip index xs
 sampleBayes (Dirichlet ps)    = Monad.Bayes.Interface.dirichlet ps
