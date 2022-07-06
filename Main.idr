@@ -28,7 +28,7 @@ parseArgs cmd = case cmd of
   -- | Examples for hidden markov model
   "simLda"          => LDA.simLda 100   >>= printThenWrite
   "simLdaMB"        => LDA.simLdaMB 100   >>= printThenWrite
-  "mhLdaMB"         => LDA.mhLdaMB 10000   >>= printThenWrite
+  "mhLdaMB"         => LDA.mhLdaMB 100   >>= printThenWrite
 
   _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 

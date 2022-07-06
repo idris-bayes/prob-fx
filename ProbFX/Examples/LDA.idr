@@ -112,7 +112,7 @@ simLdaMB doc_size = do
 
 ||| MH inference on linear regression, using monad bayes
 export
-mhLdaMB : (n_mhsteps : Nat) -> IO (List (Vect 2 Double), List (Vect 4 Double))
+mhLdaMB : (n_mhsteps : Nat) -> IO (List (Vect 2 Double), List (Vect 2 (Vect 4 Double)))
 mhLdaMB n_mhsteps  = do 
   let ldaMB = toMBayes (envExampleInf exampleDocument) (topicModel exampleVocab n_topics_pred (length exampleDocument))
       
@@ -121,7 +121,8 @@ mhLdaMB n_mhsteps  = do
 
   case env_outs of 
     -- | Get the most recent trace value to use as a predicted topic distribution
-    (env_latest :: _) => let doc_topic_ps : List (Vect 2 Double)    = get "θ" env_latest
-                             topic_word_ps : List (Vect 4 Double)   = get "φ" env_latest
-                         in  pure (doc_topic_ps, topic_word_ps)
+    (env_latest :: _) => let doc_topic_ps :  List (Vect 2 Double)   = (gets "θ") env_outs
+                             topic_word_ps : Maybe (List (Vect 2 (Vect 4 Double))) = sequence $ map (\env_out => toVect 2 $ Env.get "φ" env_out ) env_outs
+                         in  pure (doc_topic_ps, case topic_word_ps of Just xs => xs
+                                                                       Nothing => assert_total $ idris_crash "again")
     []                => assert_total $ idris_crash "what"
