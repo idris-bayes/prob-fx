@@ -4,6 +4,7 @@ import Control.Monad.Reader
 import Statistics.Distribution.GSL
 import Statistics.Distribution.Uniform
 import Statistics.Distribution.Binomial
+import Statistics.Distribution.Dirichlet
 import Statistics.Distribution.Normal
 import Statistics.Distribution.Beta
 import Statistics.Distribution.Gamma
@@ -71,6 +72,10 @@ gamma a b       = mkSampler (\seed =>  (gamma_gsl a b seed))
 export
 poisson : Double -> Sampler Nat
 poisson p       = mkSampler (\seed =>  (poisson_gsl p seed))
+
+export
+dirichlet : {n : Nat} -> Vect (S n) Double -> Sampler (Vect (S n) Double)
+dirichlet ps = mkSampler (\seed =>  (dirichlet_gsl ps seed))
 
 private
 testSeed : IO () 

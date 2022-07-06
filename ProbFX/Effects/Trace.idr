@@ -9,7 +9,7 @@ import ProbFX.Effects.Dist
 
 ||| Primitive values
 public export
-data PrimVal = PrimDouble Double | PrimNat Nat | PrimBool Bool
+data PrimVal = PrimDouble Double | PrimNat Nat | PrimBool Bool | Prim
 
 ||| Trace of sampled values
 public export
@@ -26,7 +26,8 @@ toPrimVal (Beta _ _)      = PrimDouble
 toPrimVal (Gamma _ _)     = PrimDouble
 toPrimVal (Poisson _)     = PrimNat
 toPrimVal (Categorical _) = PrimNat . finToNat
-toPrimVal (Discrete _)    = ?to_do_toPrimVal
+toPrimVal (Discrete _)    = ?to_do_toPrimVal_discrete
+toPrimVal (Dirichlet _)   = ?to_do_toPrimVal_dirichlet
 
 export
 insertTrace : (String, PrimVal) -> Trace -> Trace

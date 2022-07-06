@@ -7,6 +7,7 @@ import Statistics.Distribution.Gamma
 import Statistics.Distribution.Normal 
 import Statistics.Distribution.Uniform 
 import Statistics.Distribution.Poisson 
+import Statistics.Distribution.Dirichlet 
 import Control.Monad.Bayes.Interface
 import ProbFX.Sampler
 
@@ -22,7 +23,7 @@ data PrimDist : a -> Type where
   Poisson     : Double -> PrimDist Nat
   Categorical : {n : Nat} -> Vect (S n) Double -> PrimDist (Fin (S n))
   Discrete    : {n : Nat} -> Vect (S n) (Double, a) -> Eq a => PrimDist a
-  -- Dirichlet   : Eq a => {n : Nat} -> Vect n (Double, a) -> PrimDist a
+  Dirichlet   : {n : Nat} -> Vect (S n) Double -> PrimDist (Vect (S n) Double)
 
 ||| Density functions
 export
@@ -38,6 +39,7 @@ prob (Categorical ps) y   = index y ps
 prob (Discrete yps) y     = case (find ((== y) . snd) yps)
                             of  Just (p, _) => p
                                 Nothing     => 0.0
+prob (Dirichlet ps) ys    = dirichlet_pdf ps ys                             
 
 export
 logProb : PrimDist a -> a -> Double
@@ -68,6 +70,7 @@ sample (Categorical {n} ps) = do
 sample (Discrete pxs) = do 
   let (ps, xs) = unzip pxs
   sample (Categorical ps) >>= pure . flip index xs
+sample (Dirichlet ps) = Sampler.dirichlet ps
 
 export
 sampleBayes : MonadSample m => PrimDist b -> m b
@@ -82,3 +85,4 @@ sampleBayes (Categorical ps)  = Monad.Bayes.Interface.categorical ps
 sampleBayes (Discrete pxs)    = do
   let (ps, xs) = unzip pxs
   Monad.Bayes.Interface.categorical ps >>=  pure . flip index xs
+sampleBayes (Dirichlet ps)    = Monad.Bayes.Interface.dirichlet ps
