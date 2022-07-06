@@ -71,5 +71,24 @@ def main():
     axs2.set_ylabel("frequency")
     axs2.hist(obs_ps, bins=25)
     plt.show()
+
+  if arg == "mhLdaMB":
+    ws          = ['DNA', 'evolution', 'parsing', 'phonology']
+    topic_ps = data[0][0]
+    topic_0s = data[1][0]
+    topic_1s = data[1][1]
+    fig, ax = plt.subplots(nrows=1)
+    ax.bar(['Topic 0', 'Topic 1'], topic_ps, 0.8)
+    ax.set_xticklabels(['Topic 0', 'Topic 1'])
+    plt.title('Document-Topic Distribution')
+    fig0, ax0 = plt.subplots(nrows=1)
+    ax0.bar(ws, topic_0s, 0.8)
+    ax0.set_xticklabels(ws)
+    plt.title('Topic-Word Distribution 0')
+    fig1, ax1 = plt.subplots(nrows=1)
+    ax1.bar(ws, topic_1s, 0.8)
+    ax1.set_xticklabels(ws)
+    plt.title('Topic-Word Distribution 1')
+    plt.show()
 if __name__ == "__main__":
   main()
