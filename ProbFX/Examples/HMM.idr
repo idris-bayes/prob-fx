@@ -81,7 +81,7 @@ example_ys = [0, 0, 0, 2, 1, 2, 1, 2, 3, 2, 1, 3, 4, 5, 5, 4, 3, 7, 7, 8, 5, 6, 
 x_0 : Nat -- | Starting latent state
 x_0 = 0 
 
-||| Executing example HMM 
+||| Simulating HMM, using effect handlers
 export
 simHmm : (hmm_length : Nat) -> IO (List (Nat, Nat))
 simHmm hmm_length = do
@@ -89,6 +89,7 @@ simHmm hmm_length = do
   let ys = get "y" env_out
   pure (zip (List1.forget xs) ys)
 
+||| Simulating HMM, using monad bayes
 export
 simHmmMB : (hmm_length : Nat) -> IO (List (Nat, Nat))
 simHmmMB hmm_length = do 
@@ -97,6 +98,7 @@ simHmmMB hmm_length = do
   let ys = get "y" env_out
   pure (zip (List1.forget xs) ys)
 
+||| Metropolis-hastings inference on HMM, using monad bayes
 export
 mhHmmMB : (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
 mhHmmMB n_mhsteps hmm_length = do 
@@ -108,6 +110,7 @@ mhHmmMB n_mhsteps hmm_length = do
       obs_ps   : List Double       = gets "obs_p" env_outs
   pure (trans_ps, obs_ps)
 
+||| SMC inference on HMM, using monad bayes
 export
 smcHmmMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
 smcHmmMB n_timesteps n_particles  hmm_length = do 
@@ -119,6 +122,7 @@ smcHmmMB n_timesteps n_particles  hmm_length = do
       obs_ps   : List Double       = gets "obs_p" env_outs
   pure (trans_ps, obs_ps)
 
+||| RMSMC inference on HMM, using monad bayes
 export
 rmsmcHmmMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
 rmsmcHmmMB n_timesteps n_particles n_mhsteps hmm_length = do 
