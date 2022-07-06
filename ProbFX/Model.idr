@@ -112,19 +112,19 @@ poisson' : Double -> Model env es Nat
 poisson' p = callWithoutObs (Poisson p)
 
 export
-categorical : {n : Nat} -> Vect n Double -> (x : String) 
-  -> {auto 0 env : _} -> (prf : Observable env x (Fin n)) => Model env es (Fin n)
+categorical : {n : Nat} -> Vect (S n) Double -> (x : String) 
+  -> {auto 0 env : _} -> (prf : Observable env x (Fin (S n))) => Model env es (Fin (S n))
 categorical ps = callWithObs (Categorical ps)
 
 export
-categorical' : {n : Nat} -> Vect n Double -> Model env es (Fin n)
+categorical' : {n : Nat} -> Vect (S n) Double -> Model env es (Fin (S n))
 categorical' ps = callWithoutObs (Categorical ps)
 
 export
-discrete : {n : Nat} -> Vect n (Double, a) -> (x : String) 
+discrete : {n : Nat} -> Vect (S n) (Double, a) -> (x : String) 
   -> {auto 0 env : _} -> (prf : Observable env x a) => Eq a => Model env es a
 discrete yps x = callWithObs (Discrete yps) x
 
 export
-discrete' : {n : Nat} -> Vect n (Double, a) -> Eq a => Model env es a
+discrete' : {n : Nat} -> Vect (S n) (Double, a) -> Eq a => Model env es a
 discrete' yps = callWithoutObs (Discrete yps)

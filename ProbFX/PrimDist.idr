@@ -18,10 +18,11 @@ data PrimDist : a -> Type where
   Beta        : Double -> Double -> PrimDist Double
   Gamma       : Double -> Double -> PrimDist Double
   Bernoulli   : Double -> PrimDist Bool
-  Categorical : {n : Nat} -> Vect n Double -> PrimDist (Fin n)
   Binomial    : Nat -> Double -> PrimDist Nat
   Poisson     : Double -> PrimDist Nat
-  Discrete    : Eq a => {n : Nat} -> Vect n (Double, a) -> PrimDist a
+  Categorical : {n : Nat} -> Vect (S n) Double -> PrimDist (Fin (S n))
+  Discrete    : {n : Nat} -> Vect (S n) (Double, a) -> Eq a => PrimDist a
+  -- Dirichlet   : Eq a => {n : Nat} -> Vect n (Double, a) -> PrimDist a
 
 ||| Density functions
 export
@@ -56,9 +57,9 @@ sample (Categorical {n} ps) = do
   r <- Sampler.uniform 0 1
   let normalised_ps = map (/(sum ps)) ps 
 
-      cmf : Double -> Nat -> List Double -> Maybe (Fin n)
+      cmf : Double -> Nat -> List Double -> Maybe (Fin (S n))
       cmf acc idx (x :: xs) = let acc' = acc + x 
-                              in  if acc' > r then natToFin idx n else cmf acc' (S idx) xs
+                              in  if acc' > r then natToFin idx (S n) else cmf acc' (S idx) xs
       cmf acc idx []        = Nothing
 
   case cmf 0 0 (toList normalised_ps) of
