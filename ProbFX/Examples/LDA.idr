@@ -4,13 +4,14 @@ import ProbFX.Model as PFX
 import ProbFX.Sampler
 import ProbFX.Inference.SIM
 import ProbFX.Inference.MBAYES
+import ProbFX.Util
 import Control.Monad.Bayes.Interface
 import Control.Monad.Bayes.Sampler
 import Control.Monad.Bayes.Traced.Static
 import Control.Monad.Bayes.Inference.SMC
 import Control.Monad.Bayes.Inference.RMSMC
 import Control.Monad.Bayes.Weighted
-import ProbFX.Util
+import public Data.Vect
 
 ||| LDA environment
 LDAEnv : Nat -> Nat -> List (String, Type)
@@ -57,7 +58,7 @@ topicModel :
       Observable env "θ" (Vect (S n_topics_pred) Double),
       Observable env "w" String)
   => Model env es (Vect doc_size String)
-topicModel vocab n_topics_pred  doc_size = do
+topicModel vocab n_topics_pred doc_size = do
   -- Generate distribution over words for each topic
   topic_word_ps <- replicateM (S n_topics_pred) (topicWordPrior vocab)
   -- Generate distribution over topics for a given document
@@ -69,9 +70,13 @@ topicModel vocab n_topics_pred  doc_size = do
   pure words
 
 
-||| Example vocabulary
+||| Example vocabulary of four words
 exampleVocab : Vect 4 String
 exampleVocab = ["DNA", "evolution", "parsing", "phonology"]
+
+||| Assume two topics
+n_topics_pred : Nat
+n_topics_pred = pred 2
 
 ||| Environments for simulation and inference that assume two topics and a vocabulary of four words
 envExampleSim : Env (LDAEnv 2 4)
@@ -87,3 +92,36 @@ envExampleInf ws =  ("θ" ::= [])
                 <:> ("w" ::= ws)
                 <:> ENil
 
+exampleDocument : List String
+exampleDocument = ["DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution", "parsing", "phonology", "DNA","evolution", "DNA", "parsing", "evolution","phonology", "evolution", "DNA","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution", "parsing", "phonology", "DNA","evolution", "DNA", "parsing", "evolution","phonology", "evolution", "DNA","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution", "parsing", "phonology", "DNA","evolution", "DNA", "parsing", "evolution","phonology", "evolution", "DNA","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution", "parsing", "phonology", "DNA","evolution", "DNA", "parsing", "evolution","phonology", "evolution", "DNA","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution","DNA","evolution", "parsing", "phonology", "DNA","evolution", "DNA", "parsing", "evolution","phonology", "evolution", "DNA"]
+
+||| Simulate from LDA, using effect handlers
+export
+simLda : (doc_size : Nat) -> IO (Vect doc_size String)
+simLda doc_size = do
+  (ys, env_out) <- runSampler (simulate envExampleSim (topicModel exampleVocab n_topics_pred doc_size) )
+  pure ys
+
+||| Simulate from LDA, using monad bayes
+export
+simLdaMB : (doc_size : Nat) -> IO (Vect doc_size String)
+simLdaMB doc_size = do
+  let ldaMB = toMBayes envExampleSim (topicModel exampleVocab n_topics_pred doc_size)
+  (ys, env_out) <- sampleIO $ prior ldaMB
+  pure ys
+
+||| MH inference on linear regression, using monad bayes
+export
+mhLdaMB : (n_mhsteps : Nat) -> IO (List (Vect 2 Double), List (Vect 4 Double))
+mhLdaMB n_mhsteps  = do 
+  let ldaMB = toMBayes (envExampleInf exampleDocument) (topicModel exampleVocab n_topics_pred (length exampleDocument))
+      
+  output <- sampleIO $ prior $ mh n_mhsteps ldaMB
+  let env_outs : List (Env (LDAEnv 2 4)) = map snd (toList output)
+
+  case env_outs of 
+    -- | Get the most recent trace value to use as a predicted topic distribution
+    (env_latest :: _) => let doc_topic_ps : List (Vect 2 Double)    = get "θ" env_latest
+                             topic_word_ps : List (Vect 4 Double)   = get "φ" env_latest
+                         in  pure (doc_topic_ps, topic_word_ps)
+    []                => assert_total $ idris_crash "what"

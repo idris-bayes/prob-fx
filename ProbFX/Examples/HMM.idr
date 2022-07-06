@@ -75,8 +75,8 @@ envExampleSim = ("trans_p" ::= [0.9]) <:> ("obs_p" ::= [0.4]) <:> ("y" ::=  []) 
 envExampleInf: List Nat -> Env HMMEnv
 envExampleInf ys = ("trans_p" ::= []) <:> ("obs_p" ::= []) <:> ("y" ::= ys) <:> ENil
 
-example_ys : List Nat  -- | using trans_p = 0.9, obs_p = 0.4
-example_ys = [0, 0, 0, 2, 1, 2, 1, 2, 3, 2, 1, 3, 4, 5, 5, 4, 3, 7, 7, 8, 5, 6, 5, 9, 8, 7, 7, 11, 10, 10, 9, 13, 9, 13, 14, 9, 10, 10, 17, 17, 16, 19, 19, 13, 13, 18, 20, 16, 21, 20] 
+exampleObs : List Nat  -- | using trans_p = 0.9, obs_p = 0.4
+exampleObs = [0, 0, 0, 2, 1, 2, 1, 2, 3, 2, 1, 3, 4, 5, 5, 4, 3, 7, 7, 8, 5, 6, 5, 9, 8, 7, 7, 11, 10, 10, 9, 13, 9, 13, 14, 9, 10, 10, 17, 17, 16, 19, 19, 13, 13, 18, 20, 16, 21, 20] 
   
 x_0 : Nat -- | Starting latent state
 x_0 = 0 
@@ -102,7 +102,7 @@ simHmmMB hmm_length = do
 export
 mhHmmMB : (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
 mhHmmMB n_mhsteps hmm_length = do 
-  let hmmMB = toMBayes (envExampleInf example_ys) (hmm hmm_length x_0) 
+  let hmmMB = toMBayes (envExampleInf exampleObs) (hmm hmm_length x_0) 
 
   output <- sampleIO $ prior $ mh n_mhsteps hmmMB
   let env_outs : List (Env HMMEnv) = map snd (toList output)
@@ -114,7 +114,7 @@ mhHmmMB n_mhsteps hmm_length = do
 export
 smcHmmMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
 smcHmmMB n_timesteps n_particles  hmm_length = do 
-  let hmmMB = toMBayes (envExampleInf example_ys) (hmm hmm_length x_0) 
+  let hmmMB = toMBayes (envExampleInf exampleObs) (hmm hmm_length x_0) 
 
   output <- sampleIO $ runPopulation $ smc n_timesteps n_particles hmmMB
   let env_outs : List (Env HMMEnv) = map (snd . snd) (toList output)
@@ -126,7 +126,7 @@ smcHmmMB n_timesteps n_particles  hmm_length = do
 export
 rmsmcHmmMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
 rmsmcHmmMB n_timesteps n_particles n_mhsteps hmm_length = do 
-  let hmmMB = toMBayes (envExampleInf example_ys) (hmm hmm_length x_0) 
+  let hmmMB = toMBayes (envExampleInf exampleObs) (hmm hmm_length x_0) 
 
   output <- sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps hmmMB
   let env_outs : List (Env HMMEnv) = map (snd . snd) (toList output)

@@ -2,11 +2,12 @@ module Main
 
 import ProbFX.Examples.LinRegr
 import ProbFX.Examples.HMM
+import ProbFX.Examples.LDA
 import System
 import System.File.ReadWrite
 
 printThenWrite :  Show a => a -> IO (Either FileError ())
-printThenWrite x = print (show x) >> writeFile "model-output.txt" (show x)
+printThenWrite x = putStrLn (show x) >> writeFile "model-output.txt" (show x)
 
 parseArgs : String -> IO (Either FileError ())
 parseArgs cmd = case cmd of
@@ -23,6 +24,11 @@ parseArgs cmd = case cmd of
   "mhHmmMB"         => HMM.mhHmmMB 5000  50    >>= printThenWrite
   "smcHmmMB"        => HMM.smcHmmMB 100 100 50  >>= printThenWrite
   "rmsmcHmmMB"      => HMM.rmsmcHmmMB 100 100 10 50  >>= printThenWrite
+
+  -- | Examples for hidden markov model
+  "simLda"          => LDA.simLda 100   >>= printThenWrite
+  "simLdaMB"        => LDA.simLdaMB 100   >>= printThenWrite
+
   _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 
 main : IO ()
