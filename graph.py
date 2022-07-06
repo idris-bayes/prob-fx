@@ -71,6 +71,7 @@ def main():
     axs2.set_ylabel("frequency")
     axs2.hist(obs_ps, bins=25)
     plt.show()
+    
   if arg == "mhLdaMB":
     ws       = ['DNA', 'evolution', 'parsing', 'phonology']
     topic_ps = data[0]
