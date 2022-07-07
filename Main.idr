@@ -19,17 +19,17 @@ parseArgs cmd = case cmd of
   "rmsmcLinRegrMB"    => LinRegr.rmsmcLinRegrMB 100 100 10 20  >>= printThenWrite
 
   -- | Examples for hidden markov model
-  "simHmm"          => HMM.simHmm   50    >>= printThenWrite
-  "simHmmMB"        => HMM.simHmmMB 50    >>= printThenWrite
-  "mhHmmMB"         => HMM.mhHmmMB 5000  50    >>= printThenWrite
-  "smcHmmMB"        => HMM.smcHmmMB 100 100 50  >>= printThenWrite
-  "rmsmcHmmMB"      => HMM.rmsmcHmmMB 100 100 10 50  >>= printThenWrite
+  "simHMM"          => HMM.simHMM   50    >>= printThenWrite
+  "simHMMMB"        => HMM.simHMMMB 50    >>= printThenWrite
+  "mhHMMMB"         => HMM.mhHMMMB 5000  50    >>= printThenWrite
+  "smcHMMMB"        => HMM.smcHMMMB 100 100 50  >>= printThenWrite
+  "rmsmcHMMMB"      => HMM.rmsmcHMMMB 100 100 10 50  >>= printThenWrite
 
   -- | Examples for latent dirichlet allocation
-  "simLda"          => LDA.simLda 100   >>= printThenWrite
-  "simLdaMB"        => LDA.simLdaMB 100   >>= printThenWrite
-  "mhLdaMB"         => LDA.mhLdaMB 5000 2000  >>= printThenWrite
-  "rmsmcLdaMB"      => LDA.rmsmcLdaMB 100 50 20  >>= printThenWrite
+  "simLDA"          => LDA.simLDA 100   >>= printThenWrite
+  "simLDAMB"        => LDA.simLDAMB 100   >>= printThenWrite
+  "mhLDAMB"         => LDA.mhLDAMB 5000 2000  >>= printThenWrite
+  "rmsmcLDAMB"      => LDA.rmsmcLDAMB 100 50 20  >>= printThenWrite
   
   _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 

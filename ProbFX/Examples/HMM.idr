@@ -86,16 +86,16 @@ x_0 = 0
 
 ||| Simulating HMM, using effect handlers
 export
-simHmm : (hmm_length : Nat) -> IO (List (Nat, Nat))
-simHmm hmm_length = do
+simHMM : (hmm_length : Nat) -> IO (List (Nat, Nat))
+simHMM hmm_length = do
   (xs, env_out) <- runSampler (simulate envExampleSim (hmm hmm_length x_0) )
   let ys = get "y" env_out
   pure (zip (List1.forget xs) ys)
 
 ||| Simulating HMM, using monad bayes
 export
-simHmmMB : (hmm_length : Nat) -> IO (List (Nat, Nat))
-simHmmMB hmm_length = do 
+simHMMMB : (hmm_length : Nat) -> IO (List (Nat, Nat))
+simHMMMB hmm_length = do 
   let hmmMB = toMBayes envExampleSim (hmm hmm_length x_0) 
   (xs, env_out) <- sampleIO $ prior hmmMB
   let ys = get "y" env_out
@@ -103,8 +103,8 @@ simHmmMB hmm_length = do
 
 ||| Metropolis-hastings inference on HMM, using monad bayes
 export
-mhHmmMB : (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
-mhHmmMB n_mhsteps hmm_length = do 
+mhHMMMB : (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
+mhHMMMB n_mhsteps hmm_length = do 
   let hmmMB = toMBayes (envExampleInf exampleObs) (hmm hmm_length x_0) 
 
   output <- sampleIO $ prior $ mh n_mhsteps hmmMB
@@ -115,8 +115,8 @@ mhHmmMB n_mhsteps hmm_length = do
 
 ||| SMC inference on HMM, using monad bayes
 export
-smcHmmMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
-smcHmmMB n_timesteps n_particles  hmm_length = do 
+smcHMMMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
+smcHMMMB n_timesteps n_particles  hmm_length = do 
   let hmmMB = toMBayes (envExampleInf exampleObs) (hmm hmm_length x_0) 
 
   output <- sampleIO $ runPopulation $ smc n_timesteps n_particles hmmMB
@@ -127,8 +127,8 @@ smcHmmMB n_timesteps n_particles  hmm_length = do
 
 ||| RMSMC inference on HMM, using monad bayes
 export
-rmsmcHmmMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
-rmsmcHmmMB n_timesteps n_particles n_mhsteps hmm_length = do 
+rmsmcHMMMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> (hmm_length : Nat) -> IO (List Double, List Double)
+rmsmcHMMMB n_timesteps n_particles n_mhsteps hmm_length = do 
   let hmmMB = toMBayes (envExampleInf exampleObs) (hmm hmm_length x_0) 
 
   output <- sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps hmmMB

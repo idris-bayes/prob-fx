@@ -106,3 +106,18 @@ simSIR n_days = do
       reported = Env.get "𝜉" env_out
 
   pure (sirs, reported)
+
+-- ||| Simulating the SIR model, via monad bayes
+-- simSIRMB : (n_days : Nat) -> IO (List (Nat, Nat, Nat), List Nat)
+-- simSIRMB n_days = do
+--   let sim_env_in = envExampleSim
+--   (popls, env_out) <- runSampler (simulate envExampleSim (sirModel n_days examplePopl) )
+
+--   let sirs : List (Nat, Nat, Nat)
+--       sirs = let (sir_final ::: rest) = map getSIRs popls
+--              in (take (minus n_days 1) (sir_final :: rest))
+    
+--       reported : List Nat 
+--       reported = Env.get "𝜉" env_out
+
+--   pure (sirs, reported)

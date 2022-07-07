@@ -48,18 +48,18 @@ def main():
     axs2.hist(cs, bins=25)
     plt.show()
   
-  if arg in ["simHmm", "simHmmMB"]:
+  if arg in ["simHMM", "simHMMMB"]:
     xs = [xy[0] for xy in data]
     ys = [xy[1] for xy in data]
     plt.scatter(xs, ys)
     plt.xlabel('x data points')
     plt.ylabel('y data points')
     plt.show()
-  if arg in ["mhHmmMB", "smcHmmMB", "rmsmcHmmMB"]: # Remove duplicates from mh trace
-    if arg in ["mhHmmMB"]:
+  if arg in ["mhHMMMB", "smcHMMMB", "rmsmcHMMMB"]: # Remove duplicates from mh trace
+    if arg in ["mhHMMMB"]:
       trans_ps = removeDuplicates(data[0]) 
       obs_ps   = removeDuplicates(data[1])
-    elif arg in ["smcHmmMB", "rmsmcHmmMB"]:
+    elif arg in ["smcHMMMB", "rmsmcHMMMB"]:
       trans_ps = data[0]
       obs_ps  = data[1]
     fig1, axs1 = plt.subplots(nrows=1)
@@ -72,7 +72,7 @@ def main():
     axs2.hist(obs_ps, bins=25)
     plt.show()
 
-  if arg in ["mhLdaMB", "rmsmcLdaMB"]:
+  if arg in ["mhLDAMB", "rmsmcLDAMB"]:
     ws       = ['DNA', 'evolution', 'parsing', 'phonology']
     topic_ps = data[0]
     # Average the trace or final population of parameter values for topics

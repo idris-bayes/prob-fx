@@ -97,26 +97,26 @@ exampleDocument = ["DNA","evolution","DNA","evolution","DNA","evolution","DNA","
 
 ||| Simulate from LDA, using effect handlers
 export
-simLda : (doc_size : Nat) -> IO (Vect doc_size String)
-simLda doc_size = do
+simLDA : (doc_size : Nat) -> IO (Vect doc_size String)
+simLDA doc_size = do
   (ys, env_out) <- runSampler (simulate envExampleSim (topicModel exampleVocab n_topics_pred doc_size) )
   pure ys
 
 ||| Simulate from LDA, using monad bayes
 export
-simLdaMB : (doc_size : Nat) -> IO (Vect doc_size String)
-simLdaMB doc_size = do
+simLDAMB : (doc_size : Nat) -> IO (Vect doc_size String)
+simLDAMB doc_size = do
   let ldaMB = toMBayes envExampleSim (topicModel exampleVocab n_topics_pred doc_size)
   (ys, env_out) <- sampleIO $ prior ldaMB
   pure ys
 
 ||| MH inference on LDA, using monad bayes
 export
-mhLdaMB : (n_mhsteps : Nat) 
+mhLDAMB : (n_mhsteps : Nat) 
        -- | Number of most recent MH trace values to consider, where trace_prefix_length <= n_mhsteps
        -> (trace_prefix_length : Nat)
        -> IO (List (Vect 2 Double), List (Vect 2 (Vect 4 Double)))
-mhLdaMB n_mhsteps trace_prefix_length = do 
+mhLDAMB n_mhsteps trace_prefix_length = do 
   let ldaMB = toMBayes (envExampleInf exampleDocument) (topicModel exampleVocab n_topics_pred (length exampleDocument))
       
   output <- sampleIO $ prior $ mh n_mhsteps ldaMB
@@ -134,8 +134,8 @@ mhLdaMB n_mhsteps trace_prefix_length = do
 
 ||| RMSMC inference on LDA, using monad bayes
 export
-rmsmcLdaMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> IO (List (Vect 2 Double), List (Vect 2 (Vect 4 Double)))
-rmsmcLdaMB n_timesteps n_particles n_mhsteps = do
+rmsmcLDAMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> IO (List (Vect 2 Double), List (Vect 2 (Vect 4 Double)))
+rmsmcLDAMB n_timesteps n_particles n_mhsteps = do
   let ldaMB = toMBayes (envExampleInf exampleDocument) (topicModel exampleVocab n_topics_pred (length exampleDocument))
       
   output <- sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps ldaMB
