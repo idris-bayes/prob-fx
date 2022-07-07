@@ -32,10 +32,12 @@ parseArgs cmd = case cmd of
   "mhLDAMB"         => LDA.mhLDAMB 5000 2000  >>= printThenWrite
   "rmsmcLDAMB"      => LDA.rmsmcLDAMB 100 50 20  >>= printThenWrite
 
-  -- | Examples for latent dirichlet allocation
+  -- | Examples for SIR model
   "simSIR"          => SIR.simSIR 100       >>= printThenWrite
   "simSIRMB"        => SIR.simSIRMB 100     >>= printThenWrite
-  "mhSIRMB"         => SIR.mhSIRMB 50 100 >>= printThenWrite
+  "mhSIRMB"         => print ("NOTE: Using Monad Bayes inference (MH) for this particular case is *EXTREMELY* slow " ++
+                             "for some reason, even in Haskell! (This isn't the case when using MH in ProbFX in Haskell).") >>=
+                       \_ => SIR.mhSIRMB 2 100 >>= printThenWrite
   
   _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 

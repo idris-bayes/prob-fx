@@ -130,15 +130,15 @@ simSIRMB n_days = do
 
   pure (reverse sirs, reverse reported)
 
-||| MH inference on the SIR model, via monad bayes
+||| MH inference on the SIR model, via monad bayes. 
+||| NOTE: This particular case is *very* slow for some reason, even in Haskell.
 export
 mhSIRMB : (n_mhsteps : Nat) -> (n_days : Nat) -> IO (List Double, List Double, List Double)
 mhSIRMB n_mhsteps n_days = do
   let sirModelMB = toMBayes (envExampleInf exampleReported) (sirModel n_days examplePopl)
-  -- print "here"
 
   output <- sampleIO $ prior $ mh n_mhsteps sirModelMB
-  -- print "here"
+
   let env_outs : List (Env SIREnv) = map snd (toList output)
     
       betas   : List Double       = gets "β" env_outs
