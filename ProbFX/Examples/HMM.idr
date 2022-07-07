@@ -14,10 +14,12 @@ import Control.Monad.Bayes.Inference.RMSMC
 import Control.Monad.Bayes.Weighted
 
 ||| A generic transition model
+export
 TransModel : List (String, Type) -> List (Type -> Type) -> Type -> Type -> Type
 TransModel env es params lat   = params -> lat -> Model env es lat
 
 ||| A generic observation model
+export
 ObsModel   : List (String, Type) -> List (Type -> Type) -> Type -> Type -> Type -> Type
 ObsModel env es params lat obsv = params -> lat -> Model env es obsv
 

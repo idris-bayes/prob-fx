@@ -25,7 +25,7 @@ parseArgs cmd = case cmd of
   "smcHmmMB"        => HMM.smcHmmMB 100 100 50  >>= printThenWrite
   "rmsmcHmmMB"      => HMM.rmsmcHmmMB 100 100 10 50  >>= printThenWrite
 
-  -- | Examples for hidden markov model
+  -- | Examples for latent dirichlet allocation
   "simLda"          => LDA.simLda 100   >>= printThenWrite
   "simLdaMB"        => LDA.simLdaMB 100   >>= printThenWrite
   "mhLdaMB"         => LDA.mhLdaMB 5000 2000  >>= printThenWrite

@@ -76,9 +76,9 @@ set x v (ECons other xvs) {prf = There later}     = ECons other (set x v xvs {pr
 
 ||| Apply a function to the trace of an observable variable
 export
-update : (x : String) -> (List a -> List a) -> Env env -> {auto prf : Elem (x, a) env} -> Env env
-update x f (ECons (MkAssign x v) xvs) {prf = Here}   = ECons (x ::= f v) xvs
-update x f (ECons other xvs) {prf = There later}     = ECons other (update x f xvs {prf = later})
+modify : (x : String) -> (List a -> List a) -> Env env -> {auto prf : Elem (x, a) env} -> Env env
+modify x f (ECons (MkAssign x v) xvs) {prf = Here}   = ECons (x ::= f v) xvs
+modify x f (ECons other xvs) {prf = There later}     = ECons other (modify x f xvs {prf = later})
 
 ||| Get the size of an environment as the sum of its trace lengths
 export

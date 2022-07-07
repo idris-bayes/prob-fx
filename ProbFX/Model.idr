@@ -72,7 +72,7 @@ binomial : Nat -> Double -> (x : String)
 binomial n p = callWithObs (Binomial n p)
 
 export
-binomial' : Nat -> Double -> Model env es Nat
+binomial' : {auto 0 env : _} -> Nat -> Double -> Model env es Nat
 binomial' n p = callWithoutObs (Binomial n p)
 
 export
