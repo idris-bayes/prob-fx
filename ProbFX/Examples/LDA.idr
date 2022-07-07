@@ -112,12 +112,15 @@ simLdaMB doc_size = do
 
 ||| MH inference on LDA, using monad bayes
 export
-mhLdaMB : (n_mhsteps : Nat) -> IO (List (Vect 2 Double), List (Vect 2 (Vect 4 Double)))
-mhLdaMB n_mhsteps  = do 
+mhLdaMB : (n_mhsteps : Nat) 
+       -- | Number of most recent MH trace values to consider, where trace_prefix_length <= n_mhsteps
+       -> (trace_prefix_length : Nat)
+       -> IO (List (Vect 2 Double), List (Vect 2 (Vect 4 Double)))
+mhLdaMB n_mhsteps trace_prefix_length = do 
   let ldaMB = toMBayes (envExampleInf exampleDocument) (topicModel exampleVocab n_topics_pred (length exampleDocument))
       
   output <- sampleIO $ prior $ mh n_mhsteps ldaMB
-  let env_outs : List (Env (LDAEnv 2 4)) = map snd (toList output)
+  let env_outs : List (Env (LDAEnv 2 4)) = take trace_prefix_length (map snd (toList output))
       -- | Get trace of document-topic distributions, where each trace value is of the form:
       --   [prob of topic_1, prob of topic_2]
       doc_topic_ps  : List (Vect 2 Double) 
