@@ -97,5 +97,39 @@ def main():
     ax1.set_xticklabels(ws)
     plt.title('Topic-Word Distribution 1')
     plt.show()
+
+  if arg in ["simSIR", "simSIRMB" "simSIRSMB"]:
+    # y axis
+    sir_values   = np.array(data[0])
+    obs_infected = np.array(data[1])
+    sus            = np.array([sir[0] for sir in sir_values])
+    inf            = np.array([sir[1][0] for sir in sir_values])
+    recov          = np.array([sir[1][1] for sir in sir_values])
+    # x axis
+    timeSteps      = np.array([ t for t in range(len(sus))])
+    # interpolate data
+    X_ = np.linspace(timeSteps.min(), timeSteps.max(), 300)
+    X_S_Spline = make_interp_spline(timeSteps.ravel(), sus.ravel())
+    X_I_Spline = make_interp_spline(timeSteps.ravel(), inf.ravel())
+    X_R_Spline = make_interp_spline(timeSteps.ravel(), recov.ravel())
+    X_InfCount_Spline = make_interp_spline(timeSteps.ravel(), obs_infected.ravel())
+    S_ = X_S_Spline(X_)
+    I_ = X_I_Spline(X_)
+    R_ = X_R_Spline(X_)
+    IC_ = X_InfCount_Spline(X_)
+
+    fig1, axs1 = plt.subplots(nrows=1)
+    axs1.set_xlabel("days")
+    axs1.set_ylabel("population", fontsize=12)
+    axs1.plot(X_, S_, color='blue', label='Actual Susceptible')
+    axs1.plot(X_, I_, color='red', label='Actual Infected')
+    axs1.plot(X_, R_, color='green', label='Actual Recovered')
+    axs1.plot(X_, IC_, color='black', label='Reported Infected')
+    axs1.set_title('SIR model - Simulation')
+    plt.xlim([0,100])
+    plt.ylim([0,800])
+    plt.legend()
+    plt.show()
+
 if __name__ == "__main__":
   main()

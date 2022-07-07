@@ -93,31 +93,33 @@ getSIRs :  Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl 
 getSIRs popl = (lookup "s" popl, lookup "i" popl, lookup "r" popl)
 
 ||| Simulating the SIR model, via effect handlers
+export
 simSIR : (n_days : Nat) -> IO (List (Nat, Nat, Nat), List Nat)
 simSIR n_days = do
-  let sim_env_in = envExampleSim
   (popls, env_out) <- runSampler (simulate envExampleSim (sirModel n_days examplePopl) )
 
   let sirs : List (Nat, Nat, Nat)
       sirs = let (sir_final ::: rest) = map getSIRs popls
-             in (take (minus n_days 1) (sir_final :: rest))
+             in  take n_days (sir_final :: rest)
     
       reported : List Nat 
       reported = Env.get "𝜉" env_out
 
-  pure (sirs, reported)
+  pure (reverse sirs, reverse reported)
 
--- ||| Simulating the SIR model, via monad bayes
--- simSIRMB : (n_days : Nat) -> IO (List (Nat, Nat, Nat), List Nat)
--- simSIRMB n_days = do
---   let sim_env_in = envExampleSim
---   (popls, env_out) <- runSampler (simulate envExampleSim (sirModel n_days examplePopl) )
+||| Simulating the SIR model, via monad bayes
+export
+simSIRMB : (n_days : Nat) -> IO (List (Nat, Nat, Nat), List Nat)
+simSIRMB n_days = do
+  let sirModelMB = toMBayes envExampleSim (sirModel n_days examplePopl)
 
---   let sirs : List (Nat, Nat, Nat)
---       sirs = let (sir_final ::: rest) = map getSIRs popls
---              in (take (minus n_days 1) (sir_final :: rest))
+  (popls, env_out) <- sampleIO $ prior sirModelMB
+
+  let sirs : List (Nat, Nat, Nat)
+      sirs = let (sir_final ::: rest) = map getSIRs popls
+             in  take n_days (sir_final :: rest)
     
---       reported : List Nat 
---       reported = Env.get "𝜉" env_out
+      reported : List Nat 
+      reported = Env.get "𝜉" env_out
 
---   pure (sirs, reported)
+  pure (reverse sirs, reverse reported)

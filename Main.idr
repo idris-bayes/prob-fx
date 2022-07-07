@@ -3,6 +3,7 @@ module Main
 import ProbFX.Examples.LinRegr
 import ProbFX.Examples.HMM
 import ProbFX.Examples.LDA
+import ProbFX.Examples.SIR
 import System
 import System.File.ReadWrite
 
@@ -30,6 +31,10 @@ parseArgs cmd = case cmd of
   "simLDAMB"        => LDA.simLDAMB 100   >>= printThenWrite
   "mhLDAMB"         => LDA.mhLDAMB 5000 2000  >>= printThenWrite
   "rmsmcLDAMB"      => LDA.rmsmcLDAMB 100 50 20  >>= printThenWrite
+
+  -- | Examples for latent dirichlet allocation
+  "simSIR"          => SIR.simSIR 100    >>= printThenWrite
+  "simSIRMB"        => SIR.simSIRMB 100   >>= printThenWrite
   
   _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 
