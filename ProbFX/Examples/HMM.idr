@@ -1,7 +1,7 @@
 module ProbFX.Examples.HMM
 
 import Data.List
-import Data.List1
+import public Data.List1
 import ProbFX.Model as PFX
 import ProbFX.Sampler
 import ProbFX.Inference.SIM
@@ -14,16 +14,17 @@ import Control.Monad.Bayes.Inference.RMSMC
 import Control.Monad.Bayes.Weighted
 
 ||| A generic transition model
-export
+public export
 TransModel : List (String, Type) -> List (Type -> Type) -> Type -> Type -> Type
 TransModel env es params lat   = params -> lat -> Model env es lat
 
 ||| A generic observation model
-export
+public export
 ObsModel   : List (String, Type) -> List (Type -> Type) -> Type -> Type -> Type -> Type
 ObsModel env es params lat obsv = params -> lat -> Model env es obsv
 
 ||| A generic chain of HMM nodes
+export
 hmmChain : 
      (transPrior : Model env es ps1)
   -> (obsPrior   : Model env es ps2)

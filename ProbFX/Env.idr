@@ -10,7 +10,7 @@ public export
 data Assign : String -> Type -> Type where
   MkAssign : (x : String) -> (trace : List a) -> Assign x a
 
-infixr 10 ::=
+infix 10 ::=
 public export
 (::=) : (x : String) -> (trace : List a) -> Assign x a
 (::=) x vs = MkAssign x vs
@@ -38,11 +38,11 @@ Observables : (env : List (String, Type)) -> (var : List String) -> (var_type : 
 Observables env (x :: xs) a = (Elem (x, a) env, Observables env xs a)
 Observables env [] a        = ()
 
+infixr 10 <:>
 ||| Environment constructors
 export
 (<:>) : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 (<:>) xv env = ECons xv env
-infixr 10 <:>
 
 export
 emptyEnv : {auto prf : Env env} -> Env env
