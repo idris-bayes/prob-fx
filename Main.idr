@@ -33,8 +33,9 @@ parseArgs cmd = case cmd of
   "rmsmcLDAMB"      => LDA.rmsmcLDAMB 100 50 20  >>= printThenWrite
 
   -- | Examples for latent dirichlet allocation
-  "simSIR"          => SIR.simSIR 100    >>= printThenWrite
-  "simSIRMB"        => SIR.simSIRMB 100   >>= printThenWrite
+  "simSIR"          => SIR.simSIR 100       >>= printThenWrite
+  "simSIRMB"        => SIR.simSIRMB 100     >>= printThenWrite
+  "mhSIRMB"         => SIR.mhSIRMB 50 100 >>= printThenWrite
   
   _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 

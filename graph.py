@@ -130,6 +130,26 @@ def main():
     plt.ylim([0,800])
     plt.legend()
     plt.show()
-
+  if arg == "mhSIRMB":
+    print(data)
+    betas_unique   = data[0]
+    gammas_unique  = data[1][0]
+    rhos_unique    = data[1][1]
+    _, axs1 = plt.subplots(nrows=1)
+    axs1.set_xlabel("β values", fontsize=12)
+    axs1.set_ylabel("frequency")
+    axs1.hist(betas_unique, bins=25)
+    axs1.set_title('SIR - Metropolis Hastings Posterior (Beta)')
+    _, axs2 = plt.subplots(nrows=1)
+    axs2.set_xlabel("γ values", fontsize=12)
+    axs2.set_ylabel("frequency")
+    axs2.hist(gammas_unique, bins=25)
+    axs2.set_title('HMM - Metropolis Hastings Posterior (Gamma)')
+    _, axs3 = plt.subplots(nrows=1)
+    axs3.set_xlabel("ρ values", fontsize=12)
+    axs3.set_ylabel("frequency")
+    axs3.hist(rhos_unique, bins=25)
+    axs3.set_title('HMM - Metropolis Hastings Posterior (Rho)')
+    plt.show()
 if __name__ == "__main__":
   main()

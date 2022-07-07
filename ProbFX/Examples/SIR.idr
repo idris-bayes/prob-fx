@@ -86,8 +86,14 @@ SIREnv = [("β", Double), ("γ", Double), ("ρ", Double), ("𝜉", Nat)]
 envExampleSim : Env SIREnv
 envExampleSim = ("β" ::= [0.7]) <:> ("γ" ::= [0.009]) <:> ("ρ" ::= [0.3]) <:> ("𝜉" ::= []) <:> ENil
 
+envExampleInf : List Nat -> Env SIREnv
+envExampleInf reported = ("β" ::= []) <:> ("γ" ::= []) <:> ("ρ" ::= []) <:> ("𝜉" ::= reported) <:> ENil
+
 examplePopl : Record [("s", Nat), ("i", Nat), ("r", Nat)]
 examplePopl = Cons "s" 762 $ Cons "i" 1 $ Cons "r" 0 $ Empty
+
+exampleReported : List Nat
+exampleReported = [0,1,4,2,1,3,3,5,10,11,30,23,48,50,91,94,129,151,172,173,198,193,214,179,229,172,205,211,191,212,185,184,173,211,185,197,176,169,198,174,163,197,152,198,153,164,154,167,178,174,160,149,140,172,169,144,137,151,166,151,147,149,159,150,151,139,137,182,121,119,133,146,141,136,126,131,124,110,120,113,117,102,120,117,122,121,110,125,127,117,117,98,109,108,108,120,98,103,104,103]
 
 getSIRs :  Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl => Record popl -> (Nat, Nat, Nat)
 getSIRs popl = (lookup "s" popl, lookup "i" popl, lookup "r" popl)
@@ -123,3 +129,20 @@ simSIRMB n_days = do
       reported = Env.get "𝜉" env_out
 
   pure (reverse sirs, reverse reported)
+
+||| MH inference on the SIR model, via monad bayes
+export
+mhSIRMB : (n_mhsteps : Nat) -> (n_days : Nat) -> IO (List Double, List Double, List Double)
+mhSIRMB n_mhsteps n_days = do
+  let sirModelMB = toMBayes (envExampleInf exampleReported) (sirModel n_days examplePopl)
+  -- print "here"
+
+  output <- sampleIO $ prior $ mh n_mhsteps sirModelMB
+  -- print "here"
+  let env_outs : List (Env SIREnv) = map snd (toList output)
+    
+      betas   : List Double       = gets "β" env_outs
+      gammas  : List Double       = gets "γ" env_outs
+      rhos    : List Double       = gets "ρ" env_outs
+
+  pure (betas, gammas, rhos)
