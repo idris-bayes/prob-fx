@@ -132,3 +132,15 @@ mhLdaMB n_mhsteps  = do
 ||| RMSMC inference on LDA, using monad bayes
 export
 rmsmcLdaMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> IO (List (Vect 2 Double), List (Vect 2 (Vect 4 Double)))
+rmsmcLdaMB n_timesteps n_particles n_mhsteps = do
+  let ldaMB = toMBayes (envExampleInf exampleDocument) (topicModel exampleVocab n_topics_pred (length exampleDocument))
+      
+  output <- sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps ldaMB
+
+  let env_outs : List (Env (LDAEnv 2 4)) = map (snd . snd) (toList output)
+      doc_topic_ps  : List (Vect 2 Double) 
+          = gets "θ" env_outs
+      topic_word_ps : Maybe (List (Vect 2 (Vect 4 Double))) 
+          = mapM (\env_out => toVect 2 $ Env.get "φ" env_out) env_outs
+  pure (doc_topic_ps, case topic_word_ps of Just xs => xs
+                                            Nothing => assert_total $ idris_crash "failed to convert 'topic_word_ps : List (List (Vect 4 Double))' into 'List (Vect 2 (Vect 4 Double))' form")

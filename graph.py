@@ -71,13 +71,15 @@ def main():
     axs2.set_ylabel("frequency")
     axs2.hist(obs_ps, bins=25)
     plt.show()
-    
-  if arg == "mhLdaMB":
+
+  if arg in ["mhLdaMB", "rmsmcLdaMB"]:
     ws       = ['DNA', 'evolution', 'parsing', 'phonology']
     topic_ps = data[0]
-    topic_ps_avg = sum(np.array(topic_ps))/(len(topic_ps))
+    # Average the trace or final population of parameter values for topics
+    topic_ps_avg = sum(np.array(topic_ps))/(len(topic_ps)) 
     print(topic_ps)
     topic_word_ps = data[1]
+    # Average the trace or final population of parameter values for words
     topic_word_ps_avg = sum(np.array(topic_word_ps))/(len(topic_word_ps))
     topic_0s_avg = topic_word_ps_avg[0]
     topic_1s_avg = topic_word_ps_avg[1]
