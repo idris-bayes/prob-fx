@@ -6,7 +6,7 @@ authors     = "Minh Nguyen"
 license     = "The BSD 3-Clause License"
 sourceloc   = "www.github.com/idris-bayes/prob-fx"
 
-depends = contrib, collie, tailrec, eff, free, distributions, log-domain, monad-bayes
+depends = contrib, collie, tailrec, eff, free, distribution, log-domain, monad-bayes
 
 executable  = prob-fx
 main        = Main
