@@ -30,7 +30,7 @@ parseArgs cmd = case cmd of
   "simLdaMB"        => LDA.simLdaMB 100   >>= printThenWrite
   "mhLdaMB"         => LDA.mhLdaMB 5000 2000  >>= printThenWrite
   "rmsmcLdaMB"      => LDA.rmsmcLdaMB 100 50 20  >>= printThenWrite
-
+  
   _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 
 main : IO ()

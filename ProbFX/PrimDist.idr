@@ -1,13 +1,7 @@
 module ProbFX.PrimDist
 
 import Data.List
-import Statistics.Distribution.Binomial 
-import Statistics.Distribution.Beta 
-import Statistics.Distribution.Gamma 
-import Statistics.Distribution.Normal 
-import Statistics.Distribution.Uniform 
-import Statistics.Distribution.Poisson 
-import Statistics.Distribution.Dirichlet 
+import Statistics.Distribution
 import Control.Monad.Bayes.Interface
 import ProbFX.Sampler
 
@@ -28,18 +22,18 @@ data PrimDist : a -> Type where
 ||| Density functions
 export
 prob : PrimDist a -> a -> Double
-prob (Uniform min max) y  = uniform_pdf min max y
+prob (Uniform min max) y  = gsl_uniform_pdf min max y
 prob (Bernoulli p) y      = if y then p else (1 - p)
-prob (Binomial n p) y     = binomial_pdf n p y
-prob (Normal mu std) y    = normal_pdf mu std y
-prob (Beta a b) y         = beta_pdf a b y
-prob (Gamma a b) y        = gamma_pdf a b y
-prob (Poisson p) y        = poisson_pdf p y
+prob (Binomial n p) y     = gsl_binomial_pdf n p y
+prob (Normal mu std) y    = gsl_normal_pdf mu std y
+prob (Beta a b) y         = gsl_beta_pdf a b y
+prob (Gamma a b) y        = gsl_gamma_pdf a b y
+prob (Poisson p) y        = gsl_poisson_pdf p y
 prob (Categorical ps) y   = index y ps
 prob (Discrete yps) y     = case (find ((== y) . fst) yps)
                             of  Just (_, p) => p
                                 Nothing     => 0.0
-prob (Dirichlet ps) ys    = dirichlet_pdf ps ys                             
+prob (Dirichlet ps) ys    = gsl_dirichlet_pdf ps ys                             
 
 export
 logProb : PrimDist a -> a -> Double

@@ -1,15 +1,7 @@
 module ProbFX.Sampler
 
 import Control.Monad.Reader
-import Statistics.Distribution.GSL
-import Statistics.Distribution.Uniform
-import Statistics.Distribution.Binomial
-import Statistics.Distribution.Dirichlet
-import Statistics.Distribution.Normal
-import Statistics.Distribution.Beta
-import Statistics.Distribution.Gamma
-import Statistics.Distribution.Poisson
-import Statistics.Distribution.Test
+import Statistics.Distribution
 import System.Random
 
 ||| A Sampler that threads a provided GSL RNG seed through a computation. Warning: only works with local copy of the `distributions.so` file, copied over from the `distributions` Idris package. Need to work out how to avoid requiring a local copy. 
@@ -41,46 +33,46 @@ mkSampler f = MkSampler $ MkReaderT  f
 export
 runSampler : Sampler a -> IO a
 runSampler m = do
-  let rng_seed = init_rng
+  let rng_seed = init_gsl_rng
   runReaderT rng_seed (runSampler' m)
 
 ||| Sampling functions
 export
 uniform : Double -> Double -> Sampler Double
-uniform min max = mkSampler (\seed =>  (uniform_gsl min max seed))
+uniform min max = mkSampler (\seed =>  (gsl_uniform min max seed))
 
 export
 bernoulli : Double -> Sampler Bool
-bernoulli p     = mkSampler (\seed => binomial_gsl 1 p seed >>= (pure . (1 == )))
+bernoulli p     = mkSampler (\seed => gsl_binomial 1 p seed >>= (pure . (1 == )))
 
 export
 binomial : Nat -> Double -> Sampler Nat
-binomial n p    = mkSampler (\seed =>  (cast $ binomial_gsl n p seed))
+binomial n p    = mkSampler (\seed =>  (cast $ gsl_binomial n p seed))
 
 export
 normal : Double -> Double -> Sampler Double
-normal m s      = mkSampler (\seed =>  (normal_gsl m s seed))
+normal m s      = mkSampler (\seed =>  (gsl_normal m s seed))
 
 export
 beta : Double -> Double -> Sampler Double
-beta a b        = mkSampler (\seed =>  (beta_gsl a b seed))
+beta a b        = mkSampler (\seed =>  (gsl_beta a b seed))
 
 export
 gamma : Double -> Double -> Sampler Double
-gamma a b       = mkSampler (\seed =>  (gamma_gsl a b seed))
+gamma a b       = mkSampler (\seed =>  (gsl_gamma a b seed))
 
 export
 poisson : Double -> Sampler Nat
-poisson p       = mkSampler (\seed =>  (poisson_gsl p seed))
+poisson p       = mkSampler (\seed =>  (gsl_poisson p seed))
 
 export
 dirichlet : {n : Nat} -> Vect (S n) Double -> Sampler (Vect (S n) Double)
-dirichlet ps = mkSampler (\seed =>  (dirichlet_gsl ps seed))
+dirichlet ps = mkSampler (\seed =>  (gsl_dirichlet ps seed))
 
 private
 testSeed : IO () 
 testSeed = do 
-  let seed = GSL.init_rng
-  (normal_gsl 17 0.5 seed) >>= print
-  (binomial_gsl 17 0.5 seed) >>= print
-  (uniform_gsl 0.5 17 seed) >>= print
+  let seed = init_gsl_rng
+  (gsl_normal 17 0.5 seed) >>= print
+  (gsl_binomial 17 0.5 seed) >>= print
+  (gsl_uniform 0.5 17 seed) >>= print

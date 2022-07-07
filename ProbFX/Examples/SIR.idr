@@ -47,9 +47,15 @@ transIR gamma pop = do
   
   pure $ update "r" (r_0 + dN_IR) (update "i" (minus i_0 dN_IR) pop)
 
--- transSIR :: (Member (Writer [Record popl]) es, Lookups popl '["s", "i", "r"] Int)
---   => TransModel env es (Double, Double) (Record popl)
--- transSIR (beta, gamma) popl = do
---   popl <- (transSI beta >=> transIR gamma) popl
---   tellM [popl]
---   pure popl
+transSIR : Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl => 
+  (beta : Double) -> (gamma : Double) -> Record popl -> Model env es (Record popl)
+transSIR beta gamma pop = do
+  pop' <- (transSI beta >=> transIR gamma) pop
+  pure pop'
+
+||| SIR observation model
+obsSIR :  Elem ("i", Nat) popl => Observable env "𝜉" Nat =>
+  (rho : Double) -> Record popl -> Model env es Nat
+obsSIR rho pop = do
+  let i_0 : Nat = lookup "i" pop
+  PFX.poisson {env} (rho * cast i_0) "𝜉"
