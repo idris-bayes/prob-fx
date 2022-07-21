@@ -14,17 +14,17 @@ record Dist (a : Type) where
   constructor MkDist
   dist : PrimDist a
   obs  : Maybe a
-  tag  : Maybe String
+  tag  : String
 
 ||| Observe effect
 public export
 data Observe : Effect where
-  MkObserve : PrimDist a -> a -> Maybe String -> Observe a
+  MkObserve : PrimDist a -> a -> String -> Observe a
 
 ||| Sample effect
 public export
 data Sample : Effect where
-  MkSample  : PrimDist a -> Maybe String -> Sample a
+  MkSample  : PrimDist a -> String -> Sample a
 
 public export
 handleDist : (prf : Elem Dist es) => Prog es a -> Prog (Observe :: Sample :: es - Dist) a

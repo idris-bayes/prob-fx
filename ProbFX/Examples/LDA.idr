@@ -64,7 +64,7 @@ topicModel vocab n_topics_pred doc_size = do
   -- Generate distribution over topics for a given document
   doc_topic_ps  <- docTopicPrior n_topics_pred
   -- Use the above distributions to generate words for a document
-  words         <- replicateM doc_size (do z <- categorical' doc_topic_ps
+  words         <- replicateM doc_size (do z <- categorical' doc_topic_ps "z"
                                            let word_ps = index z topic_word_ps
                                            wordDist vocab word_ps)
   pure words
@@ -120,7 +120,8 @@ mhLDAMB n_mhsteps trace_prefix_length = do
   let ldaMB = toMBayes (envExampleInf exampleDocument) (topicModel exampleVocab n_topics_pred (length exampleDocument))
 
   output <- sampleIO $ prior $ mh n_mhsteps ldaMB
-  let env_outs : List (Env (LDAEnv 2 4)) = take trace_prefix_length (map snd (toList output))
+  let env_outs : List (Env (LDAEnv 2 4))
+            = take trace_prefix_length (map snd (toList output))
       -- | Get trace of document-topic distributions, where each trace value is of the form:
       --   [prob of topic_1, prob of topic_2]
       doc_topic_ps  : List (Vect 2 Double)
@@ -140,7 +141,8 @@ rmsmcLDAMB n_timesteps n_particles n_mhsteps = do
 
   output <- sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps ldaMB
 
-  let env_outs : List (Env (LDAEnv 2 4)) = map (snd . snd) (toList output)
+  let env_outs : List (Env (LDAEnv 2 4))
+          = map (snd . snd) (toList output)
       doc_topic_ps  : List (Vect 2 Double)
           = gets "θ" env_outs
       topic_word_ps : Maybe (List (Vect 2 (Vect 4 Double)))

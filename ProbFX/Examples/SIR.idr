@@ -35,7 +35,7 @@ transSI : Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl =
   TransModel env es Double (Record popl)
 transSI beta pop  = do
   let (s_0, i_0, r_0) : (Nat, Nat, Nat) = (lookup "s" pop,  lookup "i" pop, lookup "r" pop)
-  dN_SI <- binomial' {env} s_0 (1 - exp ((-beta * cast i_0) / cast (s_0 + i_0 + r_0)))
+  dN_SI <- binomial' {env} s_0 (1 - exp ((-beta * cast i_0) / cast (s_0 + i_0 + r_0))) "dN_SI"
 
   pure $ update "s" (minus s_0 dN_SI) (update "i" (i_0 + dN_SI) pop)
 
@@ -43,7 +43,7 @@ transIR : Elem ("i", Nat) popl => Elem ("r", Nat) popl =>
   TransModel env es Double (Record popl)
 transIR gamma pop = do
   let (i_0, r_0) =  (lookup "i" pop,  lookup "r" pop)
-  dN_IR <- binomial' {env} i_0 (1 - exp (-gamma))
+  dN_IR <- binomial' {env} i_0 (1 - exp (-gamma)) "dN_IR"
 
   pure $ update "r" (r_0 + dN_IR) (update "i" (minus i_0 dN_IR) pop)
 

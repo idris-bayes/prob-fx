@@ -54,9 +54,9 @@ transPrior = PFX.uniform 0 1 "trans_p"
 obsPrior : Observable env "obs_p" Double => Model env es Double
 obsPrior = Model.uniform 0 1 "obs_p"
 
-transModel :  Double -> Nat -> Model env es Nat
+transModel : Double -> Nat -> Model env es Nat
 transModel transition_p x_prev = do
-  dX <- boolToNat <$> PFX.bernoulli' transition_p
+  dX <- boolToNat <$> PFX.bernoulli' transition_p "dX"
   pure (dX + x_prev)
 
 obsModel : (Observable env "y" Nat)
