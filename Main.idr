@@ -38,21 +38,21 @@ parseArgs cmd = case cmd of
   "mhSIRMB"         => print ("NOTE: Using Monad Bayes inference (MH) for this particular case is *EXTREMELY* slow " ++
                              "for some reason, even in Haskell! (This isn't the case when using MH in ProbFX in Haskell).") >>=
                        \_ => SIR.mhSIRMB 2 100 >>= printThenWrite
-  
+
   _                 => putStrLn ("unrecognised command: " ++ cmd ++ "\n") >> pure (Right ())
 
 main : IO ()
 main = do
   args <- getArgs
-  case args of 
+  case args of
                (_::a::as) => (parseArgs a) >>= \_ => pure ()
                _          => print "no arguments provided to ProbFX"
   pure ()
 
 {-
     pack --with-ipkg prob-fx.ipkg repl Main.idr
-    
+
     :exec parseArgs "<arg>"
-    
+
     python3 graph.py "<arg>"
 -}

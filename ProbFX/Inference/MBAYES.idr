@@ -12,7 +12,7 @@ import ProbFX.Effects.Dist
 import ProbFX.Inference.SIM
 
 ||| Handlers for monad-bayes
-handleObserve : MonadCond m => (Elem Observe es) => (prf : Elem (Lift m) (es - Observe)) => 
+handleObserve : MonadCond m => (Elem Observe es) => (prf : Elem (Lift m) (es - Observe)) =>
             Prog es a -> Prog (es - Observe) a
 handleObserve (Val x)   = pure x
 handleObserve (Op op k) = case discharge op of
@@ -23,9 +23,9 @@ handleObserve (Op op k) = case discharge op of
 
 handleSample : MonadSample m => (Elem Sample es) => (prf : Elem (Lift m) (es - Sample)) =>
              Prog es a -> Prog (es - Sample) a
-handleSample (Val x)   = pure x  
+handleSample (Val x)   = pure x
 handleSample (Op op k) = case discharge op of
-    Left op'              => Op op' (handleSample {prf} . k) 
+    Left op'              => Op op' (handleSample {prf} . k)
     Right (MkSample d _)  => do y <- liftM {prf} (sampleBayes d)
                                 handleSample {prf} (k y)
 

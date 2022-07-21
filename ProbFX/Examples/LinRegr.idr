@@ -3,7 +3,7 @@ module ProbFX.Examples.LinRegr
 import Data.Vect
 import Data.List
 import Data.List.Elem
-import ProbFX.Env 
+import ProbFX.Env
 import ProbFX.Sampler
 import ProbFX.Inference.SIM
 import ProbFX.Inference.MBAYES
@@ -36,13 +36,13 @@ envExampleSim = ("m" ::= [3]) <:> ("c" ::= [0]) <:> ("std" ::=  [1]) <:> ("y" ::
 
 ||| An environment that represents the gradient m = 3 and intercept c = 0
 envExampleInf : List Double -> Env LinRegrEnv
-envExampleInf xs = 
+envExampleInf xs =
   let ys = map (*3) xs
   in  ("m" ::= []) <:> ("c" ::= []) <:> ("std" ::=  []) <:> ("y" ::=  ys) <:> ENil
 
 ||| Linear regression as a probabilistic program
 hdlLinRegr : Prog (Observe :: Sample :: []) (List Double, Env LinRegrEnv)
-hdlLinRegr = 
+hdlLinRegr =
   handleCore envExampleSim (linRegr [])
 
 ||| Simulating linear regression, using effect handlers
@@ -56,20 +56,20 @@ simLinRegr n_datapoints = do
 ||| Simulating linear regression, using monad bayes
 export
 simLinRegrMB : (n_datapoints : Nat) -> IO (List (Double, Double))
-simLinRegrMB n_datapoints = do 
+simLinRegrMB n_datapoints = do
   let xs        = map cast [0 .. n_datapoints]
-      linRegrMB = toMBayes envExampleSim (linRegr xs) 
+      linRegrMB = toMBayes envExampleSim (linRegr xs)
   (ys, env_out) <- sampleIO $ prior linRegrMB
   pure (zip xs ys)
 
 ||| MH inference on linear regression, using monad bayes
 export
 mhLinRegrMB : (n_mhsteps : Nat) -> (n_datapoints : Nat) -> IO (List Double, List Double)
-mhLinRegrMB n_mhsteps n_datapoints  = do 
+mhLinRegrMB n_mhsteps n_datapoints  = do
   let xs        = map cast [0 .. n_datapoints]
-      linRegrMB = toMBayes (envExampleInf xs) (linRegr xs) 
-      
-  output <- the (IO (Vect (S n_mhsteps) (List Double, Env LinRegrEnv))) 
+      linRegrMB = toMBayes (envExampleInf xs) (linRegr xs)
+
+  output <- the (IO (Vect (S n_mhsteps) (List Double, Env LinRegrEnv)))
                    (sampleIO $ prior $ mh n_mhsteps linRegrMB )
   let env_outs : List (Env LinRegrEnv) = map snd (toList output)
       mus : List Double                   = gets "m" env_outs
@@ -79,11 +79,11 @@ mhLinRegrMB n_mhsteps n_datapoints  = do
 ||| SMC inference on linear regression, using monad bayes
 export
 smcLinRegrMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_datapoints : Nat) -> IO (List Double, List Double)
-smcLinRegrMB n_timesteps n_particles n_datapoints = do 
+smcLinRegrMB n_timesteps n_particles n_datapoints = do
   let xs        = map cast [0 .. n_datapoints]
-      linRegrMB = toMBayes (envExampleInf xs) (linRegr xs) 
-      
-  output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv)))) 
+      linRegrMB = toMBayes (envExampleInf xs) (linRegr xs)
+
+  output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv))))
                    (sampleIO $ runPopulation $ smc n_timesteps n_particles linRegrMB )
   let env_outs : List (Env LinRegrEnv) = map (snd . snd) (toList output)
       mus : List Double                   = gets "m" env_outs
@@ -94,11 +94,11 @@ smcLinRegrMB n_timesteps n_particles n_datapoints = do
 ||| SMC inference on linear regression, using monad bayes
 export
 rmsmcLinRegrMB : (n_timesteps : Nat) -> (n_particles : Nat) -> (n_mhsteps : Nat) -> (n_datapoints : Nat) -> IO (List Double, List Double)
-rmsmcLinRegrMB  n_timesteps n_particles n_mhsteps n_datapoints = do 
+rmsmcLinRegrMB  n_timesteps n_particles n_mhsteps n_datapoints = do
   let xs        = map cast [0 .. n_datapoints]
-      linRegrMB = toMBayes (envExampleInf xs) (linRegr xs) 
-      
-  output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv)))) 
+      linRegrMB = toMBayes (envExampleInf xs) (linRegr xs)
+
+  output <- the (IO (List (Log Double, (List Double, Env LinRegrEnv))))
                    (sampleIO $ runPopulation $ rmsmc n_timesteps n_particles n_mhsteps linRegrMB )
   let env_outs : List (Env LinRegrEnv) = map (snd . snd) (toList output)
       mus : List Double                   = gets "m" env_outs

@@ -54,7 +54,7 @@ maybeEmptyEnv : {env : _} -> Maybe (Env env)
 maybeEmptyEnv {env = Nil}            = pure ENil
 maybeEmptyEnv {env = (x, _) :: rest} {} = do
   v <- maybeEmptyEnv {env = rest}
-  case choose (UniqueVar x rest) of 
+  case choose (UniqueVar x rest) of
     Left   p => pure $ ECons (x ::= []) v {prf = p}
     Right  _ => Nothing
 

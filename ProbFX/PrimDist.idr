@@ -33,7 +33,7 @@ prob (Categorical ps) y   = index y ps
 prob (Discrete yps) y     = case (find ((== y) . fst) yps)
                             of  Just (_, p) => p
                                 Nothing     => 0.0
-prob (Dirichlet ps) ys    = gsl_dirichlet_pdf ps ys                             
+prob (Dirichlet ps) ys    = gsl_dirichlet_pdf ps ys
 
 export
 logProb : PrimDist a -> a -> Double
@@ -51,17 +51,17 @@ sample (Gamma a b)          = Sampler.gamma a b
 sample (Poisson p)          = Sampler.poisson p
 sample (Categorical {n} ps) = do
   r <- Sampler.uniform 0 1
-  let normalised_ps = map (/(sum ps)) ps 
+  let normalised_ps = map (/(sum ps)) ps
 
       cmf : Double -> Nat -> List Double -> Maybe (Fin (S n))
-      cmf acc idx (x :: xs) = let acc' = acc + x 
+      cmf acc idx (x :: xs) = let acc' = acc + x
                               in  if acc' > r then natToFin idx (S n) else cmf acc' (S idx) xs
       cmf acc idx []        = Nothing
 
   case cmf 0 0 (toList normalised_ps) of
     Just i  => pure i
     Nothing => assert_total $ idris_crash $ "categorical: bad weights!" ++ show ps
-sample (Discrete pxs) = do 
+sample (Discrete pxs) = do
   let (xs, ps) = unzip pxs
   sample (Categorical ps) >>= pure . flip index xs
 sample (Dirichlet ps) = Sampler.dirichlet ps

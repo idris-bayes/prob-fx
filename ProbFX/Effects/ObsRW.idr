@@ -7,8 +7,9 @@ import ProbFX.Env
 import ProbFX.Prog
 import ProbFX.Util
 
+||| Reading and writing to model environments
 public export
-data ObsRW : (env : List (String, Type)) -> Effect where 
+data ObsRW : (env : List (String, Type)) -> Effect where
   Read  : (x : String) -> (prf : Observable env x a) => ObsRW env (Maybe a)
   Write : (x : String) -> (val : a) -> (prf : Observable env x a) => ObsRW env ()
 
@@ -17,8 +18,8 @@ handleObsRW' env_in env_out (Val x)   = pure (x, env_out)
 handleObsRW' env_in env_out (Op op k) = case discharge op {prf} of
     Left op'       => Op op' (handleObsRW' env_in env_out . k)
     Right (Read x) => do
-        let vs      = get x env_in 
-            maybe_v = head' vs 
+        let vs      = get x env_in
+            maybe_v = head' vs
             env_in' = set x (defaultTail vs) env_in
         handleObsRW' env_in' env_out (k maybe_v)
     Right (Write x v) => do

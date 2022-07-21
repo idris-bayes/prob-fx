@@ -3,12 +3,12 @@ module ProbFX.Examples.SIR
 import Data.Vect
 import Data.List
 import Data.List.Elem
-import ProbFX.Env 
+import ProbFX.Env
 import ProbFX.Sampler
 import ProbFX.Inference.SIM
 import ProbFX.Inference.MBAYES
 import ProbFX.Effects.Lift
-import ProbFX.Examples.HMM 
+import ProbFX.Examples.HMM
 import ProbFX.Model as PFX
 import Control.Monad.Bayes.Interface
 import Control.Monad.Bayes.Sampler
@@ -31,7 +31,7 @@ lookup key (Cons key val x) {prf = Here} = val
 lookup key (Cons x val y) {prf = (There later)} = lookup key y
 
 ||| SIR transition models
-transSI : Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl => 
+transSI : Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl =>
   TransModel env es Double (Record popl)
 transSI beta pop  = do
   let (s_0, i_0, r_0) : (Nat, Nat, Nat) = (lookup "s" pop,  lookup "i" pop, lookup "r" pop)
@@ -44,10 +44,10 @@ transIR : Elem ("i", Nat) popl => Elem ("r", Nat) popl =>
 transIR gamma pop = do
   let (i_0, r_0) =  (lookup "i" pop,  lookup "r" pop)
   dN_IR <- binomial' {env} i_0 (1 - exp (-gamma))
-  
+
   pure $ update "r" (r_0 + dN_IR) (update "i" (minus i_0 dN_IR) pop)
 
-transSIR : Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl => 
+transSIR : Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl =>
   TransModel env es (Double, Double) (Record popl)
 transSIR (beta, gamma) pop = do
   pop' <- (transSI beta >=> transIR gamma) pop
@@ -59,7 +59,7 @@ obsSIR :  Elem ("i", Nat) popl => Observable env "𝜉" Nat =>
 obsSIR rho pop = do
   let i_0 : Nat = lookup "i" pop
   PFX.poisson {env} (rho * cast i_0) "𝜉"
- 
+
 ||| SIR transition prior
 transPrior : Observables env ["β",  "γ"] Double
   => Model env es (Double, Double)
@@ -74,7 +74,7 @@ obsPrior : Observable env "ρ" Double
 obsPrior = PFX.beta 2 7 "ρ"
 
 ||| SIR as HMM
-sirModel : Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl => 
+sirModel : Elem ("s", Nat) popl => Elem ("i", Nat) popl => Elem ("r", Nat) popl =>
          Observable env "𝜉" Nat => Observables env ["ρ", "β", "γ"] Double =>
    Nat -> Record popl -> Model env es (List1 (Record popl))
 sirModel n pop = hmmChain {env} {es} transPrior obsPrior (transSIR {env} {es}  {popl}) obsSIR n pop
@@ -107,8 +107,8 @@ simSIR n_days = do
   let sirs : List (Nat, Nat, Nat)
       sirs = let (sir_final ::: rest) = map getSIRs popls
              in  take n_days (sir_final :: rest)
-    
-      reported : List Nat 
+
+      reported : List Nat
       reported = Env.get "𝜉" env_out
 
   pure (reverse sirs, reverse reported)
@@ -124,13 +124,13 @@ simSIRMB n_days = do
   let sirs : List (Nat, Nat, Nat)
       sirs = let (sir_final ::: rest) = map getSIRs popls
              in  take n_days (sir_final :: rest)
-    
-      reported : List Nat 
+
+      reported : List Nat
       reported = Env.get "𝜉" env_out
 
   pure (reverse sirs, reverse reported)
 
-||| MH inference on the SIR model, via monad bayes. 
+||| MH inference on the SIR model, via monad bayes.
 ||| NOTE: This particular case is *very* slow for some reason, even in Haskell.
 export
 mhSIRMB : (n_mhsteps : Nat) -> (n_days : Nat) -> IO (List Double, List Double, List Double)
@@ -140,7 +140,7 @@ mhSIRMB n_mhsteps n_days = do
   output <- sampleIO $ prior $ mh n_mhsteps sirModelMB
 
   let env_outs : List (Env SIREnv) = map snd (toList output)
-    
+
       betas   : List Double       = gets "β" env_outs
       gammas  : List Double       = gets "γ" env_outs
       rhos    : List Double       = gets "ρ" env_outs

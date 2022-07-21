@@ -4,19 +4,19 @@ import Control.Monad.Reader
 import Statistics.Distribution
 import System.Random
 
-||| A Sampler that threads a provided GSL RNG seed through a computation. Warning: only works with local copy of the `distributions.so` file, copied over from the `distributions` Idris package. Need to work out how to avoid requiring a local copy. 
+||| A Sampler that threads a provided GSL RNG seed through a computation. Warning: only works with local copy of the `distributions.so` file, copied over from the `distributions` Idris package. Need to work out how to avoid requiring a local copy.
 export
-record Sampler (a : Type) where 
-  constructor MkSampler 
-  runSampler' : ReaderT GslRng IO a 
+record Sampler (a : Type) where
+  constructor MkSampler
+  runSampler' : ReaderT GslRng IO a
 
 export
 Functor Sampler where
-  map f = MkSampler . map f . runSampler' 
+  map f = MkSampler . map f . runSampler'
 
 export
 Applicative Sampler where
-  pure = MkSampler . pure 
+  pure = MkSampler . pure
   mf <*> mx = MkSampler $ runSampler' mf <*> runSampler' mx
 
 export
@@ -70,8 +70,8 @@ dirichlet : {n : Nat} -> Vect (S n) Double -> Sampler (Vect (S n) Double)
 dirichlet ps = mkSampler (\seed =>  (gsl_dirichlet ps seed))
 
 private
-testSeed : IO () 
-testSeed = do 
+testSeed : IO ()
+testSeed = do
   let seed = init_gsl_rng
   (gsl_normal 17 0.5 seed) >>= print
   (gsl_binomial 17 0.5 seed) >>= print

@@ -13,12 +13,12 @@ namespace List
   export
   defaultTail : List a -> List a
   defaultTail [] = []
-  defaultTail (x :: xs) = xs 
+  defaultTail (x :: xs) = xs
 
   export
   replicateM : Monad m => Nat -> m a -> m (List a)
   replicateM n = sequence . replicate n
-  
+
   export
   mapM : Monad m => (a -> m b) -> List a -> m (List b)
   mapM f = sequence . map f

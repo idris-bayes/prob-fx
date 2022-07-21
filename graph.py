@@ -33,7 +33,7 @@ def main():
     plt.show()
   if arg in ["mhLinRegrMB", "smcLinRegrMB", "rmsmcLinRegrMB"]: # Remove duplicates from mh trace
     if arg in ["mhLinRegrMB"]:
-      mus = removeDuplicates(data[0]) 
+      mus = removeDuplicates(data[0])
       cs  = removeDuplicates(data[1])
     elif arg in ["smcLinRegrMB", "rmsmcLinRegrMB"]:
       mus = data[0]
@@ -47,7 +47,7 @@ def main():
     axs2.set_ylabel("frequency")
     axs2.hist(cs, bins=25)
     plt.show()
-  
+
   if arg in ["simHMM", "simHMMMB"]:
     xs = [xy[0] for xy in data]
     ys = [xy[1] for xy in data]
@@ -57,7 +57,7 @@ def main():
     plt.show()
   if arg in ["mhHMMMB", "smcHMMMB", "rmsmcHMMMB"]: # Remove duplicates from mh trace
     if arg in ["mhHMMMB"]:
-      trans_ps = removeDuplicates(data[0]) 
+      trans_ps = removeDuplicates(data[0])
       obs_ps   = removeDuplicates(data[1])
     elif arg in ["smcHMMMB", "rmsmcHMMMB"]:
       trans_ps = data[0]
@@ -76,7 +76,7 @@ def main():
     ws       = ['DNA', 'evolution', 'parsing', 'phonology']
     topic_ps = data[0]
     # Average the trace or final population of parameter values for topics
-    topic_ps_avg = sum(np.array(topic_ps))/(len(topic_ps)) 
+    topic_ps_avg = sum(np.array(topic_ps))/(len(topic_ps))
     print(topic_ps)
     topic_word_ps = data[1]
     # Average the trace or final population of parameter values for words

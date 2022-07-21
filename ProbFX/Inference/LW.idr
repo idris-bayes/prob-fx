@@ -24,10 +24,10 @@ handleLW = SIM.handleSample . handleObserve 0
 
 ||| Likelihood weighting on a probabilistic program
 export
-lw' : (lw_iterations : Nat) -> Prog [Observe, Sample] a -> Sampler (List (a, Double))        
+lw' : (lw_iterations : Nat) -> Prog [Observe, Sample] a -> Sampler (List (a, Double))
 lw' n = sequence . replicate n . handleLW
 
 ||| Likelihood weighting on a model
 export
-lw : (lw_iterations : Nat) -> Env env -> Model env [] a -> Sampler (List ((a, Env env), Double))        
+lw : (lw_iterations : Nat) -> Env env -> Model env [] a -> Sampler (List ((a, Env env), Double))
 lw n env = lw' n . handleCore env

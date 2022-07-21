@@ -9,11 +9,11 @@ import public ProbFX.Prog
 
 ||| Model as a type-level function, specifying a program with two proofs of membership
 public export
-Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (a : Type) -> Type 
-Model env es a = Prog (ObsRW env :: Dist :: es) a 
+Model : (env : List (String, Type)) -> (es : List (Type -> Type)) -> (a : Type) -> Type
+Model env es a = Prog (ObsRW env :: Dist :: es) a
 
 public export
-runModel : Model env es a -> Prog (ObsRW env :: Dist :: es) a 
+runModel : Model env es a -> Prog (ObsRW env :: Dist :: es) a
 runModel m = m
 
 ||| Interpret the two effects `Dist` and `ObsRW` of a model under an input model environment,
@@ -30,7 +30,7 @@ exampleHdlModel = handleCore ENil (exampleModel {env = []})
 
 ||| Call a primitive distribution with an observable variable name
 export
-callWithObs : PrimDist a -> (x : String) 
+callWithObs : PrimDist a -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x a) => Model env es a
 callWithObs d x = do
   -- | Attempt to read an observation from an input model environment
@@ -43,13 +43,13 @@ callWithObs d x = do
 
 ||| Call a primitive distribution with no observable variable name
 export
-callWithoutObs : PrimDist a 
+callWithoutObs : PrimDist a
   -> {auto 0 env : _} -> Model env es a
 callWithoutObs d = call (MkDist d Nothing Nothing)
 
 ||| Smart constructors for calling primitive distributions
-export 
-uniform :  Double -> Double -> (x : String) 
+export
+uniform :  Double -> Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x Double) => Model env es Double
 uniform min max  = callWithObs (Uniform min max)
 
@@ -57,16 +57,16 @@ export
 uniform' : Double -> Double -> Model env es Double
 uniform' min max = callWithoutObs (Uniform min max)
 
-export 
-bernoulli : Double -> (x : String) 
+export
+bernoulli : Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x Bool) => Model env es Bool
-bernoulli p = callWithObs (Bernoulli p) 
+bernoulli p = callWithObs (Bernoulli p)
 
 export
 bernoulli' : Double -> Model env es Bool
 bernoulli' p = callWithoutObs (Bernoulli p)
 
-export 
+export
 binomial : Nat -> Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x Nat) => Model env es Nat
 binomial n p = callWithObs (Binomial n p)
@@ -78,32 +78,32 @@ binomial' n p = callWithoutObs (Binomial n p)
 export
 normal : Double -> Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x Double) => Model env es Double
-normal mu sigma = callWithObs (Normal mu sigma) 
+normal mu sigma = callWithObs (Normal mu sigma)
 
 export
 normal' : Double -> Double -> Model env es Double
 normal' mu sigma = callWithoutObs (Normal mu sigma)
 
 export
-beta : Double -> Double -> (x : String) 
+beta : Double -> Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x Double) => Model env es Double
-beta a b = callWithObs (Beta a b) 
+beta a b = callWithObs (Beta a b)
 
 export
 beta' : Double -> Double -> Model env es Double
 beta' a b = callWithoutObs (Beta a b)
 
 export
-gamma : Double -> Double -> (x : String) 
+gamma : Double -> Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x Double) => Model env es Double
 gamma a b = callWithObs (Gamma a b)
 
 export
 gamma' : Double -> Double -> Model env es Double
-gamma' a b = callWithoutObs (Gamma a b) 
+gamma' a b = callWithoutObs (Gamma a b)
 
 export
-poisson : Double -> (x : String) 
+poisson : Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x Nat) => Model env es Nat
 poisson p = callWithObs (Poisson p)
 
@@ -112,7 +112,7 @@ poisson' : Double -> Model env es Nat
 poisson' p = callWithoutObs (Poisson p)
 
 export
-categorical : {n : Nat} -> Vect (S n) Double -> (x : String) 
+categorical : {n : Nat} -> Vect (S n) Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x (Fin (S n))) => Model env es (Fin (S n))
 categorical ps = callWithObs (Categorical ps)
 
@@ -121,7 +121,7 @@ categorical' : {n : Nat} -> Vect (S n) Double -> Model env es (Fin (S n))
 categorical' ps = callWithoutObs (Categorical ps)
 
 export
-discrete : {n : Nat} -> Vect (S n) (a, Double) -> (x : String) 
+discrete : {n : Nat} -> Vect (S n) (a, Double) -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x a) => Eq a => Model env es a
 discrete yps x = callWithObs (Discrete yps) x
 
@@ -130,7 +130,7 @@ discrete' : {n : Nat} -> Vect (S n) (a, Double) -> Eq a => Model env es a
 discrete' yps = callWithoutObs (Discrete yps)
 
 export
-dirichlet : {n : Nat} -> Vect (S n) Double -> (x : String) 
+dirichlet : {n : Nat} -> Vect (S n) Double -> (x : String)
   -> {auto 0 env : _} -> (prf : Observable env x (Vect (S n) Double)) => Model env es (Vect (S n) Double)
 dirichlet ps x = callWithObs (Dirichlet ps) x
 

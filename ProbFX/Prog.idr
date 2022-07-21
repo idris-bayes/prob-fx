@@ -1,13 +1,13 @@
 module ProbFX.Prog
 
-import public Data.List.Elem 
+import public Data.List.Elem
 
-||| Effect sums 
+||| Effect sums
 public export
 Effect : Type
-Effect = Type -> Type 
+Effect = Type -> Type
 
-public export 
+public export
 data EffectSum : (es : List Effect) -> (a : Type) -> Type where
   Sum : (prf : Elem e es) -> (op : e a) -> EffectSum es a
 
@@ -40,12 +40,12 @@ public export
 weaken1 : EffectSum es a -> EffectSum (e :: es) a
 weaken1 (Sum prf op) = Sum (There prf) op
 
-public export 
+public export
 discharge : {auto prf : Elem e es} -> EffectSum es a -> Either (EffectSum (es - e) a) (e a)
 discharge {prf = Here} (Sum Here op)               = Right op
 discharge {prf = Here} (Sum (There later) op)      = Left (Sum later op)
-discharge {prf = There later} (Sum Here op)        = Left (Sum Here op) 
-discharge {prf = There later1} {es = e' :: es'} (Sum (There later2) op) = 
+discharge {prf = There later} (Sum Here op)        = Left (Sum Here op)
+discharge {prf = There later1} {es = e' :: es'} (Sum (There later2) op) =
   let res : Either (EffectSum ((-) es' e) a) (e a) = discharge {prf=later1} (Sum later2 op)
   in  mapFst weaken1 res
 
@@ -79,7 +79,7 @@ implementation Functor (Prog es) where
 export
 implementation Applicative (Prog es) where
   pure = Val
-  Op op k <*> p = Op op (\x => k x <*> p) 
+  Op op k <*> p = Op op (\x => k x <*> p)
   Val f   <*> p = map f p
 
 export
