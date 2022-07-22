@@ -87,8 +87,8 @@ namespace Inv
     -> Bool
   bernoulli_inv p r = r < p
 
-  binomial_inv
-    :  (n)
+  -- binomial_inv
+  --   :  (n)
 
 private
 testSeed : IO ()
