@@ -29,3 +29,8 @@ accept x0 (strace, lptrace) (strace', lptrace') =
       logα'    = foldl (\logα, k => logα + fromMaybe 0 (lookup k lptrace'))
                         0 (keySet lptrace' `difference` sampled')
   in  exp (dom_log + logα' - logα)
+
+{-
+Looks like recording the types of sampled values will be too much of a pain.
+Best to work with traces of random doubles between 0 and 1, like monad bayes does.
+-}

@@ -33,6 +33,10 @@ fromPrimVal {ty=Bool}   (PrimBool x)   = Just x
 fromPrimVal _                          = ?to_do_fromPrimVal
 
 ||| Trace of sampled values
+{-
+Looks like recording the types of sampled values will be too much of a pain.
+Best to work with traces of random doubles between 0 and 1, like monad bayes does.
+-}
 public export
 STrace : Type
 STrace = SortedMap Addr (Erased PrimDist, PrimVal)
