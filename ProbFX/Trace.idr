@@ -74,6 +74,11 @@ insertLPTrace (x, lp) ((y, lps) :: rest) with (x == y)
     _ | False = (y, lps) :: insertLPTrace (x, lp) rest
 insertLPTrace (x, lp) [] = [(x, [lp])]
 
+export
+sumLPTrace : LPTrace -> Double
+sumLPTrace [] = 0
+sumLPTrace ((x, lps) :: rest) = sum lps + sumLPTrace rest
+
 ||| Handler for recording log-probabilities
 traceLogProbs' : (prfS : Elem Sample es) => (prfO : Elem Observe es) => LPTrace -> Prog es a -> Prog es (a, LPTrace)
 traceLogProbs' lptrace (Val x) = pure (x, lptrace)
@@ -92,3 +97,9 @@ traceLogProbs' lptrace (Op op k) with (prj op {prf=prfS})
 public export
 traceLogProbs : (prfS : Elem Sample es) => (prfO : Elem Observe es) => Prog es a -> Prog es (a, LPTrace)
 traceLogProbs = traceLogProbs' []
+
+||| Get trace size
+public export
+traceSize : List (a, List b) -> Nat
+traceSize [] = 0
+traceSize ((_, xs) :: rest) = length xs + traceSize rest
