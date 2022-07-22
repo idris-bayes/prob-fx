@@ -36,10 +36,14 @@ runSampler m = do
   let rng_seed = init_gsl_rng
   runReaderT rng_seed (runSampler' m)
 
-||| Sampling functions
+-- ||| Raw sampling functions
 export
 uniform : Double -> Double -> Sampler Double
 uniform min max = mkSampler (\seed =>  (gsl_uniform min max seed))
+
+export
+random : Sampler Double
+random = uniform 0 1
 
 export
 bernoulli : Double -> Sampler Bool
@@ -68,6 +72,23 @@ poisson p       = mkSampler (\seed =>  (gsl_poisson p seed))
 export
 dirichlet : {n : Nat} -> Vect (S n) Double -> Sampler (Vect (S n) Double)
 dirichlet ps = mkSampler (\seed =>  (gsl_dirichlet ps seed))
+
+-- ||| Inverse CDF sampling functions
+namespace Inv
+  uniform_inv
+    :  (min, max : Double)
+    -> (r : Double)
+    -> Double
+  uniform_inv min max r = gsl_uniform_cdf_inv min max r
+
+  bernoulli_inv
+    :  (p : Double)
+    -> (r : Double)
+    -> Bool
+  bernoulli_inv p r = r < p
+
+  binomial_inv
+    :  (n)
 
 private
 testSeed : IO ()

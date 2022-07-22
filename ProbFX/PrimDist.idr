@@ -88,6 +88,8 @@ sample (Discrete pxs) = do
   sample (Categorical ps) >>= pure . flip index xs
 sample (Dirichlet ps) = Sampler.dirichlet ps
 
+-- sample_inv : PrimDist a -> Double ->
+
 export
 sampleBayes : MonadSample m => PrimDist b -> m b
 sampleBayes (Normal mu std)   = Monad.Bayes.Interface.normal mu std
