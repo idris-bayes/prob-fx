@@ -1,6 +1,7 @@
 module ProbFX.PrimDist
 
 import Data.List
+import Decidable.Equality
 import Statistics.Distribution
 import Control.Monad.Bayes.Interface
 import ProbFX.Sampler
@@ -16,8 +17,29 @@ data PrimDist : a -> Type where
   Binomial    : Nat -> Double -> PrimDist Nat
   Poisson     : Double -> PrimDist Nat
   Categorical : {n : Nat} -> Vect (S n) Double -> PrimDist (Fin (S n))
-  Discrete    : {n : Nat} -> Vect (S n) (a, Double) -> Eq a => PrimDist a
+  Discrete    : {n : Nat} -> Vect (S n) (a, Double) -> (eq : Eq a) => PrimDist a
   Dirichlet   : {n : Nat} -> Vect (S n) Double -> PrimDist (Vect (S n) Double)
+
+public export
+primDistEq : PrimDist a -> PrimDist b -> Bool
+primDistEq (Normal m s) (Normal m' s')        = m == m' && s == s'
+primDistEq (Bernoulli p) (Bernoulli p')       = p == p'
+primDistEq (Binomial n p) (Binomial n' p')    = n == n' && p == p'
+primDistEq (Categorical ps) (Categorical ps') = toList ps == toList ps'
+primDistEq (Beta a b) (Beta a' b')            = a == a' && b == b'
+primDistEq (Gamma a b) (Gamma a' b')          = a == a' && b == b'
+primDistEq (Uniform a b) (Uniform a' b')      = a == a' && b == b'
+primDistEq (Poisson l) (Poisson l')           = l == l'
+primDistEq (Discrete xs ) (Discrete xs')      = xs == believe_me xs'
+primDistEq (Dirichlet xs) (Dirichlet xs')     = toList xs == toList xs'
+primDistEq _ _ = False
+
+||| Erased primitive distribution
+public export
+data Erased : (f : Type -> Type) -> Type where
+  Erase : f a -> Erased f
+
+-- hetEq : PrimDist a -> PrimDist b ->
 
 ||| Density functions
 export

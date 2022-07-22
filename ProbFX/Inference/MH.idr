@@ -2,9 +2,16 @@ module ProbFX.Inference.MH
 
 import ProbFX.Trace
 import ProbFX.Effects.Dist
+import ProbFX.PrimDist
 import Data.SortedSet
 import Data.SortedMap
 import Data.Maybe
+
+lookupSample : Addr -> PrimDist a -> STrace -> Maybe a
+lookupSample addr d strace = do
+  (Erase d', prim_val) <- lookup addr strace
+  let b = d ~=~ d'
+  ?h
 
 accept :
      Addr               -- ^ proposal sample address

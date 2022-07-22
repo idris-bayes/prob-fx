@@ -35,11 +35,7 @@ fromPrimVal _                          = ?to_do_fromPrimVal
 ||| Trace of sampled values
 public export
 STrace : Type
-STrace = SortedMap Addr PrimVal
-
-export
-insertSTrace : (Addr, PrimVal) -> STrace -> STrace
-insertSTrace (addr, val) = insert addr val
+STrace = SortedMap Addr (Erased PrimDist, PrimVal)
 
 ||| Handler for recording samples
 traceSamples' : (prf : Elem Sample es) => STrace -> Prog es a -> Prog es (a, STrace)
@@ -48,7 +44,7 @@ traceSamples' strace (Op op k) with (prj op {prf})
   _ | Just (MkSample d addr)
         = do  y <- call (MkSample d addr)
               let prim_val  = toPrimVal d y
-                  strace'   = SortedMap.insert addr prim_val strace
+                  strace'   = SortedMap.insert addr (Erase d, prim_val) strace
               (traceSamples' strace' . k) y
   _ | Nothing = Op op (traceSamples' strace . k)
 
