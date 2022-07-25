@@ -63,16 +63,15 @@ logProb d = log . prob d
 
 ||| Sampling functions
 export
-sample : PrimDist a -> Sampler a
-sample (Uniform min max)    = Sampler.uniform min max
-sample (Bernoulli p)        = Sampler.bernoulli p
-sample (Binomial n p)       = Sampler.binomial n p
-sample (Normal mu std)      = Sampler.normal mu std
-sample (Beta a b)           = Sampler.beta a b
-sample (Gamma a b)          = Sampler.gamma a b
-sample (Poisson p)          = Sampler.poisson p
-sample (Categorical {n} ps) = do
-  r <- Sampler.uniform 0 1
+sample : PrimDist a -> (r : Double) -> Sampler a
+sample (Uniform min max) r   = Sampler.uniform_inv min max r
+sample (Bernoulli p) r       = Sampler.bernoulli_inv p r
+sample (Binomial n p) r      = Sampler.binomial_inv n p r
+sample (Normal mu std) r     = Sampler.normal_inv mu std r
+sample (Beta a b) r          = Sampler.beta_inv a b r
+sample (Gamma a b) r         = Sampler.gamma_inv a b r
+sample (Poisson p) r         = Sampler.poisson_inv p r
+sample (Categorical {n} ps) r = do
   let normalised_ps = map (/(sum ps)) ps
 
       cmf : Double -> Nat -> List Double -> Maybe (Fin (S n))
@@ -83,12 +82,10 @@ sample (Categorical {n} ps) = do
   case cmf 0 0 (toList normalised_ps) of
     Just i  => pure i
     Nothing => assert_total $ idris_crash $ "categorical: bad weights!" ++ show ps
-sample (Discrete pxs) = do
+sample (Discrete pxs) r = do
   let (xs, ps) = unzip pxs
-  sample (Categorical ps) >>= pure . flip index xs
-sample (Dirichlet ps) = Sampler.dirichlet ps
-
--- sample_inv : PrimDist a -> Double ->
+  sample (Categorical ps) r >>= pure . flip index xs
+sample (Dirichlet ps) r = Sampler.dirichlet_inv ps r
 
 export
 sampleBayes : MonadSample m => PrimDist b -> m b

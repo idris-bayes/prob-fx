@@ -36,3 +36,7 @@ namespace Vect
 export
 roundUp16 : Nat -> Nat
 roundUp16 n = n + (minus 16 (n `mod` 16))
+
+export
+toSeed : Double -> Bits64
+toSeed = cast

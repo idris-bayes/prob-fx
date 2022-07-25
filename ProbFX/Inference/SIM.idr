@@ -19,7 +19,7 @@ export
 handleSample : Prog [Sample] a -> Sampler a
 handleSample (Val x)   = pure x
 handleSample (Op op k) = case prj1 op of
-  (MkSample d _) => sample d >>= (handleSample . k)
+  (MkSample d _) => sample d !random >>= (handleSample . k)
 
 ||| Simulate from a model
 public export

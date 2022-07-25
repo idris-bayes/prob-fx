@@ -50,7 +50,7 @@ export
 simLinRegr : (n_datapoints : Nat) -> IO (List (Double, Double))
 simLinRegr n_datapoints = do
   let xs = map cast [0 .. n_datapoints]
-  (ys, env_out) <- runSampler (simulate envExampleSim (linRegr xs) )
+  (ys, env_out) <- simulate envExampleSim (linRegr xs)
   pure (zip xs ys)
 
 ||| Simulating linear regression, using monad bayes
