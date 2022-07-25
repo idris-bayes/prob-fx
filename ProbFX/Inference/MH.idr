@@ -18,6 +18,10 @@ public export
 STrace : Type
 STrace = SortedMap Addr Double
 
+public export
+LPTrace : Type
+LPTrace = SortedMap Addr Double
+
 ||| Handler for recording samples
 export
 handleSample : STrace -> Prog [Sample] a -> Sampler (a, STrace)
@@ -28,6 +32,13 @@ handleSample strace (Op op k) with (prj1 op)
     _ | Nothing = do r <- random
                      sample d r >>= (handleSample (insert addr r strace) . k)
 
+export
+handleObserve : (Elem Observe es) => LPTrace -> Prog es a -> Prog (es - Observe) (a, LPTrace)
+handleObserve lptrace (Val x)   = pure (x, lptrace)
+handleObserve lptrace (Op op k) = case discharge op of
+  Left op'                   => Op op' (handleObserve lptrace . k)
+  Right (MkObserve d y addr) => handleObserve (insert addr (logProb d y) lptrace) (k y)
+  -- _ |
 -- accept :
 --      Addr               -- ^ proposal sample address
 --   -> (STrace, LPTrace)  -- ^ previous sample and log-prob traces
