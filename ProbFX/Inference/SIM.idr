@@ -22,6 +22,6 @@ handleSample (Op op k) = case prj1 op of
   (MkSample d _) => sample d !random >>= (handleSample . k)
 
 ||| Simulate from a model
-public export
+export
 simulate : Env env -> Model env [] a -> Sampler (a, Env env)
 simulate env_instance = handleSample . handleObserve . handleCore env_instance

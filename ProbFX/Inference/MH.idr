@@ -4,9 +4,11 @@ import ProbFX.Effects.Dist
 import ProbFX.PrimDist
 import ProbFX.Prog
 import ProbFX.Sampler
+import Data.List1
 import Data.List.Elem
 import Data.SortedSet
 import Data.SortedMap
+import Data.Vect
 import Data.Maybe
 
 ||| Trace of sampled values
@@ -61,8 +63,24 @@ handleObserve = loop empty
       Left op'                   => Op op' (loop lptrace . k)
       Right (MkObserve d y addr) => loop (insert addr (logProb d y) lptrace) (k y)
 
-||| Handler for one iteration of MH
-runMH
-   : STrace
-  -> Prog [Observe, Sample] a
--- runMH strace addr =
+||| Handler for one program execution under MH
+export
+runMH : STrace -> Prog [Observe, Sample] a -> Sampler ((a, LPTrace), STrace)
+runMH strace = handleSample strace . handleObserve
+
+||| Perform one iteration of MH
+export
+mhStep
+   : Prog [Observe, Sample] a
+  -> List1 ((a, LPTrace), STrace)            -- ^ trace of previous MH results
+  -> Sampler (List1 ((a, LPTrace), STrace))  -- ^ updated trace of MH results
+mhStep prog trace = do
+  let ((a, lptrace), strace) = head trace
+      addrs : List Addr
+      addrs = keys strace
+      uniform_addrs : PrimDist Addr
+      uniform_addrs = Discrete $ Vect.fromList $ (("", 0), 0.0) :: (map (, 1.0 / cast (length addrs)) addrs)
+
+  sample_site               <- sample uniform_addrs !random
+  ((a', lptrace'), strace') <- runMH (insert sample_site !random strace) prog
+  ?hole
