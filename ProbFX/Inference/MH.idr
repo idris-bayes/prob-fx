@@ -23,8 +23,8 @@ LPTrace : Type
 LPTrace = SortedMap Addr Double
 
 export
-accept :
-     Addr               -- ^ proposal sample address
+accept
+   : Addr               -- ^ proposal sample address
   -> (STrace, LPTrace)  -- ^ previous sample and log-prob traces
   -> (STrace, LPTrace)  -- ^ new sample and log-prob traces
   -> Double
@@ -52,9 +52,17 @@ handleSample strace (Op op k) with (prj1 op)
 
 ||| Handler for recording log-probabilities
 export
-handleObserve : (Elem Observe es) => LPTrace -> Prog es a -> Prog (es - Observe) (a, LPTrace)
-handleObserve lptrace (Val x)   = pure (x, lptrace)
-handleObserve lptrace (Op op k) = case discharge op of
-  Left op'                   => Op op' (handleObserve lptrace . k)
-  Right (MkObserve d y addr) => handleObserve (insert addr (logProb d y) lptrace) (k y)
+handleObserve : Elem Observe es => Prog es a -> Prog (es - Observe) (a, LPTrace)
+handleObserve = loop empty
+  where
+    loop : LPTrace -> Prog es a -> Prog (es - Observe) (a, LPTrace)
+    loop lptrace (Val x)   = pure (x, lptrace)
+    loop lptrace (Op op k) = case discharge op of
+      Left op'                   => Op op' (loop lptrace . k)
+      Right (MkObserve d y addr) => loop (insert addr (logProb d y) lptrace) (k y)
 
+||| Handler for one iteration of MH
+runMH
+   : STrace
+  -> Prog [Observe, Sample] a
+-- runMH strace addr =

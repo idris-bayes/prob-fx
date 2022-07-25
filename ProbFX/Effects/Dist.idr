@@ -34,23 +34,20 @@ data Sample : Effect where
   MkSample  : PrimDist a -> Addr -> Sample a
 
 ||| Handle the Dist effect to a Sample or Observe effect and assign an address
-handleDist' : (prf : Elem Dist es)
-  => String
-  -> List (String, Nat)
-  -> Prog es a
-  -> Prog (Observe :: Sample :: es - Dist) a
-handleDist' _ _ (Val x) = pure x
-handleDist' prevTag tagMap (Op op k) =  case discharge op {prf} of
-  Right d => let tag    = d.tag
-                 tagIdx = let currentIdx = fromMaybe 0 (lookup tag tagMap)
-                          in  if tag /= prevTag then roundUp16 currentIdx else currentIdx
-                 tagMap' = insert tag (tagIdx + 1) tagMap
-             in case d.obs of Just y  => do v <- call (MkObserve d.dist y (tag, tagIdx))
-                                            (handleDist' tag tagMap' . k) v
-                              Nothing => do v <- call (MkSample d.dist (tag, tagIdx))
-                                            (handleDist' tag tagMap'  . k) v
-  Left op' => Op (weaken1 $ weaken1 op') (handleDist' prevTag tagMap  . k)
-
 public export
 handleDist : (prf : Elem Dist es) => Prog es a -> Prog (Observe :: Sample :: es - Dist) a
-handleDist = handleDist' "" []
+handleDist = loop "" []
+  where
+    loop : String -> List (String, Nat) -> Prog es a -> Prog (Observe :: Sample :: es - Dist) a
+    loop _ _ (Val x) = pure x
+    loop prevTag tagMap (Op op k) =
+      case discharge op {prf} of
+        Right d =>  let tag    = d.tag
+                        tagIdx = let currentIdx = fromMaybe 0 (lookup tag tagMap)
+                                in  if tag /= prevTag then roundUp16 currentIdx else currentIdx
+                        tagMap' = insert tag (tagIdx + 1) tagMap
+                    in  case d.obs of Just y  => do v <- call (MkObserve d.dist y (tag, tagIdx))
+                                                    (loop tag tagMap' . k) v
+                                      Nothing => do v <- call (MkSample d.dist (tag, tagIdx))
+                                                    (loop tag tagMap'  . k) v
+        Left op' => Op (weaken1 $ weaken1 op') (loop prevTag tagMap  . k)
