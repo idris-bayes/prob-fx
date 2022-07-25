@@ -3,6 +3,7 @@ module ProbFX.Inference.MH
 import ProbFX.Effects.Dist
 import ProbFX.PrimDist
 import ProbFX.Prog
+import ProbFX.Sampler
 import Data.List.Elem
 import Data.SortedSet
 import Data.SortedMap
@@ -18,7 +19,14 @@ STrace : Type
 STrace = SortedMap Addr Double
 
 ||| Handler for recording samples
-handleSamp : (prf : Elem Sample es) => STrace -> Prog es a -> Prog es (a, STrace)
+export
+handleSample : STrace -> Prog [Sample] a -> Sampler (a, STrace)
+handleSample strace (Val x)   = pure (x, strace)
+handleSample strace (Op op k) with (prj1 op)
+  _ | (MkSample d addr) with (lookup addr strace)
+    _ | Just r  = do sample d r >>= (handleSample strace . k)
+    _ | Nothing = do r <- random
+                     sample d r >>= (handleSample (insert addr r strace) . k)
 
 -- accept :
 --      Addr               -- ^ proposal sample address
