@@ -22,7 +22,25 @@ public export
 LPTrace : Type
 LPTrace = SortedMap Addr Double
 
-||| Handler for recording samples
+export
+accept :
+     Addr               -- ^ proposal sample address
+  -> (STrace, LPTrace)  -- ^ previous sample and log-prob traces
+  -> (STrace, LPTrace)  -- ^ new sample and log-prob traces
+  -> Double
+accept x0 (strace, lptrace) (strace', lptrace') =
+  let s_addrs  = keySet strace
+      s_addrs' = keySet strace'
+      dom_log  = log (cast $ length $ SortedSet.toList s_addrs) - log (cast $ length $ SortedSet.toList s_addrs')
+      sampled  = singleton x0 `union` (s_addrs  `difference` s_addrs')
+      sampled' = singleton x0 `union` (s_addrs' `difference` s_addrs)
+      logα     = foldl (\logα, k => logα + fromMaybe 0 (lookup k lptrace))
+                        0 (keySet lptrace `difference` sampled)
+      logα'    = foldl (\logα, k => logα + fromMaybe 0 (lookup k lptrace'))
+                        0 (keySet lptrace' `difference` sampled')
+  in  exp (dom_log + logα' - logα)
+
+||| Handler for reusing samples (and generating new ones when necessary)
 export
 handleSample : STrace -> Prog [Sample] a -> Sampler (a, STrace)
 handleSample strace (Val x)   = pure (x, strace)
@@ -32,31 +50,11 @@ handleSample strace (Op op k) with (prj1 op)
     _ | Nothing = do r <- random
                      sample d r >>= (handleSample (insert addr r strace) . k)
 
+||| Handler for recording log-probabilities
 export
 handleObserve : (Elem Observe es) => LPTrace -> Prog es a -> Prog (es - Observe) (a, LPTrace)
 handleObserve lptrace (Val x)   = pure (x, lptrace)
 handleObserve lptrace (Op op k) = case discharge op of
   Left op'                   => Op op' (handleObserve lptrace . k)
   Right (MkObserve d y addr) => handleObserve (insert addr (logProb d y) lptrace) (k y)
-  -- _ |
--- accept :
---      Addr               -- ^ proposal sample address
---   -> (STrace, LPTrace)  -- ^ previous sample and log-prob traces
---   -> (STrace, LPTrace)  -- ^ new sample and log-prob traces
---   -> Double
--- accept x0 (strace, lptrace) (strace', lptrace') =
---   let s_addrs  = keySet strace
---       s_addrs' = keySet strace'
---       dom_log  = log (cast $ length $ SortedSet.toList s_addrs) - log (cast $ length $ SortedSet.toList s_addrs')
---       sampled  = singleton x0 `union` (s_addrs  `difference` s_addrs')
---       sampled' = singleton x0 `union` (s_addrs' `difference` s_addrs)
---       logα     = foldl (\logα, k => logα + fromMaybe 0 (lookup k lptrace))
---                         0 (keySet lptrace `difference` sampled)
---       logα'    = foldl (\logα, k => logα + fromMaybe 0 (lookup k lptrace'))
---                         0 (keySet lptrace' `difference` sampled')
---   in  exp (dom_log + logα' - logα)
 
-{-
-Looks like recording the types of sampled values will be too much of a pain.
-Best to work with traces of random doubles between 0 and 1, like monad bayes does.
--}
