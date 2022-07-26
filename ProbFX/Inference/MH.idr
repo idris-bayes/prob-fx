@@ -3,6 +3,7 @@ module ProbFX.Inference.MH
 import ProbFX.Effects.Dist
 import ProbFX.PrimDist
 import ProbFX.Prog
+import ProbFX.Model
 import ProbFX.Sampler
 import Data.List1
 import Data.List.Elem
@@ -40,7 +41,7 @@ accept x0 (strace, lptrace) (strace', lptrace') =
                         0 (keySet lptrace `difference` sampled)
       logα'    = foldl (\logα, k => logα + fromMaybe 0 (lookup k lptrace'))
                         0 (keySet lptrace' `difference` sampled')
-  in  exp (dom_log + logα' - logα)
+  in  min 1.0 (exp (dom_log + logα' - logα))
 
 ||| Handler for reusing samples (and generating new ones when necessary)
 export
@@ -78,9 +79,35 @@ mhStep prog trace = do
   let ((a, lptrace), strace) = head trace
       addrs : List Addr
       addrs = keys strace
-      uniform_addrs : PrimDist Addr
-      uniform_addrs = Discrete $ Vect.fromList $ (("", 0), 0.0) :: (map (, 1.0 / cast (length addrs)) addrs)
+      sample_sites : PrimDist Addr
+      sample_sites = Discrete $ Vect.fromList $ (("", 0), 0.0) :: (map (, 1.0 / cast (length addrs)) addrs)
 
-  sample_site               <- sample uniform_addrs !random
-  ((a', lptrace'), strace') <- runMH (insert sample_site !random strace) prog
-  ?hole
+  x0  <- sample sample_sites !random
+  ((a', lptrace'), strace') <- runMH (insert x0 !random strace) prog
+
+  let accept_ratio = accept x0 (strace, lptrace) (strace', lptrace')
+  pure $ if accept_ratio > !random
+          then ((a', lptrace'), strace') ::: List1.forget trace
+          else trace
+
+||| Perform MH on a probabilistic program
+export
+mhInternal
+   : Nat                          -- ^ number of MH iterations
+  -> Prog [Observe, Sample] a
+  -> Sampler (List1 ((a, LPTrace), STrace))
+mhInternal n prog = do
+  mh_out_0 <- runMH SortedMap.empty prog
+  foldl (>=>) pure (replicate n (mhStep prog)) (mh_out_0 ::: [])
+
+||| Top-level wrapper for Metropolis-Hastings (MH) inference
+export
+mh : Nat                          -- ^ number of MH iterations
+  -> Model env [] a               -- ^ model
+  -> Env env                      -- ^ input model environment
+  -> Sampler (List (Env env))     -- ^ output model environments
+mh n model env_in = do
+  let prog : Prog [Observe, Sample] (a, Env env)
+      prog = handleCore env_in model
+  mh_trace <- mhInternal n prog
+  pure (List1.forget $ map (snd . fst . fst) mh_trace)
