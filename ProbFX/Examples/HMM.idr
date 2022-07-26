@@ -88,7 +88,7 @@ x_0 = 0
 export
 simHMM : (hmm_length : Nat) -> IO (List (Nat, Nat))
 simHMM hmm_length = do
-  (xs, env_out) <- simulate envExampleSim (hmm hmm_length x_0)
+  (xs, env_out) <- simulate (hmm hmm_length x_0) envExampleSim
   let ys = get "y" env_out
   pure (zip (List1.forget xs) ys)
 

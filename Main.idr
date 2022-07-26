@@ -15,6 +15,7 @@ parseArgs cmd = case cmd of
   -- | Examples for linear regression
   "simLinRegr"        => LinRegr.simLinRegr   50    >>= printThenWrite
   "simLinRegrMB"      => LinRegr.simLinRegrMB 50    >>= printThenWrite
+  "mhLinRegr"         => LinRegr.mhLinRegr 5000 50  >>= printThenWrite
   "mhLinRegrMB"       => LinRegr.mhLinRegrMB 5000 50  >>= printThenWrite
   "smcLinRegrMB"      => LinRegr.smcLinRegrMB 100 100 20  >>= printThenWrite
   "rmsmcLinRegrMB"    => LinRegr.rmsmcLinRegrMB 100 100 10 20  >>= printThenWrite

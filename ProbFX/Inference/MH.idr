@@ -95,10 +95,10 @@ export
 mhInternal
    : Nat                          -- ^ number of MH iterations
   -> Prog [Observe, Sample] a
-  -> Sampler (List1 ((a, LPTrace), STrace))
+  -> Sampler (List ((a, LPTrace), STrace))
 mhInternal n prog = do
   mh_out_0 <- runMH SortedMap.empty prog
-  foldl (>=>) pure (replicate n (mhStep prog)) (mh_out_0 ::: [])
+  List1.forget <$> foldl (>=>) pure (replicate n (mhStep prog)) (mh_out_0 ::: [])
 
 ||| Top-level wrapper for Metropolis-Hastings (MH) inference
 export
@@ -110,4 +110,4 @@ mh n model env_in = do
   let prog : Prog [Observe, Sample] (a, Env env)
       prog = handleCore env_in model
   mh_trace <- mhInternal n prog
-  pure (List1.forget $ map (snd . fst . fst) mh_trace)
+  pure (map (snd . fst . fst) mh_trace)

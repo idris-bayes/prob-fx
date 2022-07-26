@@ -22,8 +22,8 @@ def main():
   arg  = sys.argv[1]
   f    = open("model-output.txt", "r")
 
-  data = ast.literal_eval(f.read().replace('-Infinity', '-2e308')) #
-
+  # data = ast.literal_eval(f.read().replace('-Infinity', '-2e308')) #
+  data = ast.literal_eval(f.read())
   if arg in ["simLinRegr", "simLinRegrMB"]:
     xs = [xy[0] for xy in data]
     ys = [xy[1] for xy in data]
@@ -31,11 +31,11 @@ def main():
     plt.xlabel('x data points')
     plt.ylabel('y data points')
     plt.show()
-  if arg in ["mhLinRegrMB", "smcLinRegrMB", "rmsmcLinRegrMB"]: # Remove duplicates from mh trace
+  if arg in ["mhLinRegr", "mhLinRegrMB", "smcLinRegrMB", "rmsmcLinRegrMB"]: # Remove duplicates from mh trace
     if arg in ["mhLinRegrMB"]:
       mus = removeDuplicates(data[0])
       cs  = removeDuplicates(data[1])
-    elif arg in ["smcLinRegrMB", "rmsmcLinRegrMB"]:
+    else:
       mus = data[0]
       cs  = data[1]
     _, axs1 = plt.subplots(nrows=1)

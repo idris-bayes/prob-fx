@@ -6,6 +6,8 @@ import Data.List.Elem
 import ProbFX.Env
 import ProbFX.Sampler
 import ProbFX.Inference.SIM
+import ProbFX.Inference.LW
+import ProbFX.Inference.MH
 import ProbFX.Inference.MBAYES
 import ProbFX.Effects.Lift
 import ProbFX.Model as PFX
@@ -16,7 +18,7 @@ import Control.Monad.Bayes.Traced.Static
 import Control.Monad.Bayes.Inference.SMC
 import Control.Monad.Bayes.Inference.RMSMC
 
-||| Model
+||| Linear regression model
 linRegr : (prf : Observables env ["y", "m", "c", "std"] Double) => List Double -> Model env es (List Double)
 linRegr xs = do
   m   <- PFX.normal 0 3 "m"
@@ -27,14 +29,15 @@ linRegr xs = do
                     pure y) xs
   pure ys
 
-||| Environment
+||| Linear regression environment
 LinRegrEnv : List (String, Type)
 LinRegrEnv = map ((, Double)) ["m", "c", "std", "y"]
 
+||| An environment that sets the gradient m = 3, intercept c = 0, and noise std = 1
 envExampleSim : Env LinRegrEnv
 envExampleSim = ("m" ::= [3]) <:> ("c" ::= [0]) <:> ("std" ::=  [1]) <:> ("y" ::=  []) <:> ENil
 
-||| An environment that represents the gradient m = 3 and intercept c = 0
+||| An environment for inference whose data represents the gradient m = 3 and intercept c = 0
 envExampleInf : List Double -> Env LinRegrEnv
 envExampleInf xs =
   let ys = map (*3) xs
@@ -50,8 +53,27 @@ export
 simLinRegr : (n_datapoints : Nat) -> IO (List (Double, Double))
 simLinRegr n_datapoints = do
   let xs = map cast [0 .. n_datapoints]
-  (ys, env_out) <- simulate envExampleSim (linRegr xs)
+  (ys, env_out) <- simulate (linRegr xs) envExampleSim
   pure (zip xs ys)
+
+||| LW inference on linear regression, using effect handlers
+export
+lwLinRegr : (n_lwiterations : Nat) -> (n_datapoints : Nat) -> IO (List (Double, Double))
+lwLinRegr n_lwiterations n_datapoints = do
+  let xs = map cast [0 .. n_datapoints]
+  (envs_out, ws) <- unzip <$> (lw n_lwiterations (linRegr xs) (envExampleInf xs))
+  let mus : List Double = gets "m" envs_out
+  pure (zip mus ws)
+
+||| MH inference on linear regression, using effect handlers
+export
+mhLinRegr : (n_mhsteps : Nat) -> (n_datapoints : Nat) -> IO (List Double, List Double)
+mhLinRegr n_mhsteps n_datapoints = do
+  let xs = map cast [0 .. n_datapoints]
+  envs_out <- mh n_mhsteps (linRegr xs) (envExampleInf xs)
+  let mus : List Double = gets "m" envs_out
+      cs  : List Double = gets "c" envs_out
+  pure (mus, cs)
 
 ||| Simulating linear regression, using monad bayes
 export

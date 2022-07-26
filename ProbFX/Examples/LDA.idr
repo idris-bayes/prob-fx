@@ -99,7 +99,7 @@ exampleDocument = ["DNA","evolution","DNA","evolution","DNA","evolution","DNA","
 export
 simLDA : (doc_size : Nat) -> IO (Vect doc_size String)
 simLDA doc_size = do
-  (ys, env_out) <- simulate envExampleSim (topicModel exampleVocab n_topics_pred doc_size)
+  (ys, env_out) <- simulate (topicModel exampleVocab n_topics_pred doc_size) envExampleSim
   pure ys
 
 ||| Simulate from LDA, using monad bayes

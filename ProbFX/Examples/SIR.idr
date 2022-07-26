@@ -102,7 +102,7 @@ getSIRs popl = (lookup "s" popl, lookup "i" popl, lookup "r" popl)
 export
 simSIR : (n_days : Nat) -> IO (List (Nat, Nat, Nat), List Nat)
 simSIR n_days = do
-  (popls, env_out) <- simulate envExampleSim (sirModel n_days examplePopl)
+  (popls, env_out) <- simulate (sirModel n_days examplePopl) envExampleSim
 
   let sirs : List (Nat, Nat, Nat)
       sirs = let (sir_final ::: rest) = map getSIRs popls

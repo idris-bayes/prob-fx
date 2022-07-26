@@ -13,7 +13,7 @@ import Data.List
 
 ||| Handlers for Likelihood weighting
 handleObserve : (Elem Observe es) => Double -> Prog es a -> Prog (es - Observe) (a, Double)
-handleObserve logp (Val x)   = pure (x, logp)
+handleObserve logp (Val x)   = pure (x, exp logp)
 handleObserve logp (Op op k) = case discharge op of
   Left op'                => Op op' (handleObserve logp . k)
   Right (MkObserve d y _) => handleObserve (logp + logProb d y) (k y)
@@ -29,5 +29,7 @@ lwInternal n = sequence . replicate n . handleLW
 
 ||| Likelihood weighting on a model
 export
-lw : (lw_iterations : Nat) -> Env env -> Model env [] a -> Sampler (List (Env env, Double))
-lw n env_in = (map (\(out, w) => (snd out, w)) <$>) . lwInternal n . handleCore env_in
+lw : (lw_iterations : Nat) -> Model env [] a -> Env env -> Sampler (List (Env env, Double))
+lw n model env_in = do
+  lw_trace <- (lwInternal n . handleCore env_in) model
+  pure (map (\(out, w) => (snd out, w)) lw_trace)
