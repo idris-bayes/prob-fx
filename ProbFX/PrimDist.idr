@@ -1,3 +1,4 @@
+||| A GADT encoding of (a selection of) primitive distributions and corresponding sampling and density functions
 module ProbFX.PrimDist
 
 import Data.List
@@ -20,27 +21,6 @@ data PrimDist : a -> Type where
   Discrete    : {n : Nat} -> Vect (S n) (a, Double) -> (eq : Eq a) => PrimDist a
   Dirichlet   : {n : Nat} -> Vect (S n) Double -> PrimDist (Vect (S n) Double)
 
-public export
-primDistEq : PrimDist a -> PrimDist b -> Bool
-primDistEq (Normal m s) (Normal m' s')        = m == m' && s == s'
-primDistEq (Bernoulli p) (Bernoulli p')       = p == p'
-primDistEq (Binomial n p) (Binomial n' p')    = n == n' && p == p'
-primDistEq (Categorical ps) (Categorical ps') = toList ps == toList ps'
-primDistEq (Beta a b) (Beta a' b')            = a == a' && b == b'
-primDistEq (Gamma a b) (Gamma a' b')          = a == a' && b == b'
-primDistEq (Uniform a b) (Uniform a' b')      = a == a' && b == b'
-primDistEq (Poisson l) (Poisson l')           = l == l'
-primDistEq (Discrete xs ) (Discrete xs')      = xs == believe_me xs'
-primDistEq (Dirichlet xs) (Dirichlet xs')     = toList xs == toList xs'
-primDistEq _ _ = False
-
-||| Erased primitive distribution
-public export
-data Erased : (f : Type -> Type) -> Type where
-  Erase : f a -> Erased f
-
--- hetEq : PrimDist a -> PrimDist b ->
-
 ||| Density functions
 export
 prob : PrimDist a -> a -> Double
@@ -61,7 +41,8 @@ export
 logProb : PrimDist a -> a -> Double
 logProb d = log . prob d
 
-||| Sampling functions
+||| Sample from a primitive distribution using the inverse CDF
+||| @ r a random value between 0 and 1 which we apply the inverse CDF to
 export
 sample : PrimDist a -> (r : Double) -> Sampler a
 sample (Uniform min max) r   = Sampler.uniform_inv min max r
@@ -87,6 +68,7 @@ sample (Discrete pxs) r = do
   sample (Categorical ps) r >>= pure . flip index xs
 sample (Dirichlet ps) r = Sampler.dirichlet_inv ps r
 
+||| Sample from a primitive distribution using the MonadSample interface from MonadBayes
 export
 sampleBayes : MonadSample m => PrimDist b -> m b
 sampleBayes (Normal mu std)   = Monad.Bayes.Interface.normal mu std

@@ -1,3 +1,4 @@
+||| Auxiliary functions for IO-based sampling
 module ProbFX.Sampler
 
 import Data.List
@@ -6,15 +7,18 @@ import Statistics.Distribution
 import System.Random
 import ProbFX.Util
 
+||| A Sampler is simply the IO monad
 public export
 Sampler : Type -> Type
 Sampler = IO
 
+||| Draw a random double between 0 and 1
 export
 random : Sampler Double
 random = System.Random.randomIO
 
--- ||| Inverse CDF sampling functions
+{- Inverse CDF sampling functions -}
+
 export
 uniform_inv
   :  (min, max : Double)

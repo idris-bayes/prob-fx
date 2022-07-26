@@ -1,3 +1,4 @@
+||| The effects for primitive distributions, sampling, and observing
 module ProbFX.Effects.Dist
 
 import Data.List
@@ -14,11 +15,15 @@ import ProbFX.Util
 public export
 record Dist (a : Type) where
   constructor MkDist
+  ||| Underlying primitive distribution
   dist : PrimDist a
+  ||| Optional observed value
   obs  : Maybe a
+  ||| Random variable name
   tag  : String
 
-||| Address
+||| An address is a run-time identifier for a probabilistic operation
+||| comprised of the random variable name and its run-time occurrence
 public export
 Addr : Type
 Addr = (String, Nat)
@@ -26,14 +31,26 @@ Addr = (String, Nat)
 ||| Observe effect
 public export
 data Observe : Effect where
-  MkObserve : PrimDist a -> a -> Addr -> Observe a
+  ||| The single operation of the Observe effect
+  ||| @ dist the underlying primitive distribution to condition against
+  ||| @ obs  the observed value
+  ||| @ addr the address
+  MkObserve  : (dist : PrimDist a)
+            -> (obs : a)
+            -> (addr : Addr)
+            -> Observe a
 
 ||| Sample effect
 public export
 data Sample : Effect where
-  MkSample  : PrimDist a -> Addr -> Sample a
+  ||| The single operation of the Sample effect
+  ||| @ dist the underlying primitive distribution to sample from
+  ||| @ addr the address
+  MkSample : (dist : PrimDist a)
+          -> (addr : Addr)
+          -> Sample a
 
-||| Handle the Dist effect to a Sample or Observe effect and assign an address
+||| Handle Dist to Sample or Observe, and assign an address
 public export
 handleDist : (prf : Elem Dist es) => Prog es a -> Prog (Observe :: Sample :: es - Dist) a
 handleDist = loop "" []

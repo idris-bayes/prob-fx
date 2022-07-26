@@ -1,3 +1,4 @@
+||| Simulation
 module ProbFX.Inference.SIM
 
 import ProbFX.Effects.Dist

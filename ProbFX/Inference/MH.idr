@@ -1,3 +1,4 @@
+||| Metropolis-Hastings inference
 module ProbFX.Inference.MH
 
 import ProbFX.Effects.Dist
@@ -13,24 +14,22 @@ import Data.Vect
 import Data.Maybe
 
 ||| Trace of sampled values
-{-
-Looks like recording the types of sampled values will be too much of a pain.
-Best to work with traces of random doubles between 0 and 1, like monad bayes does.
--}
 public export
 STrace : Type
 STrace = SortedMap Addr Double
 
+||| Trace of log-probabilities
 public export
 LPTrace : Type
 LPTrace = SortedMap Addr Double
 
+||| Compute an accept ratio using the previous MH result and the newly proposed MH result
 export
 accept
    : Addr               -- ^ proposal sample address
   -> (STrace, LPTrace)  -- ^ previous sample and log-prob traces
   -> (STrace, LPTrace)  -- ^ new sample and log-prob traces
-  -> Double
+  -> Double             -- ^ acceptance ratio
 accept x0 (strace, lptrace) (strace', lptrace') =
   let s_addrs  = keySet strace
       s_addrs' = keySet strace'
@@ -66,8 +65,8 @@ handleObserve = loop empty
 
 ||| Handler for one program execution under MH
 export
-runMH : STrace -> Prog [Observe, Sample] a -> Sampler ((a, LPTrace), STrace)
-runMH strace = handleSample strace . handleObserve
+handleMH : STrace -> Prog [Observe, Sample] a -> Sampler ((a, LPTrace), STrace)
+handleMH strace = handleSample strace . handleObserve
 
 ||| Perform one iteration of MH
 export
@@ -83,24 +82,24 @@ mhStep prog trace = do
       sample_sites = Discrete $ Vect.fromList $ (("", 0), 0.0) :: (map (, 1.0 / cast (length addrs)) addrs)
 
   x0  <- sample sample_sites !random
-  ((a', lptrace'), strace') <- runMH (insert x0 !random strace) prog
+  ((a', lptrace'), strace') <- handleMH (insert x0 !random strace) prog
 
   let accept_ratio = accept x0 (strace, lptrace) (strace', lptrace')
   pure $ if accept_ratio > !random
           then ((a', lptrace'), strace') ::: List1.forget trace
           else trace
 
-||| Perform MH on a probabilistic program
+||| Perform MH for n iterations
 export
 mhInternal
-   : Nat                          -- ^ number of MH iterations
+   : Nat                                    -- ^ number of MH iterations
   -> Prog [Observe, Sample] a
-  -> Sampler (List ((a, LPTrace), STrace))
+  -> Sampler (List ((a, LPTrace), STrace))  -- ^ trace of MH results
 mhInternal n prog = do
-  mh_out_0 <- runMH SortedMap.empty prog
+  mh_out_0 <- handleMH SortedMap.empty prog
   List1.forget <$> foldl (>=>) pure (replicate n (mhStep prog)) (mh_out_0 ::: [])
 
-||| Top-level wrapper for Metropolis-Hastings (MH) inference
+||| Top-level wrapper for MH on a model
 export
 mh : Nat                          -- ^ number of MH iterations
   -> Model env [] a               -- ^ model

@@ -1,3 +1,4 @@
+||| Some small utility functions
 module ProbFX.Util
 
 import Data.List

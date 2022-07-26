@@ -1,19 +1,19 @@
+||| For lifting arbitrary monadic computations into an algebraic effect setting
 module ProbFX.Effects.Lift
 
 import ProbFX.Prog
 
-||| Lifting monadic computations to an algebraic effect setting
+||| Lift a monadic computation `m a` into the effect `Lift m`
 public export
 data Lift : (m : Type -> Type) -> Effect where
   MkLift : m a -> Lift m a
 
-sendWithPrf : {prf : Elem f fs} -> f t -> Prog fs t
-sendWithPrf = call
-
+||| Wrapper function for calling Lift
 public export
 liftM : (prf : Elem (Lift m) es) =>  m a -> Prog es a
-liftM ma = sendWithPrf {prf} (MkLift ma)
+liftM ma = call {prf} (MkLift ma)
 
+||| Handle `Lift m`
 public export
 handleLift : Monad m => Prog [Lift m] a -> m a
 handleLift (Val x)   = pure x

@@ -1,3 +1,4 @@
+||| The effect for reading from and writing to observable variables
 module ProbFX.Effects.ObsRW
 
 import Data.List
@@ -7,12 +8,16 @@ import ProbFX.Env
 import ProbFX.Prog
 import ProbFX.Util
 
-||| Reading and writing to model environments
+||| The effect for reading from and writing to the observed variables of a model environment `env`
 public export
 data ObsRW : (env : List (String, Type)) -> Effect where
+  ||| Attempt to read a value from an observable
   Read  : (x : String) -> (prf : Observable env x a) => ObsRW env (Maybe a)
+  ||| Write a value to an observable variable
   Write : (x : String) -> (val : a) -> (prf : Observable env x a) => ObsRW env ()
 
+||| Handle the Read requests of observable variables from an input model environment +
+||| Handle the Write requests to observable variables to produce an output model environment
 export
 handleObsRW : (prf : Elem (ObsRW env) es) => Env env -> Prog es a -> Prog (es - ObsRW env) (a, Env env)
 handleObsRW env_in prog = loop env_in emptyEnv prog

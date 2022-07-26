@@ -1,3 +1,4 @@
+||| Implementation of model environments
 module ProbFX.Env
 
 import public Data.So
@@ -11,11 +12,11 @@ data Assign : String -> Type -> Type where
   MkAssign : (x : String) -> (trace : List a) -> Assign x a
 
 infix 10 ::=
-public export
+export
 (::=) : (x : String) -> (trace : List a) -> Assign x a
 (::=) x vs = MkAssign x vs
 
-||| Model environment
+||| A Boolean check that a variable name is not present in an environment
 public export
 UniqueVar : (var : String) -> (env : List (String, Type)) -> Bool
 UniqueVar x env = find x (map fst env) == False
@@ -23,23 +24,13 @@ UniqueVar x env = find x (map fst env) == False
         find x []        = False
         find x (y :: xs) = (x == y) || (find x xs)
 
+||| Model environment
 public export
 data Env : List (String, Type)  -> Type where
   ENil  : Env []
   ECons : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 
-||| Environment constraints
-public export
-Observable : (env : List (String, Type)) -> (var : String) -> (var_type : Type) -> Type
-Observable env x a = Elem (x, a) env
-
-public export
-Observables : (env : List (String, Type)) -> (var : List String) -> (var_type : Type) -> Type
-Observables env (x :: xs) a = (Elem (x, a) env, Observables env xs a)
-Observables env [] a        = ()
-
 infixr 10 <:>
-||| Environment constructors
 export
 (<:>) : Assign x a -> Env env -> (prf : So (UniqueVar x env)) => Env ((x, a) :: env)
 (<:>) xv env = ECons xv env
@@ -49,14 +40,16 @@ emptyEnv : {auto prf : Env env} -> Env env
 emptyEnv {prf = ENil}                      = ENil
 emptyEnv {prf = ECons (MkAssign x _) rest} = ECons (MkAssign x []) (emptyEnv {prf = rest})
 
-export
-maybeEmptyEnv : {env : _} -> Maybe (Env env)
-maybeEmptyEnv {env = Nil}            = pure ENil
-maybeEmptyEnv {env = (x, _) :: rest} {} = do
-  v <- maybeEmptyEnv {env = rest}
-  case choose (UniqueVar x rest) of
-    Left   p => pure $ ECons (x ::= []) v {prf = p}
-    Right  _ => Nothing
+||| Specifies that an environment `env` has an observable variable `x` whose observed values are of type `a`
+public export
+Observable : (env : List (String, Type)) -> (x : String) -> (a : Type) -> Type
+Observable env x a = Elem (x, a) env
+
+||| For constructing multiple `Observable` constraints
+public export
+Observables : (env : List (String, Type)) -> (var : List String) -> (var_type : Type) -> Type
+Observables env (x :: xs) a = (Elem (x, a) env, Observables env xs a)
+Observables env [] a        = ()
 
 ||| Get the trace of an observable variable
 export
@@ -85,6 +78,3 @@ export
 length : Env env -> Nat
 length ENil                       = Z
 length (ECons (MkAssign x v) xvs) = length v + length xvs
-
-exampleEnv : Env [("x", Int), ("y", Int)]
-exampleEnv = ("x" ::= []) <:> ("y" ::= []) <:> ENil
