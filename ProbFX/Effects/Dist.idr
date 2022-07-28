@@ -61,7 +61,7 @@ handleDist = loop "" []
       case discharge op {prf} of
         Right d =>  let tag    = d.tag
                         tagIdx = let currentIdx = fromMaybe 0 (lookup tag tagMap)
-                                in  if tag /= prevTag then roundUp16 currentIdx else currentIdx
+                                 in  if tag /= prevTag then roundUp16 currentIdx else currentIdx
                         tagMap' = insert tag (tagIdx + 1) tagMap
                     in  case d.obs of Just y  => do v <- call (MkObserve d.dist y (tag, tagIdx))
                                                     (loop tag tagMap' . k) v

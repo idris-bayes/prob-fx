@@ -14,7 +14,6 @@ main        = Main
 modules = ProbFX.Effects.Dist,
           ProbFX.Effects.Lift,
           ProbFX.Effects.ObsRW,
-          ProbFX.Effects.Writer,
           ProbFX.Examples.LinRegr,
           ProbFX.Examples.HMM,
           ProbFX.Examples.LDA,
