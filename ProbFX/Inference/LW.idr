@@ -2,7 +2,6 @@
 module ProbFX.Inference.LW
 
 import ProbFX.Effects.Dist
-import ProbFX.Effects.Trace
 import ProbFX.Effects.ObsRW
 import ProbFX.Effects.Lift
 import ProbFX.Inference.SIM

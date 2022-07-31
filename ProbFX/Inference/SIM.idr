@@ -2,7 +2,6 @@
 module ProbFX.Inference.SIM
 
 import ProbFX.Effects.Dist
-import ProbFX.Effects.Trace
 import ProbFX.Env
 import ProbFX.Model
 import ProbFX.Sampler

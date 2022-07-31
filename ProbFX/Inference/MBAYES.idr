@@ -7,7 +7,6 @@ import Numeric.Log
 import ProbFX.Env
 import ProbFX.PrimDist
 import ProbFX.Model
-import ProbFX.Effects.Trace
 import ProbFX.Effects.Lift
 import ProbFX.Effects.Dist
 import ProbFX.Inference.SIM
