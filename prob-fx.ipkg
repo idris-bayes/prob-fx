@@ -1,10 +1,9 @@
 package prob-fx
 
--- pack --with-ipkg prob-fx.ipkg repl file-name.idr
-
 authors     = "Minh Nguyen"
 license     = "The BSD 3-Clause License"
 sourceloc   = "www.github.com/idris-bayes/prob-fx"
+brief       = "A probabilistic programming language for modular modelling via effect handlers"
 
 depends = contrib, collie, tailrec, eff, free, distribution, log-domain, monad-bayes
 
